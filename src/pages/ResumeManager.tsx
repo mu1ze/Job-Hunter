@@ -1,22 +1,17 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef } from 'react'
 import {
     FileText,
     Upload,
     CheckCircle2,
     AlertCircle,
     Trash2,
-    Eye,
-    Clock,
-    Download,
-    Star,
     FileUp,
-    X,
     Briefcase,
     GraduationCap,
-    Award,
-    Code
+    Code,
+    Sparkles
 } from 'lucide-react'
-import { Button, Card, Input } from '../components/ui'
+import { Button, Card } from '../components/ui'
 import { useResumeStore, useUserStore } from '../stores'
 import { supabase } from '../lib/supabase'
 import type { ParsedResume } from '../types'

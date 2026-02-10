@@ -38,14 +38,11 @@ export default function Auth() {
                 if (error) throw error
 
                 if (authData.user) {
-                    // Create initial profile
-                    await supabase.from('user_profiles').insert([
-                        {
-                            id: authData.user.id,
-                            full_name: formData.name,
-                            email: formData.email,
-                        },
-                    ])
+                    // Profile creation is now handled by a database trigger
+                    // We just need to update the local state to allow access
+
+                    // Small delay to ensure trigger has fired (optional but safe)
+                    await new Promise(resolve => setTimeout(resolve, 1000))
 
                     setProfile({
                         id: authData.user.id,
@@ -75,7 +72,7 @@ export default function Auth() {
                         .from('user_profiles')
                         .select('*')
                         .eq('id', authData.user.id)
-                        .single()
+                        .maybeSingle()
 
                     if (profileData) {
                         setProfile(profileData)

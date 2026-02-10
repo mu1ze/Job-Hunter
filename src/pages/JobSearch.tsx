@@ -1,5 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
-import { useDebouncedCallback } from 'use-debounce'
+import { useState, useMemo } from 'react'
 import {
     Search,
     MapPin,
@@ -11,8 +10,6 @@ import {
     BookmarkCheck,
     Filter,
     X,
-    TrendingUp,
-    Building2,
     Globe
 } from 'lucide-react'
 import { Button, Input, Card } from '../components/ui'
@@ -21,7 +18,6 @@ import { adzunaService } from '../services/adzuna'
 import { supabase } from '../lib/supabase'
 import type { JobSearchFilters, JobListing, SavedJob } from '../types'
 import { showToast, toastMessages } from '../utils/toast'
-import { JobCardSkeleton } from '../components/Skeleton'
 
 // Live job search implementation replacing mock data
 
@@ -82,39 +78,16 @@ export default function JobSearch() {
                 count,
                 timestamp: Date.now()
             }))
-        } catch (error) {
+        } catch (error: any) {
             console.error('Search failed:', error)
+            showToast.error(error.message || 'Failed to fetch jobs. Please try again.')
         } finally {
             setIsSearching(false)
             setSearching(false)
         }
     }
 
-    // Debounced search for live typing
-    const debouncedSearch = useDebouncedCallback((searchFilters: JobSearchFilters) => {
-        handleSearch(searchFilters, false) // Skip cache for live searches
-    }, 500)
 
-    useEffect(() => {
-        if (preferences?.target_roles?.length) {
-            const initialQuery = preferences.target_roles[0]
-            const initialLocation = preferences.location || ''
-            setFilters(prev => ({
-                ...prev,
-                query: initialQuery,
-                location: initialLocation
-            }))
-            // We search with the new filters
-            adzunaService.searchJobs({
-                ...filters,
-                query: initialQuery,
-                location: initialLocation
-            }).then(({ results, count }) => {
-                setJobsList(results)
-                setTotalResults(count)
-            })
-        }
-    }, [preferences])
 
     const isJobSaved = (jobId: string) => {
         return savedJobs.some(j => j.external_job_id === jobId || j.id === jobId)
@@ -164,6 +137,8 @@ export default function JobSearch() {
                 posted_at: job.posted_at,
                 saved_at: new Date().toISOString(),
                 status: 'saved',
+                notes: null,
+                source: job.source || 'adzuna',
             }
 
             // Add to UI immediately
@@ -242,11 +217,7 @@ export default function JobSearch() {
                             placeholder="Job title, keywords, or company"
                             icon={<Search className="w-5 h-5" />}
                             value={filters.query}
-                            onChange={(e) => {
-                                const newFilters = { ...filters, query: e.target.value }
-                                setFilters(newFilters)
-                                debouncedSearch(newFilters)
-                            }}
+                            onChange={(e) => setFilters({ ...filters, query: e.target.value })}
                             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                         />
                     </div>
@@ -255,11 +226,7 @@ export default function JobSearch() {
                             placeholder="City, state, or remote"
                             icon={<MapPin className="w-5 h-5" />}
                             value={filters.location}
-                            onChange={(e) => {
-                                const newFilters = { ...filters, location: e.target.value }
-                                setFilters(newFilters)
-                                debouncedSearch(newFilters)
-                            }}
+                            onChange={(e) => setFilters({ ...filters, location: e.target.value })}
                             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                         />
                     </div>
@@ -272,7 +239,7 @@ export default function JobSearch() {
                             <Filter className="w-4 h-4 mr-2" />
                             Filters
                         </Button>
-                        <Button onClick={handleSearch} isLoading={isSearching} className="shrink-0">
+                        <Button onClick={() => handleSearch()} isLoading={isSearching} className="shrink-0">
                             <Search className="w-4 h-4 mr-2" />
                             Search
                         </Button>
@@ -597,27 +564,7 @@ export default function JobSearch() {
                         </Card>
                     )}
 
-                    {/* Market Analytics Preview */}
-                    <Card className="mt-4">
-                        <div className="flex items-center gap-2 mb-4">
-                            <TrendingUp className="w-5 h-5 text-primary-400" />
-                            <h4 className="font-medium text-white">Market Insights</h4>
-                        </div>
-                        <div className="space-y-3 text-sm">
-                            <div className="flex justify-between">
-                                <span className="text-surface-400">Avg. Salary</span>
-                                <span className="text-white font-medium">$145,000</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-surface-400">Remote Jobs</span>
-                                <span className="text-green-400 font-medium">62%</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-surface-400">New Today</span>
-                                <span className="text-white font-medium">1,234</span>
-                            </div>
-                        </div>
-                    </Card>
+
                 </div>
             </div>
         </div>
