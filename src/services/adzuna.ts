@@ -8,34 +8,49 @@ export const adzunaService = {
                 body: filters
             })
 
-            if (error) throw error
+            if (error) {
+                console.error('Supabase function invoke error:', error)
+                throw new Error(error.message || 'Failed to call search function')
+            }
+
+            // Check if the edge function returned an error in the body
+            if (data?.error) {
+                console.error('Search API error:', data.error)
+                throw new Error(data.error)
+            }
+
+            // Validate response has results
+            if (!data?.results || !Array.isArray(data.results)) {
+                console.warn('Unexpected API response format:', data)
+                return { results: [], count: 0 }
+            }
 
             const results: JobListing[] = data.results.map((job: any) => ({
-                id: job.id,
+                id: String(job.id),
                 external_job_id: `adzuna-${job.id}`,
-                title: job.title.replace(/<\/?[^>]+(>|$)/g, ""), // Strip HTML tags
-                company: job.company.display_name,
-                location: job.location.display_name,
+                title: (job.title || '').replace(/<\/?[^>]+(>|$)/g, ""),
+                company: job.company?.display_name || 'Unknown Company',
+                location: job.location?.display_name || 'Location not specified',
                 salary_min: job.salary_min,
                 salary_max: job.salary_max,
                 salary_range: job.salary_min && job.salary_max 
                     ? `$${Math.round(job.salary_min/1000)}k - $${Math.round(job.salary_max/1000)}k`
                     : job.salary_min ? `$${Math.round(job.salary_min/1000)}k+` : 'Salary not disclosed',
                 job_url: job.redirect_url,
-                description: job.description.replace(/<\/?[^>]+(>|$)/g, ""),
+                description: (job.description || '').replace(/<\/?[^>]+(>|$)/g, ""),
                 requirements: [], 
                 skills_required: [], 
                 posted_at: job.created,
                 source: 'adzuna',
-                remote: !!job.location.area.find((a: string) => a.toLowerCase().includes('remote')),
+                remote: !!(job.location?.area || []).find((a: string) => a.toLowerCase().includes('remote')),
                 job_type: job.contract_time === 'full_time' ? 'full-time' : 'part-time',
             }))
 
             return {
                 results,
-                count: data.count
+                count: data.count || results.length
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error fetching jobs from Edge Function:', error)
             throw error
         }
