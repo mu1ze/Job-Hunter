@@ -1,57 +1,68 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
+};
 
-serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders });
   }
 
   try {
-    const GROQ_API_KEY = Deno.env.get('GROQ_API_KEY')
+    const GROQ_API_KEY = Deno.env.get("GROQ_API_KEY");
     if (!GROQ_API_KEY) {
-      throw new Error('GROQ_API_KEY not configured')
+      throw new Error("GROQ_API_KEY not configured");
     }
 
-    const { resumeData, jobDescription, documentType } = await req.json()
+    const { resumeData, jobDescription, documentType, focusKeywords } =
+      await req.json();
 
     if (!resumeData || !jobDescription || !documentType) {
-      throw new Error('Resume data, job description, and document type are required')
+      throw new Error(
+        "Resume data, job description, and document type are required",
+      );
     }
 
-    let systemPrompt = ''
-    let userPrompt = ''
+    let systemPrompt = "";
+    let userPrompt = "";
 
-    if (documentType === 'resume') {
-      systemPrompt = `You are an expert ATS resume optimizer. Create a tailored resume that matches the job description while showcasing the candidate's relevant experience and skills.
+    const focusInstruction = focusKeywords && focusKeywords.length > 0
+      ? `\n\nCRITICAL: You MUST specifically incorporate and highlight these missing keywords to improve ATS score: ${
+        focusKeywords.join(", ")
+      }. Aim for a compatibility score of at least 92% by ensuring these terms are used naturally and strategically in the context of the candidate's experience.`
+      : "";
 
+    if (documentType === "resume") {
+      systemPrompt =
+        `You are an expert ATS resume optimizer. Create a tailored resume that matches the job description while showcasing the candidate's relevant experience and skills.
+      
 Guidelines:
 - Highlight skills and experience that match the job requirements
 - Use keywords from the job description naturally
 - Quantify achievements where possible
 - Keep it concise and ATS-friendly
 - Maintain professional tone
-- Format in clean, structured sections
+- Format in clean, structured sections${focusInstruction}
 
-Return ONLY the resume content as plain text, properly formatted with sections.`
+Return ONLY the resume content as plain text, properly formatted with sections.`;
 
       userPrompt = `Job Description:
 ${jobDescription}
 
 Candidate's Information:
-Summary: ${resumeData.summary || 'Not provided'}
-Skills: ${resumeData.extracted_skills?.join(', ') || 'Not provided'}
+Summary: ${resumeData.summary || "Not provided"}
+Skills: ${resumeData.extracted_skills?.join(", ") || "Not provided"}
 Work Experience: ${JSON.stringify(resumeData.work_experience || [])}
 Education: ${JSON.stringify(resumeData.education || [])}
-Certifications: ${resumeData.certifications?.join(', ') || 'None'}
+Certifications: ${resumeData.certifications?.join(", ") || "None"}
 
-Create an optimized resume tailored to this job.`
-
-    } else if (documentType === 'cover_letter') {
-      systemPrompt = `You are an expert cover letter writer. Create a compelling, personalized cover letter that connects the candidate's experience to the job requirements.
+Create an optimized resume tailored to this job.`;
+    } else if (documentType === "cover_letter") {
+      systemPrompt =
+        `You are an expert cover letter writer. Create a compelling, personalized cover letter that connects the candidate's experience to the job requirements.
 
 Guidelines:
 - Open with enthusiasm for the specific role and company
@@ -59,63 +70,66 @@ Guidelines:
 - Show cultural fit and genuine interest
 - Keep it concise (3-4 paragraphs)
 - Professional yet personable tone
-- Include a strong call to action
+- Include a strong call to action${focusInstruction}
 
-Return ONLY the cover letter content as plain text.`
+Return ONLY the cover letter content as plain text.`;
 
       userPrompt = `Job Description:
 ${jobDescription}
 
 Candidate's Information:
-Summary: ${resumeData.summary || 'Not provided'}
-Skills: ${resumeData.extracted_skills?.join(', ') || 'Not provided'}
+Summary: ${resumeData.summary || "Not provided"}
+Skills: ${resumeData.extracted_skills?.join(", ") || "Not provided"}
 Recent Experience: ${JSON.stringify(resumeData.work_experience?.[0] || {})}
 Education: ${JSON.stringify(resumeData.education?.[0] || {})}
 
-Create a personalized cover letter for this job.`
+Create a personalized cover letter for this job.`;
     }
 
     // Call Groq API
-    const groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${GROQ_API_KEY}`,
-        'Content-Type': 'application/json',
+    const groqResponse = await fetch(
+      "https://api.groq.com/openai/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${GROQ_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "llama-3.3-70b-versatile",
+          messages: [
+            {
+              role: "system",
+              content: systemPrompt,
+            },
+            {
+              role: "user",
+              content: userPrompt,
+            },
+          ],
+          temperature: 0.7,
+          max_tokens: 2000,
+        }),
       },
-      body: JSON.stringify({
-        model: 'llama-3.1-70b-versatile',
-        messages: [
-          {
-            role: 'system',
-            content: systemPrompt
-          },
-          {
-            role: 'user',
-            content: userPrompt
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: 2000
-      })
-    })
+    );
 
     if (!groqResponse.ok) {
-      const error = await groqResponse.text()
-      throw new Error(`Groq API error: ${error}`)
+      const error = await groqResponse.text();
+      throw new Error(`Groq API error: ${error}`);
     }
 
-    const groqData = await groqResponse.json()
-    const generatedContent = groqData.choices[0].message.content
+    const groqData = await groqResponse.json();
+    const generatedContent = groqData.choices[0].message.content;
 
     return new Response(JSON.stringify({ content: generatedContent }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
-    })
-  } catch (error) {
-    console.error('Error generating document:', error)
+    });
+  } catch (error: any) {
+    console.error("Error generating document:", error.message);
     return new Response(JSON.stringify({ error: error.message }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 400,
-    })
+    });
   }
-})
+});

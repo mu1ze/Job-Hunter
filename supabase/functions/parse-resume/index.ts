@@ -1,11 +1,11 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import "jsr:@supabase/functions-js/edge-runtime.d.ts"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
@@ -13,16 +13,24 @@ serve(async (req) => {
   try {
     const GROQ_API_KEY = Deno.env.get('GROQ_API_KEY')
     if (!GROQ_API_KEY) {
-      throw new Error('GROQ_API_KEY not configured')
+      return new Response(JSON.stringify({ error: 'GROQ_API_KEY not configured' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      })
     }
 
     const { resumeText } = await req.json()
 
-    if (!resumeText) {
-      throw new Error('Resume text is required')
+    if (!resumeText || resumeText.length < 5) {
+      return new Response(JSON.stringify({ error: 'No resume text provided or text too short.' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      })
     }
 
-    // Call Groq API to parse resume
+    // Sanitize input: Remove non-printable characters and junk that breaks prompts
+    const cleanText = resumeText.replace(/[^\x20-\x7E\n\r\t]/g, ' ').substring(0, 10000)
+
     const groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -30,70 +38,76 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'llama-3.1-70b-versatile',
+        model: 'llama-3.3-70b-versatile',
         messages: [
           {
             role: 'system',
-            content: `You are an expert resume parser. Extract structured information from resumes and return it as valid JSON.
+            content: `You are a resume parser. Extract information and return it as a structured JSON object. 
             
-Return the following structure:
+Important: Return ONLY the JSON object. Do not include markdown formatting or backticks.
+Schema:
 {
-  "summary": "Brief professional summary (2-3 sentences)",
-  "extracted_skills": ["skill1", "skill2", ...],
-  "work_experience": [
-    {
-      "company": "Company Name",
-      "title": "Job Title",
-      "location": "City, State",
-      "start_date": "YYYY-MM",
-      "end_date": "YYYY-MM" or null if current,
-      "is_current": boolean,
-      "description": "Brief role description",
-      "achievements": ["achievement1", "achievement2", ...]
-    }
-  ],
-  "education": [
-    {
-      "institution": "School Name",
-      "degree": "Degree Type",
-      "field_of_study": "Major/Field",
-      "start_date": "YYYY-MM",
-      "end_date": "YYYY-MM",
-      "gpa": "3.8" or null
-    }
-  ],
-  "certifications": ["cert1", "cert2", ...]
-}
-
-Be thorough and accurate. Extract all relevant information.`
+  "summary": "string",
+  "extracted_skills": ["string"],
+  "work_experience": [{"company": "string", "title": "string", "location": "string", "start_date": "string", "end_date": "string", "is_current": boolean, "description": "string", "achievements": ["string"]}],
+  "education": [{"institution": "string", "degree": "string", "field_of_study": "string", "start_date": "string", "end_date": "string", "gpa": "string"}],
+  "certifications": ["string"]
+}`
           },
           {
             role: 'user',
-            content: `Parse this resume and extract all information:\n\n${resumeText}`
+            content: `Parse this resume text:\n\n${cleanText}`
           }
         ],
-        temperature: 0.3,
-        response_format: { type: "json_object" }
+        temperature: 0,
+        // Disabling explicit json_object mode to prevent 400 errors from the API itself
+        // We will parse the response text manually.
       })
     })
 
+    const responseText = await groqResponse.text()
+
     if (!groqResponse.ok) {
-      const error = await groqResponse.text()
-      throw new Error(`Groq API error: ${error}`)
+        return new Response(JSON.stringify({ error: `Groq API error: ${responseText}` }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 200,
+        })
     }
 
-    const groqData = await groqResponse.json()
-    const parsedData = JSON.parse(groqData.choices[0].message.content)
+    const groqData = JSON.parse(responseText)
+    let content = groqData.choices[0].message.content.trim()
 
-    return new Response(JSON.stringify(parsedData), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 200,
-    })
+    // Robust cleaning for markdown backticks
+    if (content.includes('```')) {
+      // Find the first { and the last }
+      const start = content.indexOf('{')
+      const end = content.lastIndexOf('}')
+      if (start !== -1 && end !== -1) {
+        content = content.substring(start, end + 1)
+      }
+    }
+
+    try {
+      const parsedData = JSON.parse(content)
+      return new Response(JSON.stringify(parsedData), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      })
+    } catch (e) {
+      console.error('Failed to parse content as JSON:', content)
+      return new Response(JSON.stringify({ 
+        error: 'AI returned invalid JSON format. Please try again.',
+        debug: content.substring(0, 100) 
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      })
+    }
+
   } catch (error) {
-    console.error('Error parsing resume:', error)
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 400,
+      status: 200,
     })
   }
 })
