@@ -11,7 +11,6 @@ import {
     ChevronDown,
     Mail,
     Wand2,
-    GraduationCap,
     TrendingUp,
     Award,
     Briefcase
