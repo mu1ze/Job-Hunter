@@ -115,7 +115,7 @@ export default function Onboarding() {
             const { error: profileError } = await supabase
                 .from('user_profiles')
                 .update({
-                    full_name: data.full_name || profile.full_name,
+                    full_name: data.full_name || (profile?.full_name ?? ''),
                     location: data.location,
                 })
                 .eq('id', userId)
@@ -140,11 +140,13 @@ export default function Onboarding() {
             if (prefError) throw prefError
 
             // Update local state
-            setProfile({
-                ...profile,
-                full_name: data.full_name || profile.full_name,
-                location: data.location,
-            })
+            if (profile) {
+                setProfile({
+                    ...profile,
+                    full_name: data.full_name || profile.full_name,
+                    location: data.location,
+                })
+            }
 
             if (prefData) {
                 setPreferences(prefData)
