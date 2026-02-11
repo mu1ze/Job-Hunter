@@ -9,7 +9,12 @@ import {
     Target,
     RefreshCcw,
     ChevronDown,
-    Mail
+    Mail,
+    Wand2,
+    GraduationCap,
+    TrendingUp,
+    Award,
+    Briefcase
 } from 'lucide-react'
 import { Button, Card } from '../components/ui'
 import { useJobsStore, useResumeStore } from '../stores'
@@ -25,8 +30,20 @@ export default function DocumentGenerator() {
     const [isGenerating, setIsGenerating] = useState(false)
     const [generatedContent, setGeneratedContent] = useState<string | null>(null)
     const [atsScore, setAtsScore] = useState<number | null>(null)
+    const [scoreBreakdown, setScoreBreakdown] = useState<{
+        keywords: number;
+        skills: number;
+        experience: number;
+        education: number;
+    } | null>(null)
     const [matchedKeywords, setMatchedKeywords] = useState<string[]>([])
     const [missingKeywords, setMissingKeywords] = useState<string[]>([])
+    const [improvementPlan, setImprovementPlan] = useState<{
+        certificates: { name: string; description: string; priority: string }[];
+        stepping_stone_roles: { title: string; reason: string }[];
+    } | null>(null)
+    const [showImprovementModal, setShowImprovementModal] = useState(false)
+    const [isReimproving, setIsReimproving] = useState(false)
     const [copied, setCopied] = useState(false)
 
     const { savedJobs } = useJobsStore()
@@ -45,7 +62,7 @@ export default function DocumentGenerator() {
         }),
     ])
 
-    const handleGenerate = async () => {
+    const handleGenerate = async (focusKeywords?: string[]) => {
         if (!selectedJobId) {
             alert('Please select a job first')
             return
@@ -56,9 +73,17 @@ export default function DocumentGenerator() {
             return
         }
 
-        setIsGenerating(true)
-        setGeneratedContent(null)
-        setAtsScore(null)
+        const isReimprove = !!focusKeywords
+        if (isReimprove) {
+            setIsReimproving(true)
+        } else {
+            setIsGenerating(true)
+            setGeneratedContent(null)
+            setAtsScore(null)
+            setScoreBreakdown(null)
+            setImprovementPlan(null)
+            setShowImprovementModal(false)
+        }
 
         try {
             const selectedJob = savedJobs.find(j => j.id === selectedJobId)
@@ -69,17 +94,18 @@ export default function DocumentGenerator() {
                 body: {
                     resumeData: primaryResume.parsed_data || primaryResume,
                     jobDescription: selectedJob.description,
-                    documentType
+                    documentType,
+                    focusKeywords
                 }
             })
 
             if (genError) throw genError
             setGeneratedContent(generatedDoc.content)
 
-            // 2. Calculate ATS score
+            // 2. Calculate ATS score for the GENERATED content
             const { data: atsData, error: atsError } = await supabase.functions.invoke('calculate-ats-score', {
                 body: {
-                    resumeData: primaryResume.parsed_data || primaryResume,
+                    rawText: generatedDoc.content,
                     jobDescription: selectedJob.description
                 }
             })
@@ -88,14 +114,21 @@ export default function DocumentGenerator() {
                 console.warn('ATS calculation failed:', atsError)
             } else {
                 setAtsScore(atsData.ats_score)
+                setScoreBreakdown(atsData.breakdown || null)
+                setImprovementPlan(atsData.improvement_plan || null)
                 setMatchedKeywords(atsData.matched_keywords || [])
                 setMissingKeywords(atsData.missing_keywords || [])
+                
+                if (isReimprove && atsData.ats_score > (atsScore || 0)) {
+                    showToast.success(`Score improved to ${atsData.ats_score}%!`)
+                }
             }
         } catch (error: any) {
             console.error('Generation failed:', error)
-            showToast.error(toastMessages.document.generationFailed)
+            showToast.error(isReimprove ? 'Improvement failed' : toastMessages.document.generationFailed)
         } finally {
             setIsGenerating(false)
+            setIsReimproving(false)
         }
     }
 
@@ -238,7 +271,7 @@ export default function DocumentGenerator() {
 
                     {/* Generate Button */}
                     <Button
-                        onClick={handleGenerate}
+                        onClick={() => handleGenerate()}
                         size="lg"
                         className="w-full group"
                         isLoading={isGenerating}
@@ -266,9 +299,37 @@ export default function DocumentGenerator() {
                                 </div>
                                 <div className="text-right">
                                     <div className="font-display text-4xl font-bold gradient-text">{atsScore}%</div>
-                                    <div className="text-sm text-accent-400">Excellent</div>
+                                    <div className={`text-sm ${atsScore >= 90 ? 'text-accent-400' : atsScore >= 70 ? 'text-blue-400' : 'text-yellow-400'}`}>
+                                        {atsScore >= 95 ? 'Perfect' : atsScore >= 90 ? 'Excellent' : atsScore >= 70 ? 'Good' : 'Needs Work'}
+                                    </div>
                                 </div>
                             </div>
+
+                            {scoreBreakdown && (
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 pt-4 border-t border-surface-700/50">
+                                    {[
+                                        { label: 'Keywords', value: scoreBreakdown.keywords, weight: '40%' },
+                                        { label: 'Skills', value: scoreBreakdown.skills, weight: '30%' },
+                                        { label: 'Experience', value: scoreBreakdown.experience, weight: '20%' },
+                                        { label: 'Education', value: scoreBreakdown.education, weight: '10%' },
+                                    ].map((item) => (
+                                        <div key={item.label} className="text-center">
+                                            <div className="text-[10px] text-surface-500 uppercase tracking-wider mb-1">
+                                                {item.label} <span className="opacity-50">({item.weight})</span>
+                                            </div>
+                                            <div className="relative h-1.5 w-full bg-surface-800 rounded-full overflow-hidden mb-1">
+                                                <div 
+                                                    className={`absolute inset-y-0 left-0 rounded-full transition-all duration-1000 ${
+                                                        item.value >= 90 ? 'bg-accent-500' : item.value >= 70 ? 'bg-blue-500' : 'bg-yellow-500'
+                                                    }`}
+                                                    style={{ width: `${item.value}%` }}
+                                                />
+                                            </div>
+                                            <div className="text-xs font-semibold text-white">{item.value}%</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
 
                             <div className="grid md:grid-cols-2 gap-4">
                                 {/* Matched Keywords */}
@@ -299,8 +360,82 @@ export default function DocumentGenerator() {
                                             </span>
                                         ))}
                                     </div>
+                                    {missingKeywords.length > 0 && (
+                                        <div className="mt-4 pt-4 border-t border-yellow-500/20">
+                                            <Button 
+                                                variant="outline" 
+                                                size="sm" 
+                                                className="w-full bg-yellow-500/10 border-yellow-500/30 text-yellow-400 hover:bg-yellow-500/20"
+                                                onClick={() => handleGenerate(missingKeywords)}
+                                                isLoading={isReimproving}
+                                            >
+                                                <Wand2 className="w-4 h-4 mr-2" />
+                                                Re-improve with Keywords
+                                            </Button>
+                                            <p className="text-[10px] text-yellow-500/60 mt-2 text-center">
+                                                Automatically incorporates missing keywords to boost your score above 92%
+                                            </p>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
+
+                            {improvementPlan && (
+                                <div className="mt-6 pt-4 border-t border-surface-700/50">
+                                    <Button 
+                                        variant="outline" 
+                                        size="sm" 
+                                        className="w-full border-accent-500/30 text-accent-400 hover:bg-accent-500/10"
+                                        onClick={() => setShowImprovementModal(!showImprovementModal)}
+                                    >
+                                        <TrendingUp className="w-4 h-4 mr-2" />
+                                        {showImprovementModal ? 'Hide Growth Plan' : 'Improve Yourself - Career Path & Certificates'}
+                                    </Button>
+
+                                    {showImprovementModal && (
+                                        <div className="mt-6 space-y-6 animate-slide-up">
+                                            <div className="grid md:grid-cols-2 gap-6">
+                                                <div>
+                                                    <div className="flex items-center gap-2 mb-4">
+                                                        <Award className="w-5 h-5 text-accent-400" />
+                                                        <h4 className="font-display font-semibold text-white">Recommended Certificates</h4>
+                                                    </div>
+                                                    <div className="grid gap-3">
+                                                        {improvementPlan.certificates.map((cert, i) => (
+                                                            <div key={i} className="p-3 rounded-xl bg-surface-800/50 border border-surface-700">
+                                                                <div className="flex items-center justify-between mb-1">
+                                                                    <span className="font-medium text-white text-sm">{cert.name}</span>
+                                                                    <span className={`text-[10px] px-1.5 py-0.5 rounded ${
+                                                                        cert.priority === 'High' ? 'bg-red-500/20 text-red-400' : 'bg-blue-500/20 text-blue-400'
+                                                                    }`}>
+                                                                        {cert.priority}
+                                                                    </span>
+                                                                </div>
+                                                                <p className="text-xs text-surface-400">{cert.description}</p>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+
+                                                <div>
+                                                    <div className="flex items-center gap-2 mb-4">
+                                                        <Briefcase className="w-5 h-5 text-blue-400" />
+                                                        <h4 className="font-display font-semibold text-white">Career Stepping Stones</h4>
+                                                    </div>
+                                                    <div className="grid gap-3">
+                                                        {improvementPlan.stepping_stone_roles.map((role, i) => (
+                                                            <div key={i} className="p-3 rounded-xl bg-surface-800/50 border border-surface-700">
+                                                                <span className="font-medium text-white text-sm block mb-1">{role.title}</span>
+                                                                <p className="text-xs text-surface-400">{role.reason}</p>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                         </Card>
                     )}
 
@@ -313,7 +448,7 @@ export default function DocumentGenerator() {
                             </h3>
                             {generatedContent && (
                                 <div className="flex items-center gap-2">
-                                    <Button variant="ghost" size="sm" onClick={handleGenerate}>
+                                    <Button variant="ghost" size="sm" onClick={() => handleGenerate()}>
                                         <RefreshCcw className="w-4 h-4 mr-1" />
                                         Regenerate
                                     </Button>

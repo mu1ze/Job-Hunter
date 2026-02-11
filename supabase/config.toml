@@ -396,7 +396,7 @@ entrypoint = "./functions/search-jobs/index.ts"
 
 [functions.parse-resume]
 enabled = true
-verify_jwt = true
+verify_jwt = false
 import_map = "./functions/parse-resume/deno.json"
 # Uncomment to specify a custom file path to the entrypoint.
 # Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
@@ -407,7 +407,7 @@ entrypoint = "./functions/parse-resume/index.ts"
 
 [functions.generate-document]
 enabled = true
-verify_jwt = true
+verify_jwt = false
 import_map = "./functions/generate-document/deno.json"
 # Uncomment to specify a custom file path to the entrypoint.
 # Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
@@ -418,7 +418,7 @@ entrypoint = "./functions/generate-document/index.ts"
 
 [functions.calculate-ats-score]
 enabled = true
-verify_jwt = true
+verify_jwt = false
 import_map = "./functions/calculate-ats-score/deno.json"
 # Uncomment to specify a custom file path to the entrypoint.
 # Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx

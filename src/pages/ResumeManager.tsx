@@ -60,51 +60,94 @@ export default function ResumeManager() {
 
         try {
             // 1. Upload to Supabase Storage
-            const fileExt = file.name.split('.').pop()
+            const fileExt = file.name.split('.').pop()?.toLowerCase()
             const fileName = `${profile.id}/${Date.now()}.${fileExt}`
             const filePath = `${fileName}`
 
-            setUploadProgress(30)
+            setUploadProgress(20)
             const { error: uploadError } = await supabase.storage
                 .from('resumes')
                 .upload(filePath, file)
 
             if (uploadError) throw uploadError
-            setUploadProgress(60)
+            setUploadProgress(40)
 
             // 2. Extract text from file
-            const fileText = await file.text()
+            let fileText = ""
+
+            if (fileExt === 'pdf') {
+                try {
+                    // Import pdfjs from CDN dynamically
+                    const script = document.createElement('script')
+                    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js'
+                    document.head.appendChild(script)
+
+                    await new Promise((resolve) => { script.onload = resolve })
+
+                    // @ts-ignore - pdfjsLib comes from the global script
+                    const pdfjsLib = window['pdfjsLib']
+                    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'
+
+                    const arrayBuffer = await file.arrayBuffer()
+                    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise
+                    let fullText = ""
+
+                    for (let i = 1; i <= pdf.numPages; i++) {
+                        const page = await pdf.getPage(i)
+                        const content = await page.getTextContent()
+                        const strings = content.items.map((item: any) => item.str)
+                        fullText += strings.join(' ') + '\n'
+                        setUploadProgress(40 + Math.round((i / pdf.numPages) * 20))
+                    }
+                    fileText = fullText
+                } catch (pdfErr) {
+                    console.error('PDF extraction failed:', pdfErr)
+                    throw new Error('Could not read text from PDF. Ensure it is not a scanned image.')
+                }
+            } else {
+                fileText = await file.text()
+                // Simple cleanup for DOCX if it looks like XML
+                if (fileText.includes('<?xml')) {
+                    fileText = fileText.replace(/<[^>]*>/g, ' ')
+                }
+            }
+
+            if (!fileText || fileText.trim().length < 20) {
+                throw new Error('Could not extract enough text from the file. Try a plain text or different PDF file.')
+            }
+
+            setUploadProgress(70)
 
             // 3. Call AI parsing Edge Function
             const { data: parsedData, error: parseError } = await supabase.functions.invoke('parse-resume', {
                 body: { resumeText: fileText }
             })
 
-            if (parseError) {
-                console.warn('AI parsing failed:', parseError)
-                throw new Error('Failed to parse resume')
+            if (parseError || (parsedData && parsedData.error)) {
+                console.error('AI parsing failed:', parseError || parsedData.error)
+                throw new Error(parsedData?.error || 'Failed to analyze resume content. Please try again.')
             }
 
             const mockParsedData: Partial<ParsedResume> = {
                 user_id: profile.id,
                 original_filename: file.name,
                 storage_path: filePath,
-                summary: parsedData.summary,
-                extracted_skills: parsedData.extracted_skills,
-                work_experience: parsedData.work_experience,
-                education: parsedData.education,
-                certifications: parsedData.certifications,
+                summary: parsedData.summary || 'Summary not available',
+                extracted_skills: parsedData.extracted_skills || [],
+                work_experience: parsedData.work_experience || [],
+                education: parsedData.education || [],
+                certifications: parsedData.certifications || [],
                 parsed_data: parsedData,
                 is_primary: resumes.length === 0,
             }
 
-            setUploadProgress(80)
-            // 3. Save metadata to database
+            setUploadProgress(90)
+            // 4. Save metadata to database
             const { data, error: dbError } = await supabase
                 .from('resumes')
                 .insert([mockParsedData])
                 .select()
-                .single()
+                .maybeSingle()
 
             if (dbError) throw dbError
 
@@ -114,7 +157,7 @@ export default function ResumeManager() {
             setUploadProgress(100)
         } catch (error: any) {
             console.error('Upload failed:', error)
-            setUploadError(error.message || 'Failed to upload resume. Ensure the "resumes" bucket exists.')
+            setUploadError(error.message || 'Failed to upload resume.')
         } finally {
             setTimeout(() => {
                 setIsUploading(false)
