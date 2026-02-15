@@ -17,7 +17,7 @@ import { useUserStore } from '../../stores'
 const navItems = [
     { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { path: '/jobs', label: 'Job Search', icon: Search },
-    { path: '/tracker', label: 'Tracker', icon: Kanban },
+    { path: '/tracker', label: 'Career Tracker', icon: Kanban },
     { path: '/analytics', label: 'Analytics', icon: BarChart3 },
     { path: '/alerts', label: 'Alerts', icon: Bell },
     { path: '/resume', label: 'Resume', icon: FileText },

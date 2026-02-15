@@ -16,10 +16,12 @@ import {
     Briefcase
 } from 'lucide-react'
 import { Button, Card } from '../components/ui'
-import { useJobsStore, useResumeStore } from '../stores'
+import { useJobsStore, useResumeStore, useUserStore } from '../stores'
+import { useCareerStore } from '../stores/career'
 import { supabase } from '../lib/supabase'
 import { showToast, toastMessages } from '../utils/toast'
 import { useKeyboardShortcuts, commonShortcuts } from '../hooks/useKeyboardShortcuts'
+import { Check, Plus } from 'lucide-react'
 
 type DocumentType = 'resume' | 'cover_letter'
 
@@ -47,6 +49,31 @@ export default function DocumentGenerator() {
 
     const { savedJobs } = useJobsStore()
     const { primaryResume } = useResumeStore()
+    const { addItem: addCareerItem, items: careerItems } = useCareerStore()
+    const { profile } = useUserStore()
+
+    const handleSaveRole = async (role: string) => {
+        if (!profile) return
+        await addCareerItem({
+            user_id: profile.id,
+            type: 'role',
+            title: role,
+            status: 'saved'
+        })
+        showToast.success('Role saved to Career Tracker')
+    }
+
+    const handleSaveCert = async (title: string, description: string) => {
+        if (!profile) return
+        await addCareerItem({
+            user_id: profile.id,
+            type: 'certification',
+            title: title,
+            description: description,
+            status: 'saved'
+        })
+        showToast.success('Certification saved to Career Tracker')
+    }
 
     // Keyboard shortcuts
     useKeyboardShortcuts([
@@ -400,19 +427,36 @@ export default function DocumentGenerator() {
                                                         <h4 className="font-display font-semibold text-white">Recommended Certificates</h4>
                                                     </div>
                                                     <div className="grid gap-3">
-                                                        {improvementPlan.certificates.map((cert, i) => (
-                                                            <div key={i} className="p-3 rounded-xl bg-surface-800/50 border border-surface-700">
-                                                                <div className="flex items-center justify-between mb-1">
-                                                                    <span className="font-medium text-white text-sm">{cert.name}</span>
-                                                                    <span className={`text-[10px] px-1.5 py-0.5 rounded ${
-                                                                        cert.priority === 'High' ? 'bg-red-500/20 text-red-400' : 'bg-blue-500/20 text-blue-400'
-                                                                    }`}>
-                                                                        {cert.priority}
-                                                                    </span>
+                                                        {improvementPlan.certificates.map((cert, i) => {
+                                                            const isSaved = careerItems.some(item => item.type === 'certification' && item.title === cert.name);
+                                                            return (
+                                                                <div key={i} className="p-3 rounded-xl bg-surface-800/50 border border-surface-700 flex items-start gap-3 group">
+                                                                    <div className="flex-1">
+                                                                        <div className="flex items-center justify-between mb-1">
+                                                                            <span className="font-medium text-white text-sm">{cert.name}</span>
+                                                                            <span className={`text-[10px] px-1.5 py-0.5 rounded ${
+                                                                                cert.priority === 'High' ? 'bg-red-500/20 text-red-400' : 'bg-blue-500/20 text-blue-400'
+                                                                            }`}>
+                                                                                {cert.priority}
+                                                                            </span>
+                                                                        </div>
+                                                                        <p className="text-xs text-surface-400">{cert.description}</p>
+                                                                    </div>
+                                                                    <button
+                                                                        onClick={() => !isSaved && handleSaveCert(cert.name, cert.description)}
+                                                                        disabled={isSaved}
+                                                                        className={`p-2 rounded-lg transition-colors ${
+                                                                            isSaved 
+                                                                            ? 'text-green-400 cursor-default bg-green-500/10' 
+                                                                            : 'text-surface-400 hover:text-white hover:bg-surface-700 opacity-0 group-hover:opacity-100'
+                                                                        }`}
+                                                                        title={isSaved ? "Already saved" : "Save to Career Tracker"}
+                                                                    >
+                                                                        {isSaved ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                                                                    </button>
                                                                 </div>
-                                                                <p className="text-xs text-surface-400">{cert.description}</p>
-                                                            </div>
-                                                        ))}
+                                                            )
+                                                        })}
                                                     </div>
                                                 </div>
 
@@ -422,12 +466,29 @@ export default function DocumentGenerator() {
                                                         <h4 className="font-display font-semibold text-white">Career Stepping Stones</h4>
                                                     </div>
                                                     <div className="grid gap-3">
-                                                        {improvementPlan.stepping_stone_roles.map((role, i) => (
-                                                            <div key={i} className="p-3 rounded-xl bg-surface-800/50 border border-surface-700">
-                                                                <span className="font-medium text-white text-sm block mb-1">{role.title}</span>
-                                                                <p className="text-xs text-surface-400">{role.reason}</p>
-                                                            </div>
-                                                        ))}
+                                                        {improvementPlan.stepping_stone_roles.map((role, i) => {
+                                                            const isSaved = careerItems.some(item => item.type === 'role' && item.title === role.title);
+                                                            return (
+                                                                <div key={i} className="p-3 rounded-xl bg-surface-800/50 border border-surface-700 flex items-start gap-3 group">
+                                                                    <div className="flex-1">
+                                                                        <span className="font-medium text-white text-sm block mb-1">{role.title}</span>
+                                                                        <p className="text-xs text-surface-400">{role.reason}</p>
+                                                                    </div>
+                                                                    <button
+                                                                        onClick={() => !isSaved && handleSaveRole(role.title)}
+                                                                        disabled={isSaved}
+                                                                        className={`p-2 rounded-lg transition-colors ${
+                                                                            isSaved 
+                                                                            ? 'text-green-400 cursor-default bg-green-500/10' 
+                                                                            : 'text-surface-400 hover:text-white hover:bg-surface-700 opacity-0 group-hover:opacity-100'
+                                                                        }`}
+                                                                        title={isSaved ? "Already saved" : "Save to Career Tracker"}
+                                                                    >
+                                                                        {isSaved ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                                                                    </button>
+                                                                </div>
+                                                            )
+                                                        })}
                                                     </div>
                                                 </div>
                                             </div>

@@ -433,3 +433,8 @@ verify_jwt = false
 
 # Note: Cron schedules must be configured via Supabase Dashboard
 # Visit: https://supabase.com/dashboard/project/[PROJECT-REF]/functions
+
+[functions.analyze-resume]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/analyze-resume/index.ts"
