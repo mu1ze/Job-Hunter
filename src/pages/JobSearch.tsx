@@ -12,11 +12,15 @@ import {
     X,
     Globe,
     Sparkles,
-    Trophy
+    Trophy,
+    BrainCircuit, // New icon for research
+    Loader2
 } from 'lucide-react'
+import ReactMarkdown from 'react-markdown'
 import { Button, Input, Card } from '../components/ui'
 import { useJobsStore, useUserStore, useResumeStore } from '../stores'
 import { adzunaService } from '../services/adzuna'
+import { perplexityService } from '../services/perplexity'
 import { supabase } from '../lib/supabase'
 import type { JobSearchFilters, JobListing, SavedJob } from '../types'
 import { showToast, toastMessages } from '../utils/toast'
@@ -30,6 +34,7 @@ export default function JobSearch() {
         radius: 50,
         remote_only: false,
         sort_by: 'relevance',
+        country: 'us'
     })
     const [showFilters, setShowFilters] = useState(false)
     const [jobsList, setJobsList] = useState<JobListing[]>([])
@@ -37,11 +42,33 @@ export default function JobSearch() {
     const [selectedJob, setSelectedJob] = useState<JobListing | null>(null)
     const [isSearching, setIsSearching] = useState(false)
     const [currentPage, setCurrentPage] = useState(1)
+    
+    // Research State
+    const [isResearching, setIsResearching] = useState(false)
+    const [researchResult, setResearchResult] = useState<string | null>(null)
+    const [showResearchModal, setShowResearchModal] = useState(false)
+
     const resultsPerPage = 20
 
     const { savedJobs, addSavedJob, removeSavedJob, setSearching } = useJobsStore()
     const { profile, preferences } = useUserStore()
     const { primaryResume } = useResumeStore()
+
+    const countries = [
+        { code: 'us', name: 'United States' },
+        { code: 'ca', name: 'Canada' },
+        { code: 'gb', name: 'United Kingdom' },
+        { code: 'au', name: 'Australia' },
+        { code: 'in', name: 'India' },
+        { code: 'sg', name: 'Singapore' },
+        { code: 'ng', name: 'Nigeria' },
+        { code: 'za', name: 'South Africa' },
+        { code: 'nz', name: 'New Zealand' },
+        { code: 'fr', name: 'France' },
+        { code: 'de', name: 'Germany' },
+        { code: 'nl', name: 'Netherlands' },
+        { code: 'pl', name: 'Poland' },
+    ]
 
     // Compatibility score for each job
     const [matchScores, setMatchScores] = useState<Record<string, number>>({})
@@ -92,41 +119,72 @@ export default function JobSearch() {
         setIsSearching(true)
         setSearching(true)
         setMatchScores({})
+        setSelectedJob(null)
 
         try {
-            // Construct a deep query based on resume
-            const topSkills = (primaryResume.extracted_skills || []).slice(0, 3).join(" ")
-            const recentRole = primaryResume.work_experience?.[0]?.title || ""
-            const aiQuery = `${recentRole} ${topSkills}`.trim()
+            // Use the new Edge Function for deep search
+            const { results, count, queries_used } = await adzunaService.deepSearchJobs(
+                filters,
+                // Construct resume text from parsed data since we don't store raw text
+                `
+                Summary: ${primaryResume.summary || ''}
+                
+                Skills: ${primaryResume.extracted_skills?.join(', ') || ''}
+                
+                Experience:
+                ${primaryResume.work_experience?.map(exp => `
+                    ${exp.title} at ${exp.company}
+                    ${exp.description}
+                    ${exp.achievements?.join('\n')}
+                `).join('\n') || ''}
+                `,
+                preferences
+            )
 
-            const searchFilters: JobSearchFilters = {
-                ...filters,
-                query: aiQuery,
-                sort_by: 'relevance'
-            }
-
-            const { results, count } = await adzunaService.searchJobs(searchFilters)
-
-            // Calculate scores for all results
-            const scores: Record<string, number> = {}
-            results.forEach(job => {
-                scores[job.id] = calculateCompatibility(job, primaryResume)
-            })
-
-            // Sort results by compatibility DESC
-            const sortedResults = [...results].sort((a, b) => (scores[b.id] || 0) - (scores[a.id] || 0))
-
-            setJobsList(sortedResults)
+            setJobsList(results)
             setTotalResults(count)
-            setMatchScores(scores)
             setCurrentPage(1)
 
-            showToast.success(`Found ${results.length} matches optimized for your profile!`)
-        } catch (error: any) {
-            showToast.error("Deep search failed. Try again.")
+            // Update match scores from AI results
+            const newScores: Record<string, number> = {}
+            results.forEach(job => {
+                if (job.__match_score) {
+                    newScores[job.id] = job.__match_score
+                }
+            })
+            setMatchScores(newScores)
+
+            if (queries_used && queries_used.length > 0) {
+                showToast.success(`Deep search complete! Used ${queries_used.length} smart queries.`)
+            } else {
+                showToast.success("Deep search complete!")
+            }
+
+        } catch (error) {
+            console.error("Deep search error:", error)
+            showToast.error("Failed to perform AI analysis. Please try again.")
         } finally {
             setIsSearching(false)
             setSearching(false)
+        }
+    }
+
+    const handleCompanyResearch = async () => {
+        if (!selectedJob) return
+
+        setIsResearching(true)
+        setResearchResult(null)
+        setShowResearchModal(true)
+
+        try {
+            const result = await perplexityService.researchCompany(selectedJob.company, selectedJob.title)
+            setResearchResult(result.content)
+        } catch (error) {
+            showToast.error("Failed to research company. Please check your API key.")
+            setShowResearchModal(false)
+            console.error('Research error:', error)
+        } finally {
+            setIsResearching(false)
         }
     }
 
@@ -225,7 +283,7 @@ export default function JobSearch() {
                 requirements: job.requirements,
                 skills_required: job.skills_required,
                 posted_at: job.posted_at,
-                saved_at: new Date().toISOString(),
+                created_at: new Date().toISOString(),
                 status: 'saved',
                 notes: null,
                 source: job.source || 'adzuna',
@@ -290,7 +348,51 @@ export default function JobSearch() {
     }
 
     return (
-        <div className="animate-fade-in">
+        <div className="animate-fade-in relative">
+            {/* Research Modal */}
+            {showResearchModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+                    <Card className="w-full max-w-2xl max-h-[80vh] flex flex-col shadow-2xl border-primary-500/20">
+                        <div className="flex items-center justify-between mb-4 border-b border-surface-700 pb-4">
+                            <h3 className="text-xl font-display font-bold text-white flex items-center gap-2">
+                                <BrainCircuit className="w-6 h-6 text-primary-400" />
+                                Deep Research: {selectedJob?.company}
+                            </h3>
+                            <button 
+                                onClick={() => setShowResearchModal(false)}
+                                className="text-surface-400 hover:text-white transition-colors"
+                            >
+                                <X className="w-6 h-6" />
+                            </button>
+                        </div>
+                        
+                        <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+                            {isResearching ? (
+                                <div className="flex flex-col items-center justify-center py-12 space-y-4">
+                                    <Loader2 className="w-12 h-12 text-primary-500 animate-spin" />
+                                    <p className="text-surface-300 animate-pulse">Analyzing company culture, news, and red flags...</p>
+                                </div>
+                            ) : researchResult ? (
+                                <div className="prose prose-invert prose-sm max-w-none">
+                                    <ReactMarkdown>{researchResult}</ReactMarkdown>
+                                </div>
+                            ) : (
+                                <div className="text-center py-12 text-surface-400">
+                                    Failed to load research. Please try again or check your API key.
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="mt-4 pt-4 border-t border-surface-700 flex justify-end">
+                            <Button variant="secondary" onClick={() => setShowResearchModal(false)}>
+                                Close
+                            </Button>
+                        </div>
+                    </Card>
+                </div>
+            )}
+
+
             {/* Search Header */}
             <div className="mb-6">
                 <h1 className="font-display text-3xl font-bold text-white mb-2">Find Your Next Role</h1>
@@ -302,6 +404,18 @@ export default function JobSearch() {
             {/* Search Bar */}
             <Card className="mb-6">
                 <div className="flex flex-col md:flex-row gap-4">
+                    <div className="w-full md:w-48 shrink-0">
+                        <select
+                            className="w-full px-4 py-3 rounded-xl bg-surface-800/50 border border-surface-700 text-surface-100 focus:outline-none focus:border-primary-500 appearance-none cursor-pointer"
+                            value={filters.country}
+                            onChange={(e) => setFilters({ ...filters, country: e.target.value })}
+                            style={{ backgroundImage: 'none' }} 
+                        >
+                            {countries.map(c => (
+                                <option key={c.code} value={c.code}>{c.name}</option>
+                            ))}
+                        </select>
+                    </div>
                     <div className="flex-1">
                         <Input
                             placeholder="Job title, keywords, or company"
@@ -444,12 +558,19 @@ export default function JobSearch() {
                                                 </div>
                                                 <div className="flex items-center gap-2">
                                                     {matchScores[job.id] !== undefined && (
-                                                        <div className={`px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1 ${matchScores[job.id] >= 80 ? 'bg-green-500/20 text-green-400 border border-green-500/30' :
-                                                            matchScores[job.id] >= 60 ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
-                                                                'bg-surface-800 text-surface-400'
-                                                            }`}>
-                                                            {matchScores[job.id] >= 85 && <Trophy className="w-3 h-3" />}
-                                                            {matchScores[job.id]}% Match
+                                                        <div className="flex flex-col items-end">
+                                                            <div className={`px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1 ${matchScores[job.id] >= 80 ? 'bg-green-500/20 text-green-400 border border-green-500/30' :
+                                                                matchScores[job.id] >= 60 ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
+                                                                    'bg-surface-800 text-surface-400'
+                                                                }`}>
+                                                                {matchScores[job.id] >= 85 && <Trophy className="w-3 h-3" />}
+                                                                {matchScores[job.id]}% Match
+                                                            </div>
+                                                            {job.__match_reason && (
+                                                                <span className="text-[10px] text-surface-400 mt-1 max-w-[150px] text-right truncate">
+                                                                    {job.__match_reason}
+                                                                </span>
+                                                            )}
                                                         </div>
                                                     )}
                                                     <button
@@ -582,21 +703,22 @@ export default function JobSearch() {
                 {/* Job Detail Panel */}
                 <div className="lg:col-span-1">
                     {selectedJob ? (
-                        <Card className="sticky top-24">
-                            <div className="flex items-center justify-between mb-4">
-                                <h3 className="font-display text-lg font-semibold text-white">Job Details</h3>
-                                <button
-                                    onClick={() => setSelectedJob(null)}
-                                    className="p-1 rounded-lg hover:bg-surface-800 text-surface-400 lg:hidden"
-                                >
-                                    <X className="w-5 h-5" />
-                                </button>
-                            </div>
+                        <Card className="sticky top-24 max-h-[calc(100vh-8rem)] flex flex-col !p-0 overflow-hidden">
+                            {/* Fixed Header */}
+                            <div className="p-6 pb-4 border-b border-surface-700/50 shrink-0 bg-surface-800/50 backdrop-blur-sm z-10">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="font-display text-lg font-semibold text-white">Job Details</h3>
+                                    <button
+                                        onClick={() => setSelectedJob(null)}
+                                        className="p-1 rounded-lg hover:bg-surface-700 text-surface-400 lg:hidden"
+                                    >
+                                        <X className="w-5 h-5" />
+                                    </button>
+                                </div>
 
-                            <div className="space-y-4">
                                 <div className="flex items-start justify-between gap-4">
                                     <div>
-                                        <h4 className="font-semibold text-white text-xl">{selectedJob.title}</h4>
+                                        <h4 className="font-semibold text-white text-xl line-clamp-2">{selectedJob.title}</h4>
                                         <p className="text-surface-400">{selectedJob.company}</p>
                                     </div>
                                     {matchScores[selectedJob.id] !== undefined && (
@@ -609,7 +731,10 @@ export default function JobSearch() {
                                         </div>
                                     )}
                                 </div>
+                            </div>
 
+                            {/* Scrollable Content */}
+                            <div className="p-6 overflow-y-auto flex-1 space-y-6 custom-scrollbar">
                                 <div className="flex flex-wrap gap-2">
                                     <span className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-surface-800 text-surface-300 text-sm">
                                         <MapPin className="w-4 h-4" />
@@ -621,22 +746,24 @@ export default function JobSearch() {
                                             Remote
                                         </span>
                                     )}
+                                    {selectedJob.salary_range && (
+                                        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-accent-500/10 text-accent-400 text-sm">
+                                            <DollarSign className="w-4 h-4" />
+                                            {selectedJob.salary_range}
+                                        </span>
+                                    )}
                                 </div>
 
-                                {selectedJob.salary_range && (
-                                    <div className="flex items-center gap-2 text-accent-400">
-                                        <DollarSign className="w-5 h-5" />
-                                        <span className="font-semibold">{selectedJob.salary_range}</span>
-                                    </div>
-                                )}
-
                                 <div>
-                                    <h5 className="font-medium text-surface-200 mb-2">Required Skills</h5>
+                                    <h5 className="font-medium text-surface-200 mb-3 flex items-center gap-2">
+                                        <BrainCircuit className="w-4 h-4 text-primary-400" />
+                                        Required Skills
+                                    </h5>
                                     <div className="flex flex-wrap gap-2">
                                         {selectedJob.skills_required.map((skill) => (
                                             <span
                                                 key={skill}
-                                                className="px-3 py-1 rounded-lg bg-primary-500/20 text-primary-400 text-sm"
+                                                className="px-3 py-1 rounded-lg bg-primary-500/10 text-primary-400 text-sm border border-primary-500/20"
                                             >
                                                 {skill}
                                             </span>
@@ -645,17 +772,20 @@ export default function JobSearch() {
                                 </div>
 
                                 <div>
-                                    <h5 className="font-medium text-surface-200 mb-2">Description</h5>
-                                    <p className="text-surface-400 text-sm leading-relaxed">
+                                    <h5 className="font-medium text-surface-200 mb-3">Description</h5>
+                                    <div className="text-surface-400 text-sm leading-relaxed space-y-4 whitespace-pre-wrap">
                                         {selectedJob.description}
-                                    </p>
+                                    </div>
                                 </div>
+                            </div>
 
-                                <div className="flex gap-3 pt-4 border-t border-surface-700">
+                            {/* Fixed Footer */}
+                            <div className="p-6 pt-4 border-t border-surface-700/50 shrink-0 bg-surface-800/50 backdrop-blur-sm z-10">
+                                <div className="grid grid-cols-2 gap-3">
                                     <Button
                                         onClick={() => toggleSaveJob(selectedJob)}
                                         variant={isJobSaved(selectedJob.id) ? 'secondary' : 'outline'}
-                                        className="flex-1"
+                                        className="w-full"
                                     >
                                         {isJobSaved(selectedJob.id) ? (
                                             <>
@@ -665,13 +795,23 @@ export default function JobSearch() {
                                         ) : (
                                             <>
                                                 <Bookmark className="w-4 h-4 mr-2" />
-                                                Save Job
+                                                Save
                                             </>
                                         )}
                                     </Button>
-                                    <a href={selectedJob.job_url} target="_blank" rel="noopener noreferrer" className="flex-1">
-                                        <Button className="w-full">
-                                            Apply
+                                    
+                                    <Button
+                                        variant="outline"
+                                        onClick={handleCompanyResearch}
+                                        className="w-full border-blue-500/50 text-blue-400 hover:border-blue-500 hover:text-blue-300"
+                                    >
+                                        <BrainCircuit className="w-4 h-4 mr-2" />
+                                        Research
+                                    </Button>
+
+                                    <a href={selectedJob.job_url} target="_blank" rel="noopener noreferrer" className="col-span-2">
+                                        <Button className="w-full bg-gradient-to-r from-primary-600 to-purple-600 hover:from-primary-500 hover:to-purple-500 border-none shadow-lg shadow-primary-500/20">
+                                            Apply Now
                                             <ExternalLink className="w-4 h-4 ml-2" />
                                         </Button>
                                     </a>

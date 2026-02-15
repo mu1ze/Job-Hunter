@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import {
     FileText,
     Upload,
@@ -13,19 +13,68 @@ import {
 } from 'lucide-react'
 import { Button, Card } from '../components/ui'
 import { useResumeStore, useUserStore } from '../stores'
+import { useCareerStore } from '../stores/career'
 import { supabase } from '../lib/supabase'
+import { analysisService } from '../services/analysis'
 import type { ParsedResume } from '../types'
+import { showToast } from '../utils/toast'
+import { useNavigate } from 'react-router-dom'
 
 export default function ResumeManager() {
     const { resumes, addResume, setResumes, primaryResume, setPrimaryResume } = useResumeStore()
+    const { fetchItems: fetchCareerItems, addAnalysis } = useCareerStore()
     const { profile } = useUserStore()
+    const navigate = useNavigate()
+    
+    // Upload State
     const [isUploading, setIsUploading] = useState(false)
     const [uploadProgress, setUploadProgress] = useState(0)
     const [dragActive, setDragActive] = useState(false)
     const [uploadError, setUploadError] = useState<string | null>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
 
+    // Analysis State
+    const [isAnalyzing, setIsAnalyzing] = useState(false)
+
+    // ... (rest of code)
+
+    const handleAnalyzeCareer = async () => {
+        if (!currentResume || !profile) return
+        
+        setIsAnalyzing(true)
+
+        try {
+            const resumeTextRep = JSON.stringify(currentResume.parsed_data)
+            
+            const result = await analysisService.analyzeResume(
+                resumeTextRep, 
+                currentResume.work_experience?.[0]?.title || 'Job Seeker'
+            )
+            
+            await addAnalysis({
+                user_id: profile.id,
+                resume_id: currentResume.id,
+                analysis_data: result,
+                created_at: new Date().toISOString()
+            })
+
+            showToast.success("Career analyzed! Redirecting to tracker...")
+            navigate('/tracker?tab=analysis')
+        } catch (error: any) {
+            console.error('Analysis failed:', error)
+            showToast.error("Career analysis failed. Please try again.")
+        } finally {
+            setIsAnalyzing(false)
+        }
+    }
+
     const currentResume = primaryResume || resumes[0]
+
+    useEffect(() => {
+        if (profile) {
+            fetchCareerItems(profile.id)
+        }
+    }, [profile])
 
     const handleDrag = (e: React.DragEvent) => {
         e.preventDefault()
@@ -197,13 +246,39 @@ export default function ResumeManager() {
         return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
     }
 
+
+
     return (
-        <div className="animate-fade-in">
-            <div className="mb-6 text-center lg:text-left">
-                <h1 className="font-display text-3xl font-bold text-white mb-2">Resume Manager</h1>
-                <p className="text-surface-400">
-                    Upload and manage your resumes. We'll extract skills and experience for better matching.
-                </p>
+        <div className="animate-fade-in relative">
+            {/* Analysis Modal Removed - Redirecting to Tracker instead */}
+
+            <div className="mb-6 text-center lg:text-left flex flex-col md:flex-row md:items-end justify-between gap-4">
+                <div>
+                    <h1 className="font-display text-3xl font-bold text-white mb-2">Resume Manager</h1>
+                    <p className="text-surface-400">
+                        Upload and manage your resumes. We'll extract skills and experience for better matching.
+                    </p>
+                </div>
+                {/* Analyze Button */}
+                {currentResume && (
+                    <Button 
+                        onClick={handleAnalyzeCareer}
+                        disabled={isAnalyzing}
+                        className="bg-gradient-to-r from-primary-600 to-purple-600 hover:from-primary-500 hover:to-purple-500 border-none shadow-lg shadow-primary-500/20 disabled:opacity-70 disabled:cursor-not-allowed"
+                    >
+                        {isAnalyzing ? (
+                            <>
+                                <div className="w-5 h-5 mr-2 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                Analyzing...
+                            </>
+                        ) : (
+                            <>
+                                <Sparkles className="w-5 h-5 mr-2" />
+                                Analyze Career Path
+                            </>
+                        )}
+                    </Button>
+                )}
             </div>
 
             <div className="grid lg:grid-cols-3 gap-6">
