@@ -120,7 +120,7 @@ export default function JobSearch() {
 
         } catch (error) {
             console.error("Deep search error:", error)
-            showToast.error("Failed to perform AI analysis. Please try again.")
+            showToast.error(toastMessages.error.aiBusy)
         } finally {
             setIsSearching(false)
             setSearching(false)
@@ -138,7 +138,7 @@ export default function JobSearch() {
             const result = await perplexityService.researchCompany(selectedJob.company, selectedJob.title)
             setResearchResult(result.content)
         } catch (error) {
-            showToast.error("Failed to research company. Please check your API key.")
+            showToast.error(toastMessages.error.aiBusy)
             setShowResearchModal(false)
             console.error('Research error:', error)
         } finally {
@@ -164,6 +164,9 @@ export default function JobSearch() {
                 if (Date.now() - cachedData.timestamp < 5 * 60 * 1000) {
                     setJobsList(cachedData.results)
                     setTotalResults(cachedData.count)
+                    if (cachedData.results.length === 0) {
+                        showToast.error(toastMessages.error.noJobsFound)
+                    }
                     setIsSearching(false)
                     setSearching(false)
                     return
@@ -175,6 +178,10 @@ export default function JobSearch() {
             setTotalResults(count)
             setCurrentPage(1)
 
+            if (results.length === 0) {
+                showToast.error(toastMessages.error.noJobsFound)
+            }
+
             localStorage.setItem(cacheKey, JSON.stringify({
                 results,
                 count,
@@ -182,7 +189,7 @@ export default function JobSearch() {
             }))
         } catch (error: any) {
             console.error('Search failed:', error)
-            showToast.error(error.message || 'Failed to fetch jobs. Please try again.')
+            showToast.error(toastMessages.error.networkError)
         } finally {
             setIsSearching(false)
             setSearching(false)

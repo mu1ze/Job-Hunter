@@ -70,4 +70,12 @@ export const toastMessages = {
     deleteSuccess: 'Deleted successfully',
     deleteFailed: 'Delete failed. Please try again.',
   },
+  error: {
+    urlReadable: "Uh oh! I can't read that URL. It might be blocked or private. Try pasting the description instead! 🙈",
+    descriptionParse: "I'm having trouble understanding this job description. It seems a bit garbled. Could you try cleaning it up? 🧹",
+    noJobsFound: "I couldn't find any jobs matching that. Maybe try broader keywords? The perfect role is hiding somewhere! 🕵️‍♂️",
+    aiBusy: "My AI brain is a bit overloaded right now. Give me a moment to cool down and try again! 🤯",
+    networkError: "Network gremlins are at it again. Please check your connection! 🔌",
+    generic: "Something went wrong. I'm looking into it! 🧐"
+  }
 }

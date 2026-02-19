@@ -15,9 +15,11 @@ import {
     Award,
     Briefcase,
     Check,
-    Plus
+    Plus,
+    Link as LinkIcon,
+    Type
 } from 'lucide-react'
-import { Button, Card } from '../components/ui'
+import { Button, Card, Input } from '../components/ui'
 import { useJobsStore, useResumeStore, useUserStore } from '../stores'
 import { useCareerStore } from '../stores/career'
 import { supabase } from '../lib/supabase'
@@ -25,9 +27,18 @@ import { showToast, toastMessages } from '../utils/toast'
 import { useKeyboardShortcuts, commonShortcuts } from '../hooks/useKeyboardShortcuts'
 
 type DocumentType = 'resume' | 'cover_letter'
+type InputType = 'saved' | 'custom'
 
 export default function DocumentGenerator() {
+    const [inputType, setInputType] = useState<InputType>('saved')
     const [selectedJobId, setSelectedJobId] = useState<string>('')
+
+    // Custom Job State
+    const [customJobTitle, setCustomJobTitle] = useState('')
+    const [customJobCompany, setCustomJobCompany] = useState('')
+    const [customJobDescription, setCustomJobDescription] = useState('')
+    const [customJobUrl, setCustomJobUrl] = useState('')
+
     const [documentType, setDocumentType] = useState<DocumentType>('resume')
     const [isGenerating, setIsGenerating] = useState(false)
     const [generatedContent, setGeneratedContent] = useState<string | null>(null)
@@ -79,7 +90,7 @@ export default function DocumentGenerator() {
     // Keyboard shortcuts
     useKeyboardShortcuts([
         commonShortcuts.save(() => {
-            if (selectedJobId && !isGenerating) {
+            if ((selectedJobId || (inputType === 'custom' && customJobDescription)) && !isGenerating) {
                 handleGenerate()
             }
         }),
@@ -90,9 +101,27 @@ export default function DocumentGenerator() {
     ])
 
     const handleGenerate = async (focusKeywords?: string[]) => {
-        if (!selectedJobId) {
-            alert('Please select a job first')
-            return
+        let jobDescription = ''
+        let jobTitle = ''
+
+        if (inputType === 'saved') {
+            const selectedJob = savedJobs.find(j => j.id === selectedJobId)
+            if (!selectedJob) {
+                alert('Please select a saved job')
+                return
+            }
+            jobDescription = selectedJob.description
+            jobTitle = selectedJob.title
+        } else {
+            if (!customJobDescription) {
+                alert('Please enter a job description')
+                return
+            }
+            jobDescription = customJobDescription
+            if (customJobUrl) {
+                jobDescription += `\n\nJob Link: ${customJobUrl}`
+            }
+            jobTitle = customJobTitle || 'Target Role'
         }
 
         if (!primaryResume) {
@@ -113,27 +142,26 @@ export default function DocumentGenerator() {
         }
 
         try {
-            const selectedJob = savedJobs.find(j => j.id === selectedJobId)
-            if (!selectedJob) throw new Error('Job not found')
-
             // 1. Call AI to generate document
             const { data: generatedDoc, error: genError } = await supabase.functions.invoke('generate-document', {
                 body: {
                     resumeData: primaryResume.parsed_data || primaryResume,
-                    jobDescription: selectedJob.description,
+                    jobDescription: jobDescription,
                     documentType,
-                    focusKeywords
+                    focusKeywords,
+                    jobTitle: jobTitle
                 }
             })
 
             if (genError) throw genError
             setGeneratedContent(generatedDoc.content)
+            showToast.success(toastMessages.document.generated)
 
             // 2. Calculate ATS score for the GENERATED content
             const { data: atsData, error: atsError } = await supabase.functions.invoke('calculate-ats-score', {
                 body: {
                     rawText: generatedDoc.content,
-                    jobDescription: selectedJob.description
+                    jobDescription: jobDescription
                 }
             })
 
@@ -152,7 +180,17 @@ export default function DocumentGenerator() {
             }
         } catch (error: any) {
             console.error('Generation failed:', error)
-            showToast.error(isReimprove ? 'Improvement failed' : toastMessages.document.generationFailed)
+
+            // Handle specific errors
+            if (error.message?.includes('url')) {
+                showToast.error(toastMessages.error.urlReadable)
+            } else if (error.message?.includes('description') || error.message?.includes('parse')) {
+                showToast.error(toastMessages.error.descriptionParse)
+            } else if (error.message?.includes('network') || error.message?.includes('fetch')) {
+                showToast.error(toastMessages.error.networkError)
+            } else {
+                showToast.error(isReimprove ? 'Improvement failed' : toastMessages.error.generic)
+            }
         } finally {
             setIsGenerating(false)
             setIsReimproving(false)
@@ -230,41 +268,94 @@ export default function DocumentGenerator() {
                     {/* Job Selection */}
                     <Card className="border border-white/10 bg-white/5">
                         <h3 className="font-medium text-lg text-white mb-4">Target Job</h3>
-                        {savedJobs.length > 0 ? (
-                            <div className="relative">
-                                <select
-                                    value={selectedJobId}
-                                    onChange={(e) => setSelectedJobId(e.target.value)}
-                                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-white/30 appearance-none cursor-pointer"
-                                >
-                                    <option value="" className="bg-black text-white">Select a saved job...</option>
-                                    {savedJobs.map((job) => (
-                                        <option key={job.id} value={job.id} className="bg-black text-white">
-                                            {job.title} at {job.company}
-                                        </option>
-                                    ))}
-                                </select>
-                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40 pointer-events-none" />
-                            </div>
-                        ) : (
-                            <div className="text-center py-4">
-                                <p className="text-white/40 text-sm mb-3">No saved jobs yet</p>
-                                <Button variant="outline" size="sm" onClick={() => window.location.href = '/jobs'}>
-                                    Find Jobs First
-                                </Button>
-                            </div>
-                        )}
 
-                        {selectedJob && (
-                            <div className="mt-4 p-3 rounded-xl bg-white/5 border border-white/10">
-                                <h4 className="font-medium text-white">{selectedJob.title}</h4>
-                                <p className="text-white/60 text-sm">{selectedJob.company}</p>
-                                <div className="flex flex-wrap gap-1.5 mt-2">
-                                    {selectedJob.skills_required.slice(0, 5).map((skill) => (
-                                        <span key={skill} className="px-2 py-0.5 rounded bg-white/10 text-white/80 text-xs border border-white/5">
-                                            {skill}
-                                        </span>
-                                    ))}
+                        {/* Input Type Toggle */}
+                        <div className="flex bg-black/20 p-1 rounded-lg mb-4 border border-white/5">
+                            <button
+                                onClick={() => setInputType('saved')}
+                                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-md text-sm transition-all ${inputType === 'saved' ? 'bg-white/10 text-white shadow-sm' : 'text-white/40 hover:text-white'
+                                    }`}
+                            >
+                                <Briefcase className="w-3.5 h-3.5" />
+                                Saved Job
+                            </button>
+                            <button
+                                onClick={() => setInputType('custom')}
+                                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-md text-sm transition-all ${inputType === 'custom' ? 'bg-white/10 text-white shadow-sm' : 'text-white/40 hover:text-white'
+                                    }`}
+                            >
+                                <LinkIcon className="w-3.5 h-3.5" />
+                                Custom / URL
+                            </button>
+                        </div>
+
+                        {inputType === 'saved' ? (
+                            <>
+                                {savedJobs.length > 0 ? (
+                                    <div className="relative">
+                                        <select
+                                            value={selectedJobId}
+                                            onChange={(e) => setSelectedJobId(e.target.value)}
+                                            className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-white/30 appearance-none cursor-pointer"
+                                        >
+                                            <option value="" className="bg-black text-white">Select a saved job...</option>
+                                            {savedJobs.map((job) => (
+                                                <option key={job.id} value={job.id} className="bg-black text-white">
+                                                    {job.title} at {job.company}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40 pointer-events-none" />
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-4">
+                                        <p className="text-white/40 text-sm mb-3">No saved jobs yet</p>
+                                        <Button variant="outline" size="sm" onClick={() => window.location.href = '/jobs'}>
+                                            Find Jobs First
+                                        </Button>
+                                    </div>
+                                )}
+
+                                {selectedJob && (
+                                    <div className="mt-4 p-3 rounded-xl bg-white/5 border border-white/10">
+                                        <h4 className="font-medium text-white">{selectedJob.title}</h4>
+                                        <p className="text-white/60 text-sm">{selectedJob.company}</p>
+                                        <div className="flex flex-wrap gap-1.5 mt-2">
+                                            {selectedJob.skills_required.slice(0, 5).map((skill) => (
+                                                <span key={skill} className="px-2 py-0.5 rounded bg-white/10 text-white/80 text-xs border border-white/5">
+                                                    {skill}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </>
+                        ) : (
+                            <div className="space-y-3">
+                                <Input
+                                    placeholder="Ex: Senior Frontend Engineer"
+                                    value={customJobTitle}
+                                    onChange={(e) => setCustomJobTitle(e.target.value)}
+                                />
+                                <Input
+                                    placeholder="Company Name (Optional)"
+                                    value={customJobCompany}
+                                    onChange={(e) => setCustomJobCompany(e.target.value)}
+                                />
+                                <Input
+                                    placeholder="Job Post URL (Optional)"
+                                    icon={<LinkIcon className="w-4 h-4" />}
+                                    value={customJobUrl}
+                                    onChange={(e) => setCustomJobUrl(e.target.value)}
+                                />
+                                <div className="relative">
+                                    <textarea
+                                        placeholder="Paste the full job description here..."
+                                        value={customJobDescription}
+                                        onChange={(e) => setCustomJobDescription(e.target.value)}
+                                        className="w-full h-32 px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-white/30 resize-none text-sm placeholder:text-white/20 custom-scrollbar"
+                                    />
+                                    <Type className="absolute right-3 top-3 w-4 h-4 text-white/20 pointer-events-none" />
                                 </div>
                             </div>
                         )}
@@ -302,7 +393,7 @@ export default function DocumentGenerator() {
                         size="lg"
                         className="w-full group rounded-full"
                         isLoading={isGenerating}
-                        disabled={!selectedJobId}
+                        disabled={!primaryResume || (inputType === 'saved' ? !selectedJobId : !customJobDescription)}
                     >
                         <Sparkles className="w-5 h-5 mr-2" />
                         {isGenerating ? 'Generating...' : `Generate ${documentType === 'resume' ? 'Resume' : 'Cover Letter'}`}
@@ -445,8 +536,8 @@ export default function DocumentGenerator() {
                                                                         onClick={() => !isSaved && handleSaveCert(cert.name, cert.description)}
                                                                         disabled={isSaved}
                                                                         className={`p-2 rounded-lg transition-colors ${isSaved
-                                                                                ? 'text-green-300 cursor-default bg-green-500/10'
-                                                                                : 'text-white/40 hover:text-white hover:bg-white/10 opacity-0 group-hover:opacity-100'
+                                                                            ? 'text-green-300 cursor-default bg-green-500/10'
+                                                                            : 'text-white/40 hover:text-white hover:bg-white/10 opacity-0 group-hover:opacity-100'
                                                                             }`}
                                                                         title={isSaved ? "Already saved" : "Save to Career Tracker"}
                                                                     >
@@ -476,8 +567,8 @@ export default function DocumentGenerator() {
                                                                         onClick={() => !isSaved && handleSaveRole(role.title)}
                                                                         disabled={isSaved}
                                                                         className={`p-2 rounded-lg transition-colors ${isSaved
-                                                                                ? 'text-green-400 cursor-default bg-green-500/10'
-                                                                                : 'text-white/40 hover:text-white hover:bg-white/10 opacity-0 group-hover:opacity-100'
+                                                                            ? 'text-green-400 cursor-default bg-green-500/10'
+                                                                            : 'text-white/40 hover:text-white hover:bg-white/10 opacity-0 group-hover:opacity-100'
                                                                             }`}
                                                                         title={isSaved ? "Already saved" : "Save to Career Tracker"}
                                                                     >
