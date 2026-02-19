@@ -60,6 +60,9 @@ export interface SavedJob extends JobListing {
     rejected_date?: string | null;
     contact_name?: string | null;
     contact_email?: string | null;
+    company_url?: string | null;
+    recruiter_phone?: string | null;
+    recruiter_linkedin?: string | null;
 }
 
 export interface CareerItem {

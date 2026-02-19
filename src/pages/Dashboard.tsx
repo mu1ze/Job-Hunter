@@ -21,21 +21,18 @@ const quickActions = [
         label: 'Search Jobs',
         description: 'Find your next opportunity',
         path: '/jobs',
-        gradient: 'from-blue-500 to-cyan-500'
     },
     {
         icon: FileText,
         label: 'Upload Resume',
         description: 'Parse and analyze your CV',
         path: '/resume',
-        gradient: 'from-purple-500 to-pink-500'
     },
     {
         icon: Sparkles,
         label: 'Generate Cover Letter',
         description: 'AI-tailored applications',
         path: '/generate',
-        gradient: 'from-orange-500 to-red-500'
     },
 ]
 
@@ -75,21 +72,21 @@ export default function Dashboard() {
     }, [])
 
     const stats = [
-        { label: 'Saved Jobs', value: savedJobs.length, icon: Briefcase, color: 'text-blue-400' },
-        { label: 'Applied', value: savedJobs.filter(j => j.status === 'applied').length, icon: Clock, color: 'text-purple-400' },
-        { label: 'Interviews', value: savedJobs.filter(j => j.status === 'interviewing').length, icon: Target, color: 'text-green-400' },
-        { label: 'Skills Matched', value: primaryResume?.extracted_skills?.length || 0, icon: TrendingUp, color: 'text-orange-400' },
+        { label: 'Saved Jobs', value: savedJobs.length, icon: Briefcase },
+        { label: 'Applied', value: savedJobs.filter(j => j.status === 'applied').length, icon: Clock },
+        { label: 'Interviews', value: savedJobs.filter(j => j.status === 'interviewing').length, icon: Target },
+        { label: 'Skills Matched', value: primaryResume?.extracted_skills?.length || 0, icon: TrendingUp },
     ]
 
     return (
-        <div className="space-y-8 animate-fade-in">
+        <div className="space-y-8 animate-fade-in font-['General_Sans',_sans-serif]">
             {/* Welcome Header */}
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
-                    <h1 className="font-display text-3xl font-bold text-white mb-2">
+                    <h1 className="font-medium text-3xl text-white mb-2 tracking-tight">
                         Welcome back, {profile?.full_name?.split(' ')[0] || 'there'}! 👋
                     </h1>
-                    <p className="text-surface-400">
+                    <p className="text-white/60">
                         {preferences?.target_roles?.length
                             ? `Looking for ${preferences.target_roles.slice(0, 2).join(', ')}${preferences.target_roles.length > 2 ? ' and more' : ''} roles`
                             : 'Set up your job preferences to get started'
@@ -97,7 +94,7 @@ export default function Dashboard() {
                     </p>
                 </div>
                 <Link to="/jobs">
-                    <Button className="group">
+                    <Button className="group rounded-full bg-white text-black hover:bg-white/90">
                         <Search className="w-4 h-4 mr-2" />
                         Find New Jobs
                         <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
@@ -110,13 +107,13 @@ export default function Dashboard() {
                 {stats.map((stat) => {
                     const Icon = stat.icon
                     return (
-                        <Card key={stat.label} className="relative overflow-hidden">
+                        <Card key={stat.label} className="relative overflow-hidden border border-white/10 bg-white/5 backdrop-blur-sm">
                             <div className="flex items-start justify-between">
                                 <div>
-                                    <p className="text-surface-400 text-sm mb-1">{stat.label}</p>
-                                    <p className="font-display text-3xl font-bold text-white">{stat.value}</p>
+                                    <p className="text-white/50 text-sm mb-1 uppercase tracking-wider">{stat.label}</p>
+                                    <p className="font-medium text-3xl text-white">{stat.value}</p>
                                 </div>
-                                <div className={`p-2 rounded-lg bg-surface-800 ${stat.color}`}>
+                                <div className={`p-2 rounded-lg bg-white/5 text-white/80`}>
                                     <Icon className="w-5 h-5" />
                                 </div>
                             </div>
@@ -127,20 +124,20 @@ export default function Dashboard() {
 
             {/* Quick Actions */}
             <div>
-                <h2 className="font-display text-xl font-semibold text-white mb-4">Quick Actions</h2>
-                <div className="grid md:grid-cols-3 gap-4">
+                <h2 className="font-medium text-xl text-white mb-6">Quick Actions</h2>
+                <div className="grid md:grid-cols-3 gap-6">
                     {quickActions.map((action) => {
                         const Icon = action.icon
                         return (
                             <Link key={action.path} to={action.path}>
-                                <Card hover className="h-full">
-                                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${action.gradient} flex items-center justify-center mb-4 shadow-lg`}>
+                                <Card hover className="h-full border border-white/10 bg-white/5 hover:bg-white/10 transition-all">
+                                    <div className={`w-12 h-12 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center mb-6`}>
                                         <Icon className="w-6 h-6 text-white" />
                                     </div>
-                                    <h3 className="font-display text-lg font-semibold text-white mb-1">
+                                    <h3 className="font-medium text-lg text-white mb-2">
                                         {action.label}
                                     </h3>
-                                    <p className="text-surface-400 text-sm">
+                                    <p className="text-white/50 text-sm leading-relaxed">
                                         {action.description}
                                     </p>
                                 </Card>
@@ -153,25 +150,25 @@ export default function Dashboard() {
             {/* Main Content Grid */}
             <div className="grid lg:grid-cols-2 gap-6">
                 {/* Resume Status */}
-                <Card>
-                    <div className="flex items-center justify-between mb-4">
-                        <h3 className="font-display text-lg font-semibold text-white">Resume Status</h3>
+                <Card className="border border-white/10 bg-white/5">
+                    <div className="flex items-center justify-between mb-6">
+                        <h3 className="font-medium text-lg text-white">Resume Status</h3>
                         <Link to="/resume">
-                            <Button variant="ghost" size="sm">
+                            <Button variant="ghost" size="sm" className="text-white/60 hover:text-white">
                                 Manage <ArrowRight className="w-4 h-4 ml-1" />
                             </Button>
                         </Link>
                     </div>
 
                     {primaryResume ? (
-                        <div className="space-y-4">
-                            <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-xl bg-accent-500/20 flex items-center justify-center">
-                                    <FileText className="w-6 h-6 text-accent-400" />
+                        <div className="space-y-6">
+                            <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5">
+                                <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center">
+                                    <FileText className="w-6 h-6 text-white" />
                                 </div>
                                 <div>
                                     <p className="font-medium text-white">{primaryResume.original_filename}</p>
-                                    <p className="text-sm text-surface-400">
+                                    <p className="text-sm text-white/50">
                                         {primaryResume.extracted_skills?.length} skills extracted
                                     </p>
                                 </div>
@@ -179,18 +176,18 @@ export default function Dashboard() {
 
                             {primaryResume.extracted_skills && (
                                 <div>
-                                    <p className="text-sm text-surface-400 mb-2">Top Skills</p>
+                                    <p className="text-sm text-white/50 mb-3 uppercase tracking-wider">Top Skills</p>
                                     <div className="flex flex-wrap gap-2">
                                         {primaryResume.extracted_skills.slice(0, 6).map((skill) => (
                                             <span
                                                 key={skill}
-                                                className="px-3 py-1 rounded-lg bg-surface-800 text-surface-300 text-sm"
+                                                className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-white/80 text-sm"
                                             >
                                                 {skill}
                                             </span>
                                         ))}
                                         {primaryResume.extracted_skills.length > 6 && (
-                                            <span className="px-3 py-1 rounded-lg bg-primary-500/20 text-primary-400 text-sm">
+                                            <span className="px-3 py-1.5 rounded-full bg-white/10 text-white/60 text-sm">
                                                 +{primaryResume.extracted_skills.length - 6} more
                                             </span>
                                         )}
@@ -199,24 +196,24 @@ export default function Dashboard() {
                             )}
                         </div>
                     ) : (
-                        <div className="text-center py-8">
-                            <div className="w-16 h-16 rounded-2xl bg-surface-800 flex items-center justify-center mx-auto mb-4">
-                                <Plus className="w-8 h-8 text-surface-500" />
+                        <div className="text-center py-12">
+                            <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center mx-auto mb-6 border border-white/10">
+                                <Plus className="w-8 h-8 text-white/40" />
                             </div>
-                            <p className="text-surface-400 mb-4">No resume uploaded yet</p>
+                            <p className="text-white/60 mb-6">No resume uploaded yet</p>
                             <Link to="/resume">
-                                <Button variant="outline">Upload Resume</Button>
+                                <Button variant="outline" className="rounded-full">Upload Resume</Button>
                             </Link>
                         </div>
                     )}
                 </Card>
 
                 {/* Saved Jobs */}
-                <Card>
-                    <div className="flex items-center justify-between mb-4">
-                        <h3 className="font-display text-lg font-semibold text-white">Recent Saved Jobs</h3>
+                <Card className="border border-white/10 bg-white/5">
+                    <div className="flex items-center justify-between mb-6">
+                        <h3 className="font-medium text-lg text-white">Recent Saved Jobs</h3>
                         <Link to="/jobs">
-                            <Button variant="ghost" size="sm">
+                            <Button variant="ghost" size="sm" className="text-white/60 hover:text-white">
                                 View All <ArrowRight className="w-4 h-4 ml-1" />
                             </Button>
                         </Link>
@@ -225,38 +222,43 @@ export default function Dashboard() {
                     {savedJobs.length > 0 ? (
                         <div className="space-y-3">
                             {savedJobs.slice(0, 4).map((job) => (
-                                <div
+                                <Link
                                     key={job.id}
-                                    className="flex items-center gap-4 p-3 rounded-xl bg-surface-800/50 hover:bg-surface-800 transition-colors"
+                                    to={`/jobs/${job.id}`}
+                                    className="block"
                                 >
-                                    <div className="w-10 h-10 rounded-lg bg-surface-700 flex items-center justify-center text-white font-semibold">
-                                        {job.company[0]}
+                                    <div
+                                        className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors"
+                                    >
+                                        <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-white font-semibold border border-white/10">
+                                            {job.company[0]}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="font-medium text-white truncate">{job.title}</p>
+                                            <p className="text-sm text-white/50 truncate">{job.company}</p>
+                                        </div>
+                                        <span className={`
+                        px-3 py-1 rounded-full text-xs font-medium capitalize border border-white/5
+                        ${job.status === 'saved' ? 'bg-blue-500/10 text-blue-300' : ''}
+                        ${job.status === 'applied' ? 'bg-purple-500/10 text-purple-300' : ''}
+                        ${job.status === 'interviewing' ? 'bg-green-500/10 text-green-300' : ''}
+                        ${job.status === 'offer' ? 'bg-yellow-500/10 text-yellow-300' : ''}
+                        ${job.status === 'rejected' ? 'bg-red-500/10 text-red-300' : ''}
+                      `}>
+                                            {job.status}
+                                        </span>
                                     </div>
-                                    <div className="flex-1 min-w-0">
-                                        <p className="font-medium text-white truncate">{job.title}</p>
-                                        <p className="text-sm text-surface-400 truncate">{job.company}</p>
-                                    </div>
-                                    <span className={`
-                    px-2 py-1 rounded-lg text-xs font-medium capitalize
-                    ${job.status === 'saved' ? 'bg-blue-500/20 text-blue-400' : ''}
-                    ${job.status === 'applied' ? 'bg-purple-500/20 text-purple-400' : ''}
-                    ${job.status === 'interviewing' ? 'bg-green-500/20 text-green-400' : ''}
-                    ${job.status === 'offer' ? 'bg-yellow-500/20 text-yellow-400' : ''}
-                    ${job.status === 'rejected' ? 'bg-red-500/20 text-red-400' : ''}
-                  `}>
-                                        {job.status}
-                                    </span>
-                                </div>
+                                </Link>
                             ))}
                         </div>
                     ) : (
-                        <div className="text-center py-8">
-                            <div className="w-16 h-16 rounded-2xl bg-surface-800 flex items-center justify-center mx-auto mb-4">
-                                <Briefcase className="w-8 h-8 text-surface-500" />
+                        <div className="text-center py-12">
+                            <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center mx-auto mb-6 border border-white/10">
+                                <Briefcase className="w-8 h-8 text-white/40" />
                             </div>
-                            <p className="text-surface-400 mb-4">No saved jobs yet</p>
+                            <p className="text-white/60 mb-6">No saved jobs yet</p>
                             <Link to="/jobs">
-                                <Button variant="outline">Start Searching</Button>
+                                <Button variant="outline" className="rounded-full">Start Searching</Button>
                             </Link>
                         </div>
                     )}
@@ -264,24 +266,24 @@ export default function Dashboard() {
             </div>
 
             {/* AI Generation CTA */}
-            <Card className="relative overflow-hidden border-primary-500/20">
-                <div className="absolute inset-0 bg-gradient-to-r from-primary-500/10 via-transparent to-accent-500/10" />
-                <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                    <div className="flex items-center gap-4">
-                        <div className="w-14 h-14 rounded-2xl gradient-bg flex items-center justify-center shadow-glow">
-                            <Sparkles className="w-7 h-7 text-white" />
+            <Card className="relative overflow-hidden border border-white/10 bg-white/5">
+                <div className="absolute inset-0 bg-gradient-to-r from-white/5 via-transparent to-transparent opacity-50" />
+                <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-6 p-2">
+                    <div className="flex items-center gap-6">
+                        <div className="w-16 h-16 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center shadow-lg shadow-white/5">
+                            <Sparkles className="w-8 h-8 text-white" />
                         </div>
                         <div>
-                            <h3 className="font-display text-xl font-semibold text-white">
+                            <h3 className="font-medium text-xl text-white mb-2">
                                 Ready to create tailored applications?
                             </h3>
-                            <p className="text-surface-400">
+                            <p className="text-white/60">
                                 Use AI to generate resumes and cover letters optimized for each job
                             </p>
                         </div>
                     </div>
                     <Link to="/generate">
-                        <Button size="lg" className="group shrink-0">
+                        <Button size="lg" className="group shrink-0 rounded-full bg-white text-black hover:bg-white/90 border-0">
                             Generate Now
                             <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                         </Button>

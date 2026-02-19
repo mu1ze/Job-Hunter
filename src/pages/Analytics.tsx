@@ -83,11 +83,11 @@ export default function Analytics() {
     // Status breakdown
     const statusBreakdown = useMemo(() => {
         return [
-            { name: 'Saved', value: savedJobs.filter(j => j.status === 'saved').length, color: '#3b82f6' },
-            { name: 'Applied', value: savedJobs.filter(j => j.status === 'applied').length, color: '#8b5cf6' },
-            { name: 'Interviewing', value: metrics.interviewing, color: '#f59e0b' },
-            { name: 'Offer', value: metrics.offers, color: '#10b981' },
-            { name: 'Rejected', value: metrics.rejected, color: '#ef4444' },
+            { name: 'Saved', value: savedJobs.filter(j => j.status === 'saved').length, color: '#60a5fa' }, // Blue
+            { name: 'Applied', value: savedJobs.filter(j => j.status === 'applied').length, color: '#a78bfa' }, // Purple
+            { name: 'Interviewing', value: metrics.interviewing, color: '#fcd34d' }, // Yellow
+            { name: 'Offer', value: metrics.offers, color: '#34d399' }, // Green
+            { name: 'Rejected', value: metrics.rejected, color: '#f87171' }, // Red
         ].filter(item => item.value > 0)
     }, [savedJobs, metrics])
 
@@ -131,11 +131,11 @@ export default function Analytics() {
     }, [savedJobs])
 
     return (
-        <div className="animate-fade-in space-y-6">
+        <div className="animate-fade-in space-y-6 font-['General_Sans',_sans-serif]">
             {/* Header */}
             <div>
-                <h1 className="font-display text-3xl font-bold text-white mb-2">Analytics Dashboard</h1>
-                <p className="text-surface-400">
+                <h1 className="font-medium text-3xl text-white mb-2 tracking-tight">Analytics Dashboard</h1>
+                <p className="text-white/60">
                     Insights into your job search journey
                 </p>
             </div>
@@ -143,59 +143,60 @@ export default function Analytics() {
             {/* Key Metrics */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <MetricCard
-                    icon={<Briefcase className="w-6 h-6" />}
+                    icon={<Briefcase className="w-5 h-5 text-white" />}
                     label="Total Applications"
                     value={metrics.total.toString()}
-                    color="text-blue-400"
+                    color="bg-blue-500/20"
                 />
                 <MetricCard
-                    icon={<Target className="w-6 h-6" />}
+                    icon={<Target className="w-5 h-5 text-white" />}
                     label="Response Rate"
                     value={`${metrics.responseRate}%`}
-                    color="text-purple-400"
+                    color="bg-purple-500/20"
                 />
                 <MetricCard
-                    icon={<Calendar className="w-6 h-6" />}
+                    icon={<Calendar className="w-5 h-5 text-white" />}
                     label="Avg. Days to Interview"
                     value={metrics.avgDaysToInterview > 0 ? metrics.avgDaysToInterview.toString() : 'N/A'}
-                    color="text-yellow-400"
+                    color="bg-yellow-500/20"
                 />
                 <MetricCard
-                    icon={<Award className="w-6 h-6" />}
+                    icon={<Award className="w-5 h-5 text-white" />}
                     label="Success Rate"
                     value={`${metrics.successRate}%`}
-                    color="text-green-400"
+                    color="bg-green-500/20"
                 />
             </div>
 
             {/* Charts Row 1 */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Applications Over Time */}
-                <Card>
-                    <h3 className="font-semibold text-white mb-4 flex items-center gap-2">
-                        <TrendingUp className="w-5 h-5" />
+                <Card className="border border-white/10 bg-white/5">
+                    <h3 className="font-medium text-white mb-4 flex items-center gap-2">
+                        <TrendingUp className="w-5 h-5 text-white/60" />
                         Applications Over Time
                     </h3>
                     <ResponsiveContainer width="100%" height={250}>
                         <LineChart data={applicationsOverTime}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                            <XAxis dataKey="name" stroke="#94a3b8" />
-                            <YAxis stroke="#94a3b8" />
+                            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" vertical={false} />
+                            <XAxis dataKey="name" stroke="rgba(255,255,255,0.4)" tickLine={false} axisLine={false} />
+                            <YAxis stroke="rgba(255,255,255,0.4)" tickLine={false} axisLine={false} />
                             <Tooltip
                                 contentStyle={{
-                                    backgroundColor: '#1e293b',
-                                    border: '1px solid #334155',
-                                    borderRadius: '8px'
+                                    backgroundColor: '#000000',
+                                    border: '1px solid rgba(255,255,255,0.1)',
+                                    borderRadius: '12px',
+                                    color: '#fff'
                                 }}
                             />
-                            <Line type="monotone" dataKey="count" stroke="#3b82f6" strokeWidth={2} />
+                            <Line type="monotone" dataKey="count" stroke="#ffffff" strokeWidth={2} dot={{ r: 4, fill: '#000', strokeWidth: 2 }} activeDot={{ r: 6 }} />
                         </LineChart>
                     </ResponsiveContainer>
                 </Card>
 
                 {/* Status Breakdown */}
-                <Card>
-                    <h3 className="font-semibold text-white mb-4">Status Breakdown</h3>
+                <Card className="border border-white/10 bg-white/5">
+                    <h3 className="font-medium text-white mb-4">Status Breakdown</h3>
                     {statusBreakdown.length > 0 ? (
                         <ResponsiveContainer width="100%" height={250}>
                             <PieChart>
@@ -206,8 +207,9 @@ export default function Analytics() {
                                     labelLine={false}
                                     label={(entry) => `${entry.name}: ${entry.value}`}
                                     outerRadius={80}
-                                    fill="#8884d8"
                                     dataKey="value"
+                                    stroke="rgba(0,0,0,0.5)"
+                                    strokeWidth={2}
                                 >
                                     {statusBreakdown.map((entry, index) => (
                                         <Cell key={`cell-${index}`} fill={entry.color} />
@@ -215,15 +217,16 @@ export default function Analytics() {
                                 </Pie>
                                 <Tooltip
                                     contentStyle={{
-                                        backgroundColor: '#1e293b',
-                                        border: '1px solid #334155',
-                                        borderRadius: '8px'
+                                        backgroundColor: '#000000',
+                                        border: '1px solid rgba(255,255,255,0.1)',
+                                        borderRadius: '12px',
+                                        color: '#fff'
                                     }}
                                 />
                             </PieChart>
                         </ResponsiveContainer>
                     ) : (
-                        <div className="text-center py-20 text-surface-500">
+                        <div className="text-center py-20 text-white/20 text-sm border-2 border-dashed border-white/5 rounded-2xl">
                             No application data yet
                         </div>
                     )}
@@ -233,51 +236,53 @@ export default function Analytics() {
             {/* Charts Row 2 */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Salary Distribution */}
-                <Card>
-                    <h3 className="font-semibold text-white mb-4 flex items-center gap-2">
-                        <DollarSign className="w-5 h-5" />
+                <Card className="border border-white/10 bg-white/5">
+                    <h3 className="font-medium text-white mb-4 flex items-center gap-2">
+                        <DollarSign className="w-5 h-5 text-white/60" />
                         Salary Distribution
                     </h3>
                     {salaryData.length > 0 ? (
                         <ResponsiveContainer width="100%" height={250}>
                             <BarChart data={salaryData}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                                <XAxis dataKey="range" stroke="#94a3b8" />
-                                <YAxis stroke="#94a3b8" />
+                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" vertical={false} />
+                                <XAxis dataKey="range" stroke="rgba(255,255,255,0.4)" tickLine={false} axisLine={false} />
+                                <YAxis stroke="rgba(255,255,255,0.4)" tickLine={false} axisLine={false} />
                                 <Tooltip
                                     contentStyle={{
-                                        backgroundColor: '#1e293b',
-                                        border: '1px solid #334155',
-                                        borderRadius: '8px'
+                                        backgroundColor: '#000000',
+                                        border: '1px solid rgba(255,255,255,0.1)',
+                                        borderRadius: '12px',
+                                        color: '#fff'
                                     }}
+                                    cursor={{ fill: 'rgba(255,255,255,0.05)' }}
                                 />
-                                <Bar dataKey="count" fill="#10b981" />
+                                <Bar dataKey="count" fill="#ffffff" radius={[4, 4, 0, 0]} />
                             </BarChart>
                         </ResponsiveContainer>
                     ) : (
-                        <div className="text-center py-20 text-surface-500">
+                        <div className="text-center py-20 text-white/20 text-sm border-2 border-dashed border-white/5 rounded-2xl">
                             No salary data available
                         </div>
                     )}
                 </Card>
 
                 {/* Top Companies */}
-                <Card>
-                    <h3 className="font-semibold text-white mb-4">Top Companies</h3>
+                <Card className="border border-white/10 bg-white/5">
+                    <h3 className="font-medium text-white mb-4">Top Companies</h3>
                     {topCompanies.length > 0 ? (
                         <div className="space-y-3">
                             {topCompanies.map((item, index) => (
-                                <div key={item.company} className="flex items-center justify-between p-3 rounded-lg bg-surface-800">
-                                    <div className="flex items-center gap-3">
-                                        <span className="font-semibold text-primary-400 text-lg">#{index + 1}</span>
-                                        <span className="text-white">{item.company}</span>
+                                <div key={item.company} className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5">
+                                    <div className="flex items-center gap-4">
+                                        <span className="font-bold text-white/20 text-xl w-6">#{index + 1}</span>
+                                        <span className="text-white font-medium">{item.company}</span>
                                     </div>
-                                    <span className="text-surface-400">{item.count} apps</span>
+                                    <span className="text-white/60 text-sm bg-white/5 px-2 py-1 rounded-md">{item.count} apps</span>
                                 </div>
                             ))}
                         </div>
                     ) : (
-                        <div className="text-center py-20 text-surface-500">
+                        <div className="text-center py-20 text-white/20 text-sm border-2 border-dashed border-white/5 rounded-2xl">
                             No company data yet
                         </div>
                     )}
@@ -294,14 +299,14 @@ function MetricCard({ icon, label, value, color }: {
     color: string
 }) {
     return (
-        <Card>
-            <div className="flex items-center gap-3">
-                <div className={`${color}`}>
-                    {icon}
-                </div>
+        <Card className="border border-white/10 bg-white/5 backdrop-blur-sm">
+            <div className="flex items-start justify-between">
                 <div>
-                    <p className="text-sm text-surface-400">{label}</p>
-                    <p className="text-2xl font-bold text-white">{value}</p>
+                    <p className="text-sm text-white/60 mb-1">{label}</p>
+                    <p className="text-3xl font-medium text-white tracking-tight">{value}</p>
+                </div>
+                <div className={`p-3 rounded-xl ${color} border border-white/5`}>
+                    {icon}
                 </div>
             </div>
         </Card>
