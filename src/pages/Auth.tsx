@@ -38,25 +38,14 @@ export default function Auth() {
                 if (error) throw error
 
                 if (authData.user) {
-                    // Profile creation is now handled by a database trigger
-                    // We just need to update the local state to allow access
-
-                    // Small delay to ensure trigger has fired (optional but safe)
-                    await new Promise(resolve => setTimeout(resolve, 1000))
-
-                    setProfile({
-                        id: authData.user.id,
-                        full_name: formData.name,
-                        email: formData.email,
-                        phone: null,
-                        location: null,
-                        linkedin_url: null,
-                        portfolio_url: null,
-                        created_at: new Date().toISOString(),
-                        updated_at: new Date().toISOString(),
-                    })
-                    setAuthenticated(true)
-                    navigate('/onboarding')
+                    // Check if email confirmation is required (implied if identities exists and updated_at matches created_at roughly, or session is null)
+                    if (!authData.session) {
+                        alert("Please check your email (and spam folder) to verify your account before logging in!");
+                        setMode('signin');
+                    } else {
+                        // User verified immediately (unlikely in prod without auto-confirm) or auto-confirm is on
+                        await handlePostLogin(authData.user.id);
+                    }
                 }
             } else {
                 const { data: authData, error } = await supabase.auth.signInWithPassword({
@@ -64,41 +53,68 @@ export default function Auth() {
                     password: formData.password,
                 })
 
-                if (error) throw error
+                if (error) {
+                    if (error.message.includes("Email not confirmed")) {
+                        throw new Error("Please verify your email address before signing in. Check your inbox and spam folder.");
+                    }
+                    throw error;
+                }
 
                 if (authData.user) {
-                    // Fetch existing profile
-                    const { data: profileData } = await supabase
-                        .from('user_profiles')
-                        .select('*')
-                        .eq('id', authData.user.id)
-                        .maybeSingle()
-
-                    if (profileData) {
-                        setProfile(profileData)
-                    } else {
-                        // Fallback if profile doesn't exist for some reason
-                        setProfile({
-                            id: authData.user.id,
-                            full_name: authData.user.user_metadata.full_name || '',
-                            email: formData.email,
-                            phone: null,
-                            location: null,
-                            linkedin_url: null,
-                            portfolio_url: null,
-                            created_at: new Date().toISOString(),
-                            updated_at: new Date().toISOString(),
-                        })
-                    }
-
-                    setAuthenticated(true)
-                    navigate('/dashboard')
+                    await handlePostLogin(authData.user.id);
                 }
             }
         } catch (error: any) {
             alert(error.message || 'An error occurred during authentication')
         } finally {
             setIsLoading(false)
+        }
+    }
+
+    const handlePostLogin = async (userId: string) => {
+        // Fetch existing profile
+        const { data: profileData } = await supabase
+            .from('user_profiles')
+            .select('*')
+            .eq('id', userId)
+            .maybeSingle()
+
+        if (profileData) {
+            setProfile(profileData)
+            setAuthenticated(true)
+
+            // Check if onboarding is truly complete (e.g. has target roles or resume)
+            const { data: resumeData } = await supabase
+                .from('resumes')
+                .select('id')
+                .eq('user_id', userId)
+                .limit(1);
+
+            // Simple check: if no target roles in profile OR no resume, send to onboarding
+            // You might want to add a 'onboarding_completed' flag to user_profiles for robustness
+            if (!profileData.target_roles || profileData.target_roles.length === 0 || !resumeData?.length) {
+                navigate('/onboarding');
+            } else {
+                navigate('/dashboard');
+            }
+
+        } else {
+            // Profile doesn't exist yet (maybe trigger failed or first login after signup without trigger)
+            // We can create a basic one or let onboarding handle it.
+            // For now, let's redirect to onboarding which should handle profile creation/updating
+            setProfile({
+                id: userId,
+                full_name: formData.name || '',
+                email: formData.email,
+                phone: null,
+                location: null,
+                linkedin_url: null,
+                portfolio_url: null,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+            })
+            setAuthenticated(true)
+            navigate('/onboarding')
         }
     }
 

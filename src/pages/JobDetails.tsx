@@ -1,12 +1,12 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
     Briefcase, MapPin, DollarSign, Calendar, Globe, ExternalLink,
-    User, Mail, Phone, Linkedin, ChevronLeft, Save, Edit2, Share2,
-    CheckCircle, List
+    User, Mail, Phone, Linkedin, ChevronLeft, Save, Edit2,
+    CheckCircle, List, Trophy, AlertCircle
 } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
-import { useJobsStore } from '../stores'
+import { useJobsStore, useResumeStore } from '../stores'
 import { Button, Card, Input } from '../components/ui'
 import { supabase } from '../lib/supabase'
 import { showToast } from '../utils/toast'
@@ -16,6 +16,7 @@ export default function JobDetails() {
     const { id } = useParams<{ id: string }>()
     const navigate = useNavigate()
     const { savedJobs, updateJob } = useJobsStore()
+    const { primaryResume } = useResumeStore()
     const [job, setJob] = useState<SavedJob | null>(null)
     const [loading, setLoading] = useState(true)
     const [editing, setEditing] = useState(false)
@@ -30,6 +31,28 @@ export default function JobDetails() {
         company_url: '',
         notes: ''
     })
+
+    // Calculate Match Score
+    const matchData = useMemo(() => {
+        if (!job || !primaryResume || !primaryResume.extracted_skills) return null;
+
+        const jobSkills = job.skills_required.map(s => s.toLowerCase());
+        const resumeSkills = primaryResume.extracted_skills.map(s => s.toLowerCase());
+
+        if (jobSkills.length === 0) return { score: 0, matched: [], missing: [] };
+
+        const matched = job.skills_required.filter(skill =>
+            resumeSkills.includes(skill.toLowerCase())
+        );
+
+        const missing = job.skills_required.filter(skill =>
+            !resumeSkills.includes(skill.toLowerCase())
+        );
+
+        const score = Math.round((matched.length / jobSkills.length) * 100);
+
+        return { score, matched, missing };
+    }, [job, primaryResume]);
 
     useEffect(() => {
         if (!id) return;
@@ -74,7 +97,7 @@ export default function JobDetails() {
             }
         } catch (error) {
             console.error('Error fetching job:', error)
-            showToast.error('Job not found')
+            showToast.error(toastMessages.error.noJobsFound)
             navigate('/jobs')
         } finally {
             setLoading(false)
@@ -199,16 +222,31 @@ export default function JobDetails() {
                                     )}
                                 </div>
                             </div>
-                            <span className={`
-                                px-3 py-1 rounded-full text-xs font-medium border
-                                ${job.status === 'applied' ? 'bg-purple-500/10 text-purple-300 border-purple-500/20' :
-                                    job.status === 'interviewing' ? 'bg-yellow-500/10 text-yellow-300 border-yellow-500/20' :
-                                        job.status === 'offer' ? 'bg-green-500/10 text-green-300 border-green-500/20' :
-                                            job.status === 'rejected' ? 'bg-red-500/10 text-red-300 border-red-500/20' :
-                                                'bg-blue-500/10 text-blue-300 border-blue-500/20'}
-                            `}>
-                                {job.status.charAt(0).toUpperCase() + job.status.slice(1)}
-                            </span>
+
+                            <div className="flex flex-col items-end gap-2">
+                                <span className={`
+                                    px-3 py-1 rounded-full text-xs font-medium border
+                                    ${job.status === 'applied' ? 'bg-purple-500/10 text-purple-300 border-purple-500/20' :
+                                        job.status === 'interviewing' ? 'bg-yellow-500/10 text-yellow-300 border-yellow-500/20' :
+                                            job.status === 'offer' ? 'bg-green-500/10 text-green-300 border-green-500/20' :
+                                                job.status === 'rejected' ? 'bg-red-500/10 text-red-300 border-red-500/20' :
+                                                    'bg-blue-500/10 text-blue-300 border-blue-500/20'}
+                                `}>
+                                    {job.status.charAt(0).toUpperCase() + job.status.slice(1)}
+                                </span>
+
+                                {matchData && (
+                                    <div className={`
+                                        px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 border
+                                        ${matchData.score >= 80 ? 'bg-green-500/10 text-green-300 border-green-500/20' :
+                                            matchData.score >= 60 ? 'bg-blue-500/10 text-blue-300 border-blue-500/20' :
+                                                'bg-white/5 text-white/40 border-white/10'}
+                                    `}>
+                                        {matchData.score >= 85 && <Trophy className="w-3 h-3" />}
+                                        {matchData.score}% Match
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         {/* Salary & Type Badges */}
@@ -413,12 +451,39 @@ export default function JobDetails() {
                             Skills Match
                         </h3>
                         <div className="flex flex-wrap gap-2">
-                            {job.skills_required.map((skill, i) => (
-                                <span key={i} className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/5 text-sm text-white/80">
-                                    {skill}
-                                </span>
-                            ))}
+                            {job.skills_required.map((skill, i) => {
+                                const isMatched = matchData?.matched.includes(skill);
+                                return (
+                                    <span
+                                        key={i}
+                                        className={`
+                                            px-3 py-1.5 rounded-lg text-sm border
+                                            ${isMatched
+                                                ? 'bg-green-500/10 text-green-300 border-green-500/20'
+                                                : 'bg-white/5 border-white/5 text-white/40'}
+                                        `}
+                                    >
+                                        {skill}
+                                        {isMatched && <CheckCircle className="w-3 h-3 inline-block ml-1.5" />}
+                                    </span>
+                                )
+                            })}
                         </div>
+                        {matchData && matchData.missing.length > 0 && (
+                            <div className="mt-4 pt-4 border-t border-white/5">
+                                <h4 className="text-sm font-medium text-white/60 mb-2 flex items-center gap-2">
+                                    <AlertCircle className="w-4 h-4 text-yellow-500/50" />
+                                    Missing Skills
+                                </h4>
+                                <div className="flex flex-wrap gap-2">
+                                    {matchData.missing.map((skill, i) => (
+                                        <span key={i} className="px-3 py-1.5 rounded-lg bg-red-500/5 border border-red-500/10 text-red-300/60 text-sm">
+                                            {skill}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </Card>
                 </div>
             </div>
