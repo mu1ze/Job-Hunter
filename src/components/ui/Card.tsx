@@ -11,8 +11,8 @@ export default function Card({ children, className = '', hover = false, glow = f
         <div
             onClick={onClick}
             className={`
-        glass rounded-2xl p-6
-        ${hover ? 'hover:bg-surface-800/80 hover:border-primary-500/30 transition-all duration-300 cursor-pointer' : ''}
+        glass rounded-3xl p-6
+        ${hover ? 'hover:bg-white/10 hover:border-white/20 hover:scale-[1.01] hover:shadow-lg hover:shadow-white/5 transition-all duration-300 cursor-pointer' : ''}
         ${glow ? 'animate-glow' : ''}
         ${className}
       `}

@@ -15,14 +15,14 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
                 {label && (
                     <label
                         htmlFor={inputId}
-                        className="block text-sm font-medium text-surface-300 mb-1.5"
+                        className="block text-sm font-medium text-white/70 mb-2"
                     >
                         {label}
                     </label>
                 )}
                 <div className="relative">
                     {icon && (
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-surface-400">
+                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/50">
                             {icon}
                         </div>
                     )}
@@ -30,13 +30,13 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
                         ref={ref}
                         id={inputId}
                         className={`
-              w-full px-4 py-2.5 rounded-xl
-              bg-surface-800/50 border border-surface-700
-              text-surface-100 placeholder-surface-500
-              focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500
-              transition-colors duration-200
-              ${icon ? 'pl-10' : ''}
-              ${error ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}
+              w-full px-4 py-3 rounded-2xl
+              bg-white/5 border border-white/10
+              text-white placeholder-white/30
+              focus:outline-none focus:border-white/30 focus:ring-1 focus:ring-white/30
+              transition-all duration-300
+              ${icon ? 'pl-11' : ''}
+              ${error ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500/50 bg-red-500/5' : ''}
               ${className}
             `}
                         {...props}

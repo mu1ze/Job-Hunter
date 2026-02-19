@@ -5,6 +5,7 @@ import { useUserStore } from './stores'
 import Landing from './pages/Landing'
 import Dashboard from './pages/Dashboard'
 import JobSearch from './pages/JobSearch'
+import JobDetails from './pages/JobDetails'
 import ResumeManager from './pages/ResumeManager'
 import DocumentGenerator from './pages/DocumentGenerator'
 import Auth from './pages/Auth'
@@ -71,6 +72,7 @@ function App() {
                 <Route element={<MainLayout />}>
                     <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/jobs" element={<JobSearch />} />
+                    <Route path="/jobs/:id" element={<JobDetails />} />
                     <Route path="/resume" element={<ResumeManager />} />
                     <Route path="/generate" element={<DocumentGenerator />} />
                     <Route path="/tracker" element={<ApplicationTracker />} />

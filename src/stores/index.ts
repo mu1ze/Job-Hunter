@@ -77,6 +77,7 @@ interface JobsState {
     addSavedJob: (job: SavedJob) => void
     removeSavedJob: (jobId: string) => void
     updateJobStatus: (jobId: string, status: SavedJob['status']) => void
+    updateJob: (job: SavedJob) => void
     setSearchResults: (jobs: SavedJob[]) => void
     setSearching: (status: boolean) => void
 }
@@ -96,6 +97,11 @@ export const useJobsStore = create<JobsState>()((set) => ({
     updateJobStatus: (jobId, status) => set((state) => ({
         savedJobs: state.savedJobs.map((j) =>
             j.id === jobId ? { ...j, status } : j
+        )
+    })),
+    updateJob: (job) => set((state) => ({
+        savedJobs: state.savedJobs.map((j) =>
+            j.id === job.id ? job : j
         )
     })),
     setSearchResults: (jobs) => set({ searchResults: jobs }),

@@ -25,7 +25,7 @@ export default function ResumeManager() {
     const { fetchItems: fetchCareerItems, addAnalysis } = useCareerStore()
     const { profile } = useUserStore()
     const navigate = useNavigate()
-    
+
     // Upload State
     const [isUploading, setIsUploading] = useState(false)
     const [uploadProgress, setUploadProgress] = useState(0)
@@ -36,21 +36,19 @@ export default function ResumeManager() {
     // Analysis State
     const [isAnalyzing, setIsAnalyzing] = useState(false)
 
-    // ... (rest of code)
-
     const handleAnalyzeCareer = async () => {
         if (!currentResume || !profile) return
-        
+
         setIsAnalyzing(true)
 
         try {
             const resumeTextRep = JSON.stringify(currentResume.parsed_data)
-            
+
             const result = await analysisService.analyzeResume(
-                resumeTextRep, 
+                resumeTextRep,
                 currentResume.work_experience?.[0]?.title || 'Job Seeker'
             )
-            
+
             await addAnalysis({
                 user_id: profile.id,
                 resume_id: currentResume.id,
@@ -249,31 +247,31 @@ export default function ResumeManager() {
 
 
     return (
-        <div className="animate-fade-in relative">
+        <div className="animate-fade-in relative font-['General_Sans',_sans-serif]">
             {/* Analysis Modal Removed - Redirecting to Tracker instead */}
 
             <div className="mb-6 text-center lg:text-left flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div>
-                    <h1 className="font-display text-3xl font-bold text-white mb-2">Resume Manager</h1>
-                    <p className="text-surface-400">
+                    <h1 className="font-medium text-3xl text-white mb-2 tracking-tight">Resume Manager</h1>
+                    <p className="text-white/60">
                         Upload and manage your resumes. We'll extract skills and experience for better matching.
                     </p>
                 </div>
                 {/* Analyze Button */}
                 {currentResume && (
-                    <Button 
+                    <Button
                         onClick={handleAnalyzeCareer}
                         disabled={isAnalyzing}
-                        className="bg-gradient-to-r from-primary-600 to-purple-600 hover:from-primary-500 hover:to-purple-500 border-none shadow-lg shadow-primary-500/20 disabled:opacity-70 disabled:cursor-not-allowed"
+                        className="bg-white text-black hover:bg-white/90 border-none shadow-lg shadow-white/10 disabled:opacity-70 disabled:cursor-not-allowed group rounded-full"
                     >
                         {isAnalyzing ? (
                             <>
-                                <div className="w-5 h-5 mr-2 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                <div className="w-5 h-5 mr-2 border-2 border-black/30 border-t-black rounded-full animate-spin" />
                                 Analyzing...
                             </>
                         ) : (
                             <>
-                                <Sparkles className="w-5 h-5 mr-2" />
+                                <Sparkles className="w-5 h-5 mr-2 text-black/60 group-hover:text-black" />
                                 Analyze Career Path
                             </>
                         )}
@@ -284,8 +282,8 @@ export default function ResumeManager() {
             <div className="grid lg:grid-cols-3 gap-6">
                 {/* Left Column: Upload & List */}
                 <div className="lg:col-span-1 space-y-4">
-                    <Card className="p-6">
-                        <h3 className="font-display text-lg font-semibold text-white mb-4">Upload New</h3>
+                    <Card className="p-6 border border-white/10 bg-white/5">
+                        <h3 className="font-medium text-lg text-white mb-4">Upload New</h3>
                         <div
                             onDragEnter={handleDrag}
                             onDragLeave={handleDrag}
@@ -294,7 +292,7 @@ export default function ResumeManager() {
                             onClick={() => fileInputRef.current?.click()}
                             className={`
                 relative border-2 border-dashed rounded-xl p-8 text-center transition-all cursor-pointer
-                ${dragActive ? 'border-primary-500 bg-primary-500/10' : 'border-surface-700 hover:border-surface-600 bg-surface-800/30'}
+                ${dragActive ? 'border-white bg-white/10' : 'border-white/10 hover:border-white/20 bg-white/5'}
               `}
                         >
                             <input
@@ -306,14 +304,14 @@ export default function ResumeManager() {
                             />
                             {isUploading ? (
                                 <div className="space-y-3">
-                                    <div className="w-12 h-12 rounded-full border-2 border-primary-500 border-t-transparent animate-spin mx-auto" />
+                                    <div className="w-12 h-12 rounded-full border-2 border-white/50 border-t-transparent animate-spin mx-auto" />
                                     <p className="text-white text-sm font-medium">Processing... {uploadProgress}%</p>
                                 </div>
                             ) : (
                                 <div className="space-y-2">
-                                    <Upload className="w-10 h-10 text-surface-500 mx-auto" />
+                                    <Upload className="w-10 h-10 text-white/40 mx-auto" />
                                     <p className="text-white font-medium">Drop Resume or Click</p>
-                                    <p className="text-surface-500 text-xs text-nowrap">PDF or DOCX allowed</p>
+                                    <p className="text-white/40 text-xs text-nowrap">PDF or DOCX allowed</p>
                                 </div>
                             )}
                         </div>
@@ -325,31 +323,35 @@ export default function ResumeManager() {
                         )}
                     </Card>
 
-                    <Card className="p-6">
-                        <h3 className="font-display text-lg font-semibold text-white mb-4">Your Resumes</h3>
+                    <Card className="p-6 border border-white/10 bg-white/5">
+                        <h3 className="font-medium text-lg text-white mb-4">Your Resumes</h3>
                         <div className="space-y-2">
                             {resumes.length === 0 ? (
-                                <p className="text-surface-500 text-sm text-center py-4 italic">No resumes uploaded yet</p>
+                                <p className="text-white/40 text-sm text-center py-4 italic">No resumes uploaded yet</p>
                             ) : (
                                 resumes.map(resume => (
                                     <div
                                         key={resume.id}
                                         className={`
-                      group p-3 rounded-xl border transition-all flex items-center justify-between
-                      ${resume.is_primary ? 'bg-primary-500/10 border-primary-500/30' : 'bg-surface-800/50 border-transparent hover:border-surface-700'}
+                      group p-3 rounded-xl border transition-all flex items-center justify-between cursor-pointer
+                      ${resume.is_primary ? 'bg-white text-black border-transparent' : 'bg-white/5 border-transparent hover:bg-white/10 text-white'}
                     `}
+                                        onClick={() => handleSetPrimary(resume.id)}
                                     >
-                                        <div className="flex items-center gap-3 overflow-hidden cursor-pointer" onClick={() => handleSetPrimary(resume.id)}>
-                                            <FileText className={`w-5 h-5 shrink-0 ${resume.is_primary ? 'text-primary-400' : 'text-surface-500'}`} />
+                                        <div className="flex items-center gap-3 overflow-hidden">
+                                            <FileText className={`w-5 h-5 shrink-0 ${resume.is_primary ? 'text-black' : 'text-white/40'}`} />
                                             <div className="min-w-0">
-                                                <p className="text-sm font-medium text-white truncate">{resume.original_filename}</p>
-                                                <p className="text-[10px] text-surface-500">Uploaded {new Date(resume.created_at || '').toLocaleDateString()}</p>
+                                                <p className="text-sm font-medium truncate">{resume.original_filename}</p>
+                                                <p className={`text-[10px] ${resume.is_primary ? 'text-black/60' : 'text-white/40'}`}>Uploaded {new Date(resume.created_at || '').toLocaleDateString()}</p>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                             <button
-                                                onClick={() => handleDeleteResume(resume.id, resume.storage_path)}
-                                                className="p-1.5 rounded-lg hover:bg-red-500/20 text-surface-500 hover:text-red-400 transition-colors"
+                                                onClick={(e) => {
+                                                    e.stopPropagation()
+                                                    handleDeleteResume(resume.id, resume.storage_path)
+                                                }}
+                                                className={`p-1.5 rounded-lg transition-colors ${resume.is_primary ? 'hover:bg-red-500/10 text-black/40 hover:text-red-600' : 'hover:bg-red-500/20 text-white/40 hover:text-red-400'}`}
                                             >
                                                 <Trash2 className="w-4 h-4" />
                                             </button>
@@ -366,27 +368,27 @@ export default function ResumeManager() {
                     {currentResume ? (
                         <>
                             {/* Summary Card */}
-                            <Card className="p-6 border-l-4 border-l-primary-500">
+                            <Card className="p-6 border border-white/10 bg-white/5">
                                 <div className="flex items-start gap-4">
-                                    <div className="w-12 h-12 rounded-xl bg-primary-500/10 flex items-center justify-center shrink-0">
-                                        <Sparkles className="w-6 h-6 text-primary-400" />
+                                    <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center shrink-0 border border-white/5">
+                                        <Sparkles className="w-6 h-6 text-white" />
                                     </div>
                                     <div>
-                                        <h3 className="text-lg font-bold text-white mb-2 underline decoration-primary-500/30">AI Insight Summary</h3>
-                                        <p className="text-surface-400 text-sm leading-relaxed">{currentResume.summary}</p>
+                                        <h3 className="text-lg font-medium text-white mb-2">AI Insight Summary</h3>
+                                        <p className="text-white/60 text-sm leading-relaxed">{currentResume.summary}</p>
                                     </div>
                                 </div>
                             </Card>
 
                             {/* Skills Card */}
-                            <Card className="p-6">
+                            <Card className="p-6 border border-white/10 bg-white/5">
                                 <div className="flex items-center gap-2 mb-6">
-                                    <Code className="w-5 h-5 text-accent-400" />
-                                    <h3 className="font-display text-lg font-semibold text-white">Core Skills Identified</h3>
+                                    <Code className="w-5 h-5 text-white/60" />
+                                    <h3 className="font-medium text-lg text-white">Core Skills Identified</h3>
                                 </div>
                                 <div className="flex flex-wrap gap-2">
                                     {currentResume.extracted_skills?.map(skill => (
-                                        <span key={skill} className="px-3 py-1.5 rounded-lg bg-surface-800 text-surface-200 text-sm font-medium border border-surface-700 select-none">
+                                        <span key={skill} className="px-3 py-1.5 rounded-full bg-white/5 text-white/80 text-sm border border-white/10 select-none">
                                             {skill}
                                         </span>
                                     ))}
@@ -394,30 +396,30 @@ export default function ResumeManager() {
                             </Card>
 
                             {/* Experience Card */}
-                            <Card className="p-6">
+                            <Card className="p-6 border border-white/10 bg-white/5">
                                 <div className="flex items-center gap-2 mb-6">
-                                    <Briefcase className="w-5 h-5 text-blue-400" />
-                                    <h3 className="font-display text-lg font-semibold text-white">Work Experience</h3>
+                                    <Briefcase className="w-5 h-5 text-white/60" />
+                                    <h3 className="font-medium text-lg text-white">Work Experience</h3>
                                 </div>
                                 <div className="space-y-8">
                                     {currentResume.work_experience?.map((exp, i) => (
-                                        <div key={i} className="relative pl-6 border-l-2 border-surface-800 last:border-transparent">
-                                            <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-surface-700 group-hover:bg-blue-500 transition-colors" />
+                                        <div key={i} className="relative pl-6 border-l border-white/10 last:border-transparent">
+                                            <div className="absolute -left-[5px] top-2 w-2.5 h-2.5 rounded-full bg-white/20 ring-4 ring-black" />
                                             <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-2 mb-3">
                                                 <div>
-                                                    <h4 className="font-bold text-white text-lg leading-tight">{exp.title}</h4>
-                                                    <p className="text-primary-400 font-medium">{exp.company}</p>
+                                                    <h4 className="font-medium text-white text-lg leading-tight">{exp.title}</h4>
+                                                    <p className="text-white/60 font-medium">{exp.company}</p>
                                                 </div>
-                                                <div className="text-surface-500 text-sm whitespace-nowrap">
+                                                <div className="text-white/40 text-sm whitespace-nowrap">
                                                     {formatDate(exp.start_date)} — {exp.is_current ? 'Present' : formatDate(exp.end_date)}
                                                 </div>
                                             </div>
-                                            <p className="text-surface-400 text-sm mb-4 leading-relaxed">{exp.description}</p>
+                                            <p className="text-white/50 text-sm mb-4 leading-relaxed">{exp.description}</p>
                                             {exp.achievements && exp.achievements.length > 0 && (
                                                 <ul className="space-y-2">
                                                     {exp.achievements.map((achievement, idx) => (
-                                                        <li key={idx} className="flex items-start gap-2 text-sm text-surface-300">
-                                                            <CheckCircle2 className="w-4 h-4 text-green-500/70 shrink-0 mt-0.5" />
+                                                        <li key={idx} className="flex items-start gap-3 text-sm text-white/60">
+                                                            <CheckCircle2 className="w-4 h-4 text-white/40 shrink-0 mt-0.5" />
                                                             <span>{achievement}</span>
                                                         </li>
                                                     ))}
@@ -429,30 +431,30 @@ export default function ResumeManager() {
                             </Card>
 
                             {/* Education Card */}
-                            <Card className="p-6">
+                            <Card className="p-6 border border-white/10 bg-white/5">
                                 <div className="flex items-center gap-2 mb-6">
-                                    <GraduationCap className="w-5 h-5 text-purple-400" />
-                                    <h3 className="font-display text-lg font-semibold text-white">Education</h3>
+                                    <GraduationCap className="w-5 h-5 text-white/60" />
+                                    <h3 className="font-medium text-lg text-white">Education</h3>
                                 </div>
                                 <div className="grid md:grid-cols-2 gap-4">
                                     {currentResume.education?.map((edu, i) => (
-                                        <div key={i} className="p-4 rounded-xl bg-surface-800/30 border border-surface-700/50">
-                                            <h4 className="font-bold text-white leading-tight">{edu.degree}</h4>
-                                            <p className="text-surface-400 text-sm mt-1">{edu.institution}</p>
-                                            <p className="text-xs text-surface-500 mt-2">{formatDate(edu.start_date)} — {formatDate(edu.end_date)}</p>
+                                        <div key={i} className="p-4 rounded-xl bg-white/5 border border-white/10">
+                                            <h4 className="font-medium text-white leading-tight">{edu.degree}</h4>
+                                            <p className="text-white/60 text-sm mt-1">{edu.institution}</p>
+                                            <p className="text-xs text-white/40 mt-2">{formatDate(edu.start_date)} — {formatDate(edu.end_date)}</p>
                                         </div>
                                     ))}
                                 </div>
                             </Card>
                         </>
                     ) : (
-                        <div className="h-full min-h-[400px] flex flex-col items-center justify-center border-2 border-dashed border-surface-800 rounded-3xl p-12 text-center opacity-70">
-                            <FileUp className="w-16 h-16 text-surface-600 mb-4" />
-                            <h3 className="text-xl font-bold text-white mb-2">No Resume Selected</h3>
-                            <p className="text-surface-500 max-w-sm">
+                        <div className="h-full min-h-[400px] flex flex-col items-center justify-center border-2 border-dashed border-white/10 rounded-3xl p-12 text-center opacity-70 bg-white/5">
+                            <FileUp className="w-16 h-16 text-white/20 mb-4" />
+                            <h3 className="text-xl font-medium text-white mb-2">No Resume Selected</h3>
+                            <p className="text-white/50 max-w-sm">
                                 Upload a resume to see your parsed profile information and start tailoring your applications.
                             </p>
-                            <Button variant="outline" className="mt-6" onClick={() => fileInputRef.current?.click()}>
+                            <Button variant="outline" className="mt-6 rounded-full border-white/20 hover:border-white text-white hover:bg-white/10" onClick={() => fileInputRef.current?.click()}>
                                 Upload First Resume
                             </Button>
                         </div>

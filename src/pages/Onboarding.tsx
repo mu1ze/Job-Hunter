@@ -9,7 +9,8 @@ import {
     ArrowLeft,
     Building2,
     Home,
-    Monitor
+    Monitor,
+    Check
 } from 'lucide-react'
 import { Button, Input, Card } from '../components/ui'
 import { useUserStore } from '../stores'
@@ -174,11 +175,11 @@ export default function Onboarding() {
     }
 
     return (
-        <div className="min-h-screen bg-surface-950 py-12 px-4 sm:px-6">
+        <div className="min-h-screen bg-black py-12 px-4 sm:px-6 font-['General_Sans',_sans-serif]">
             {/* Background */}
             <div className="fixed inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-0 left-1/3 w-96 h-96 bg-primary-500/20 rounded-full blur-3xl animate-pulse-slow" />
-                <div className="absolute bottom-0 right-1/3 w-96 h-96 bg-accent-500/20 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '2s' }} />
+                <div className="absolute top-0 left-1/3 w-96 h-96 bg-white/5 rounded-full blur-3xl animate-pulse-slow" />
+                <div className="absolute bottom-0 right-1/3 w-96 h-96 bg-white/5 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '2s' }} />
             </div>
 
             <div className="max-w-2xl mx-auto relative z-10">
@@ -193,17 +194,17 @@ export default function Onboarding() {
                             <div key={step.id} className="flex items-center">
                                 <div className="flex flex-col items-center">
                                     <div className={`
-                    w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-300
-                    ${isActive ? 'gradient-bg shadow-glow' : isComplete ? 'bg-accent-500' : 'bg-surface-800 border border-surface-700'}
+                    w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300
+                    ${isActive ? 'bg-white text-black shadow-lg shadow-white/20' : isComplete ? 'bg-white/10 text-white' : 'bg-white/5 text-white/40 border border-white/5'}
                   `}>
-                                        <StepIcon className={`w-5 h-5 ${isActive || isComplete ? 'text-white' : 'text-surface-400'}`} />
+                                        {isComplete ? <Check className="w-5 h-5" /> : <StepIcon className="w-5 h-5" />}
                                     </div>
-                                    <span className={`mt-2 text-xs font-medium ${isActive ? 'text-primary-400' : 'text-surface-500'}`}>
+                                    <span className={`mt-2 text-xs font-medium ${isActive ? 'text-white' : 'text-white/40'}`}>
                                         {step.title}
                                     </span>
                                 </div>
                                 {index < steps.length - 1 && (
-                                    <div className={`w-16 h-0.5 mx-2 ${isComplete ? 'bg-accent-500' : 'bg-surface-700'}`} />
+                                    <div className={`w-16 h-0.5 mx-2 ${isComplete ? 'bg-white/20' : 'bg-white/5'}`} />
                                 )}
                             </div>
                         )
@@ -211,14 +212,14 @@ export default function Onboarding() {
                 </div>
 
                 {/* Step Content */}
-                <Card className="animate-fade-in">
+                <Card className="animate-fade-in border border-white/10 bg-black/40 backdrop-blur-xl">
                     {currentStep === 1 && (
                         <div className="space-y-6">
                             <div className="text-center mb-8">
-                                <h2 className="font-display text-2xl font-bold text-white mb-2">
+                                <h2 className="font-medium text-2xl text-white mb-2 tracking-tight">
                                     Let's get to know you
                                 </h2>
-                                <p className="text-surface-400">
+                                <p className="text-white/60">
                                     Tell us a bit about yourself to personalize your experience
                                 </p>
                             </div>
@@ -244,16 +245,16 @@ export default function Onboarding() {
                     {currentStep === 2 && (
                         <div className="space-y-6">
                             <div className="text-center mb-8">
-                                <h2 className="font-display text-2xl font-bold text-white mb-2">
+                                <h2 className="font-medium text-2xl text-white mb-2 tracking-tight">
                                     What roles are you looking for?
                                 </h2>
-                                <p className="text-surface-400">
+                                <p className="text-white/60">
                                     Select all that apply - we'll find jobs matching these titles
                                 </p>
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-surface-300 mb-3">
+                                <label className="block text-sm font-medium text-white/60 mb-3">
                                     Target Roles
                                 </label>
                                 <div className="flex flex-wrap gap-2">
@@ -262,10 +263,10 @@ export default function Onboarding() {
                                             key={role}
                                             onClick={() => toggleRole(role)}
                                             className={`
-                        px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200
+                        px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 border
                         ${data.target_roles.includes(role)
-                                                    ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/25'
-                                                    : 'bg-surface-800 text-surface-400 hover:bg-surface-700 hover:text-surface-200 border border-surface-700'
+                                                    ? 'bg-white text-black border-transparent shadow-lg shadow-white/10'
+                                                    : 'bg-white/5 text-white/60 hover:text-white hover:bg-white/10 border-white/5'
                                                 }
                       `}
                                         >
@@ -276,7 +277,7 @@ export default function Onboarding() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-surface-300 mb-3">
+                                <label className="block text-sm font-medium text-white/60 mb-3">
                                     Preferred Industries (Optional)
                                 </label>
                                 <div className="flex flex-wrap gap-2">
@@ -285,10 +286,10 @@ export default function Onboarding() {
                                             key={industry}
                                             onClick={() => toggleIndustry(industry)}
                                             className={`
-                        px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200
+                        px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 border
                         ${data.target_industries.includes(industry)
-                                                    ? 'bg-accent-500 text-white shadow-lg shadow-accent-500/25'
-                                                    : 'bg-surface-800 text-surface-400 hover:bg-surface-700 hover:text-surface-200 border border-surface-700'
+                                                    ? 'bg-white/20 text-white border-transparent'
+                                                    : 'bg-white/5 text-white/60 hover:text-white hover:bg-white/10 border-white/5'
                                                 }
                       `}
                                         >
@@ -299,7 +300,7 @@ export default function Onboarding() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-surface-300 mb-3">
+                                <label className="block text-sm font-medium text-white/60 mb-3">
                                     Work Preference
                                 </label>
                                 <div className="grid grid-cols-2 gap-3">
@@ -311,16 +312,16 @@ export default function Onboarding() {
                                                 key={pref.value}
                                                 onClick={() => setData({ ...data, remote_preference: pref.value as OnboardingData['remote_preference'] })}
                                                 className={`
-                          p-4 rounded-xl text-left transition-all duration-200 border
+                          p-4 rounded-2xl text-left transition-all duration-200 border
                           ${isSelected
-                                                        ? 'bg-primary-500/20 border-primary-500 text-white'
-                                                        : 'bg-surface-800/50 border-surface-700 text-surface-400 hover:border-surface-600'
+                                                        ? 'bg-white text-black border-transparent shadow-lg shadow-white/10'
+                                                        : 'bg-white/5 border-white/5 text-white/60 hover:text-white hover:bg-white/10'
                                                     }
                         `}
                                             >
-                                                <Icon className={`w-5 h-5 mb-2 ${isSelected ? 'text-primary-400' : 'text-surface-500'}`} />
+                                                <Icon className={`w-5 h-5 mb-2 ${isSelected ? 'text-black' : 'text-white/40'}`} />
                                                 <div className="font-medium text-sm">{pref.label}</div>
-                                                <div className="text-xs opacity-70">{pref.description}</div>
+                                                <div className={`text-xs ${isSelected ? 'text-black/60' : 'text-white/40'}`}>{pref.description}</div>
                                             </button>
                                         )
                                     })}
@@ -332,10 +333,10 @@ export default function Onboarding() {
                     {currentStep === 3 && (
                         <div className="space-y-6">
                             <div className="text-center mb-8">
-                                <h2 className="font-display text-2xl font-bold text-white mb-2">
+                                <h2 className="font-medium text-2xl text-white mb-2 tracking-tight">
                                     What's your salary range?
                                 </h2>
-                                <p className="text-surface-400">
+                                <p className="text-white/60">
                                     This helps us filter jobs within your expectations (optional)
                                 </p>
                             </div>
@@ -359,25 +360,37 @@ export default function Onboarding() {
                                 />
                             </div>
 
-                            <div className="glass-light rounded-xl p-4 mt-6">
-                                <h4 className="text-sm font-medium text-surface-200 mb-2">Your Preferences Summary</h4>
-                                <div className="space-y-1 text-sm text-surface-400">
-                                    <p><span className="text-surface-300">Name:</span> {data.full_name}</p>
-                                    <p><span className="text-surface-300">Location:</span> {data.location}</p>
-                                    <p><span className="text-surface-300">Roles:</span> {data.target_roles.join(', ') || 'Not specified'}</p>
-                                    <p><span className="text-surface-300">Work Type:</span> {workPreferences.find(p => p.value === data.remote_preference)?.label}</p>
+                            <div className="bg-white/5 border border-white/5 rounded-2xl p-6 mt-6">
+                                <h4 className="text-sm font-medium text-white mb-4">Your Preferences Summary</h4>
+                                <div className="space-y-2 text-sm text-white/60">
+                                    <div className="flex justify-between border-b border-white/5 pb-2">
+                                        <span>Name</span>
+                                        <span className="text-white">{data.full_name}</span>
+                                    </div>
+                                    <div className="flex justify-between border-b border-white/5 pb-2">
+                                        <span>Location</span>
+                                        <span className="text-white">{data.location}</span>
+                                    </div>
+                                    <div className="flex justify-between border-b border-white/5 pb-2">
+                                        <span>Roles</span>
+                                        <span className="text-white text-right max-w-[50%] truncate">{data.target_roles.join(', ') || 'Not specified'}</span>
+                                    </div>
+                                    <div className="flex justify-between pt-1">
+                                        <span>Work Type</span>
+                                        <span className="text-white">{workPreferences.find(p => p.value === data.remote_preference)?.label}</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     )}
 
                     {/* Navigation */}
-                    <div className="flex items-center justify-between mt-8 pt-6 border-t border-surface-700">
+                    <div className="flex items-center justify-between mt-8 pt-6 border-t border-white/10">
                         <Button
                             variant="ghost"
                             onClick={handleBack}
                             disabled={currentStep === 1}
-                            className={currentStep === 1 ? 'invisible' : ''}
+                            className={`${currentStep === 1 ? 'invisible' : ''} text-white/50 hover:text-white`}
                         >
                             <ArrowLeft className="w-4 h-4 mr-2" />
                             Back
@@ -387,7 +400,7 @@ export default function Onboarding() {
                             onClick={handleNext}
                             disabled={!canProceed()}
                             isLoading={isLoading}
-                            className="group"
+                            className="group rounded-full bg-white text-black hover:bg-white/90 shadow-lg shadow-white/10"
                         >
                             {currentStep === 3 ? 'Complete Setup' : 'Continue'}
                             <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />

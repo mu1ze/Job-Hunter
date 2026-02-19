@@ -9,9 +9,9 @@ import {
     ArrowRight,
     CheckCircle,
     Zap,
-    Users
+    Users,
+    ChevronDown
 } from 'lucide-react'
-import { Button } from '../components/ui'
 
 const features = [
     {
@@ -58,252 +58,272 @@ const benefits = [
 
 export default function Landing() {
     return (
-        <div className="min-h-screen bg-surface-950 overflow-hidden">
-            {/* Animated Background */}
-            <div className="fixed inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary-500/20 rounded-full blur-3xl animate-pulse-slow" />
-                <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-accent-500/20 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '2s' }} />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-br from-primary-500/5 to-transparent rounded-full blur-3xl" />
+        <div className="min-h-screen bg-black text-white selection:bg-white/20 overflow-x-hidden font-['General_Sans',_sans-serif]">
+            {/* Background Video & Overlay */}
+            <div className="fixed inset-0 z-0">
+                <video
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="absolute inset-0 w-full h-full object-cover opacity-60"
+                    poster="https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop"
+                >
+                    <source src="https://assets.mixkit.co/videos/preview/mixkit-digital-animation-of-blue-particles-4788-large.mp4" type="video/mp4" />
+                </video>
+                <div className="absolute inset-0 bg-black/50" /> {/* 50% black overlay as requested */}
             </div>
 
-            {/* Header */}
-            <header className="relative z-10 glass border-b border-surface-700/50">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex items-center justify-between h-16">
+            {/* Navbar */}
+            <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
+                <div className="max-w-7xl mx-auto px-6 py-6 md:px-[120px] md:py-[20px]">
+                    <div className="flex items-center justify-between">
+                        {/* Left: Logo */}
                         <div className="flex items-center gap-2">
-                            <div className="w-9 h-9 rounded-xl gradient-bg flex items-center justify-center shadow-lg shadow-primary-500/20">
-                                <Sparkles className="w-5 h-5 text-white" />
+                            <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-white/10 backdrop-blur-md border border-white/10">
+                                <Sparkles className="w-4 h-4 text-white" />
                             </div>
-                            <span className="font-display font-bold text-xl text-white">
-                                Job<span className="gradient-text">Hunter</span>
+                            <span className="font-medium text-lg text-white tracking-wide">
+                                JobHunter
                             </span>
                         </div>
-                        <div className="flex items-center gap-4">
-                            <Link to="/auth">
-                                <Button variant="ghost">Sign In</Button>
+
+                        {/* Center: Nav Links (Desktop) */}
+                        <nav className="hidden md:flex items-center gap-8">
+                            {['Features', 'Benefits', 'Stats', 'Resources'].map((item) => (
+                                <a
+                                    key={item}
+                                    href={`#${item.toLowerCase()}`}
+                                    className="text-white text-sm font-medium hover:text-white/80 transition-colors flex items-center gap-[14px] group"
+                                >
+                                    {item}
+                                    <ChevronDown className="w-3 h-3 text-white/50 group-hover:text-white transition-colors" />
+                                </a>
+                            ))}
+                        </nav>
+
+                        {/* Right: CTA */}
+                        <div className="flex items-center gap-6">
+                            <Link to="/auth" className="hidden md:block text-sm font-medium text-white hover:text-white/80 transition-colors">
+                                Sign In
                             </Link>
-                            <Link to="/auth">
-                                <Button>Get Started</Button>
+                            <Link to="/auth" className="relative group">
+                                <div className="absolute inset-0 bg-white/20 blur opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-full" />
+                                <div className="relative px-7 py-[11px] bg-black border border-white/30 rounded-full flex items-center gap-2 overflow-hidden hover:border-white/60 transition-colors">
+                                    <div className="hero-glow-streak" />
+                                    <span className="text-sm font-medium text-white relative z-10">Get Started</span>
+                                </div>
                             </Link>
                         </div>
                     </div>
                 </div>
             </header>
 
-            {/* Hero Section */}
-            <section className="relative z-10 pt-20 pb-32 px-4 sm:px-6 lg:px-8">
-                <div className="max-w-7xl mx-auto text-center">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-primary-500/30 mb-8 animate-fade-in">
-                        <Zap className="w-4 h-4 text-primary-400" />
-                        <span className="text-sm text-primary-300">Powered by AI • ATS Optimized • 2026 Ready</span>
-                    </div>
+            <main className="relative z-10">
+                {/* Hero Section */}
+                <section className="pt-[200px] pb-[102px] px-4 text-center md:pt-[280px]">
+                    <div className="max-w-4xl mx-auto flex flex-col items-center">
+                        {/* Badge */}
+                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/20 bg-white/10 backdrop-blur-sm mb-10 animate-fade-in hover:bg-white/20 transition-colors cursor-default">
+                            <div className="w-1 h-1 rounded-full bg-white" />
+                            <span className="text-[13px] font-medium text-white/60">
+                                Powered by AI <span className="text-white mx-1">•</span> ATS Optimized
+                            </span>
+                        </div>
 
-                    <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold text-white mb-6 animate-slide-up">
-                        Land Your Dream Job with
-                        <br />
-                        <span className="gradient-text text-glow">AI-Powered Resumes</span>
-                    </h1>
+                        {/* Heading */}
+                        <h1 className="font-medium text-4xl md:text-[56px] leading-[1.28] text-white mb-10 tracking-tight max-w-[613px] mx-auto animate-slide-up">
+                            Land Your Dream Job with{' '}
+                            <span className="gradient-text-hero">
+                                AI-Powered Resumes
+                            </span>
+                        </h1>
 
-                    <p className="text-xl text-surface-400 max-w-3xl mx-auto mb-10 animate-slide-up" style={{ animationDelay: '0.1s' }}>
-                        Search thousands of jobs, upload your resume, and let AI craft the perfect
-                        tailored application that passes ATS systems and impresses recruiters.
-                    </p>
-
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-slide-up" style={{ animationDelay: '0.2s' }}>
-                        <Link to="/auth">
-                            <Button size="lg" className="group">
-                                Start Free
-                                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-                            </Button>
-                        </Link>
-                        <Link to="/auth">
-                            <Button variant="outline" size="lg">
-                                See How It Works
-                            </Button>
-                        </Link>
-                    </div>
-                </div>
-            </section>
-
-            {/* Stats Section */}
-            <section className="relative z-10 py-16 px-4 sm:px-6 lg:px-8 border-y border-surface-800">
-                <div className="max-w-7xl mx-auto">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-                        {stats.map((stat, index) => (
-                            <div
-                                key={stat.label}
-                                className="text-center animate-slide-up"
-                                style={{ animationDelay: `${index * 0.1}s` }}
-                            >
-                                <div className="font-display text-4xl md:text-5xl font-bold gradient-text mb-2">
-                                    {stat.value}
-                                </div>
-                                <div className="text-surface-400 text-sm">{stat.label}</div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* Features Section */}
-            <section className="relative z-10 py-24 px-4 sm:px-6 lg:px-8">
-                <div className="max-w-7xl mx-auto">
-                    <div className="text-center mb-16">
-                        <h2 className="font-display text-3xl md:text-4xl font-bold text-white mb-4">
-                            Everything You Need to Land Interviews
-                        </h2>
-                        <p className="text-surface-400 text-lg max-w-2xl mx-auto">
-                            From job discovery to application submission, we've got you covered with cutting-edge AI tools.
+                        {/* Subtitle */}
+                        <p className="text-[15px] text-white/70 max-w-[680px] mx-auto mb-10 leading-relaxed animate-slide-up" style={{ animationDelay: '0.1s' }}>
+                            Search thousands of jobs, upload your resume, and let AI craft the perfect
+                            tailored application that passes ATS systems and impresses recruiters.
                         </p>
-                    </div>
 
-                    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {features.map((feature, index) => (
-                            <div
-                                key={feature.title}
-                                className="glass rounded-2xl p-6 hover:bg-surface-800/80 hover:border-primary-500/30 transition-all duration-300 group animate-slide-up"
-                                style={{ animationDelay: `${index * 0.1}s` }}
-                            >
-                                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-lg`}>
-                                    <feature.icon className="w-6 h-6 text-white" />
-                                </div>
-                                <h3 className="font-display text-lg font-semibold text-white mb-2">
-                                    {feature.title}
-                                </h3>
-                                <p className="text-surface-400 text-sm leading-relaxed">
-                                    {feature.description}
-                                </p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
+                        {/* CTA Buttons */}
+                        <div className="flex flex-col sm:flex-row items-center gap-4 animate-slide-up" style={{ animationDelay: '0.2s' }}>
+                            <Link to="/auth" className="relative group">
+                                <div className="absolute inset-0 bg-white/40 blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-full" />
+                                <button className="relative px-8 py-3 bg-white text-black rounded-full text-sm font-medium border border-white/60 hover:bg-white/90 transition-all flex items-center gap-2">
+                                    <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white to-transparent opacity-50" />
+                                    Start Free
+                                    <ArrowRight className="w-4 h-4" />
+                                </button>
+                            </Link>
 
-            {/* Benefits Section */}
-            <section className="relative z-10 py-24 px-4 sm:px-6 lg:px-8 bg-surface-900/50">
-                <div className="max-w-7xl mx-auto">
-                    <div className="grid lg:grid-cols-2 gap-16 items-center">
-                        <div>
-                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent-500/20 border border-accent-500/30 mb-6">
-                                <Shield className="w-4 h-4 text-accent-400" />
-                                <span className="text-sm text-accent-300">ATS Ready for 2026</span>
-                            </div>
-
-                            <h2 className="font-display text-3xl md:text-4xl font-bold text-white mb-6">
-                                Built for Modern Hiring Systems
-                            </h2>
-
-                            <p className="text-surface-400 text-lg mb-8">
-                                Our AI understands how modern ATS systems work with semantic parsing,
-                                NLP-based matching, and skills-based filtering. Your resume will always
-                                make it to human eyes.
-                            </p>
-
-                            <ul className="space-y-4">
-                                {benefits.map((benefit, index) => (
-                                    <li
-                                        key={benefit}
-                                        className="flex items-start gap-3 animate-slide-up"
-                                        style={{ animationDelay: `${index * 0.1}s` }}
-                                    >
-                                        <CheckCircle className="w-5 h-5 text-accent-400 flex-shrink-0 mt-0.5" />
-                                        <span className="text-surface-300">{benefit}</span>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-
-                        <div className="relative">
-                            <div className="glass rounded-2xl p-8 border-primary-500/20">
-                                <div className="flex items-center gap-4 mb-6">
-                                    <div className="w-16 h-16 rounded-2xl gradient-bg flex items-center justify-center shadow-glow">
-                                        <TrendingUp className="w-8 h-8 text-white" />
-                                    </div>
-                                    <div>
-                                        <div className="text-3xl font-bold text-white">92%</div>
-                                        <div className="text-surface-400">ATS Compatibility Score</div>
-                                    </div>
-                                </div>
-
-                                <div className="space-y-4">
-                                    <div>
-                                        <div className="flex justify-between text-sm mb-1">
-                                            <span className="text-surface-300">Keywords Matched</span>
-                                            <span className="text-accent-400">18/20</span>
-                                        </div>
-                                        <div className="h-2 bg-surface-700 rounded-full overflow-hidden">
-                                            <div className="h-full w-[90%] bg-gradient-to-r from-accent-500 to-accent-400 rounded-full" />
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <div className="flex justify-between text-sm mb-1">
-                                            <span className="text-surface-300">Skills Match</span>
-                                            <span className="text-primary-400">15/16</span>
-                                        </div>
-                                        <div className="h-2 bg-surface-700 rounded-full overflow-hidden">
-                                            <div className="h-full w-[94%] bg-gradient-to-r from-primary-500 to-primary-400 rounded-full" />
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <div className="flex justify-between text-sm mb-1">
-                                            <span className="text-surface-300">Format Score</span>
-                                            <span className="text-green-400">100%</span>
-                                        </div>
-                                        <div className="h-2 bg-surface-700 rounded-full overflow-hidden">
-                                            <div className="h-full w-full bg-gradient-to-r from-green-500 to-green-400 rounded-full" />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Decorative elements */}
-                            <div className="absolute -top-4 -right-4 w-24 h-24 bg-primary-500/20 rounded-full blur-2xl" />
-                            <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-accent-500/20 rounded-full blur-2xl" />
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* CTA Section */}
-            <section className="relative z-10 py-24 px-4 sm:px-6 lg:px-8">
-                <div className="max-w-4xl mx-auto text-center">
-                    <div className="glass rounded-3xl p-12 border-primary-500/20 relative overflow-hidden">
-                        <div className="absolute inset-0 bg-gradient-to-br from-primary-500/10 to-accent-500/10" />
-
-                        <div className="relative">
-                            <Users className="w-12 h-12 text-primary-400 mx-auto mb-6" />
-                            <h2 className="font-display text-3xl md:text-4xl font-bold text-white mb-4">
-                                Ready to Land Your Dream Job?
-                            </h2>
-                            <p className="text-surface-400 text-lg mb-8 max-w-2xl mx-auto">
-                                Join thousands of job seekers who've transformed their applications
-                                with AI-powered optimization. Start for free today.
-                            </p>
                             <Link to="/auth">
-                                <Button size="lg" className="group">
-                                    Get Started Free
-                                    <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-                                </Button>
+                                <button className="px-8 py-3 text-white text-sm font-medium hover:text-white/80 transition-colors">
+                                    See How It Works
+                                </button>
                             </Link>
                         </div>
                     </div>
-                </div>
-            </section>
+                </section>
 
-            {/* Footer */}
-            <footer className="relative z-10 border-t border-surface-800 py-8 px-4 sm:px-6 lg:px-8">
-                <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-                    <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-lg gradient-bg flex items-center justify-center">
-                            <Sparkles className="w-4 h-4 text-white" />
+                {/* Stats Section */}
+                <section id="stats" className="py-20 px-4 border-y border-white/10 bg-black/40 backdrop-blur-sm">
+                    <div className="max-w-7xl mx-auto">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-12">
+                            {stats.map((stat, index) => (
+                                <div
+                                    key={stat.label}
+                                    className="text-center"
+                                >
+                                    <div className="font-medium text-4xl md:text-5xl text-white mb-2 tracking-tight">
+                                        {stat.value}
+                                    </div>
+                                    <div className="text-white/50 text-sm uppercase tracking-wider">{stat.label}</div>
+                                </div>
+                            ))}
                         </div>
-                        <span className="font-display font-semibold text-white">JobHunter</span>
                     </div>
-                    <p className="text-surface-500 text-sm">
-                        © 2026 JobHunter. All rights reserved.
-                    </p>
-                </div>
-            </footer>
+                </section>
+
+                {/* Features Section */}
+                <section id="features" className="py-32 px-4">
+                    <div className="max-w-7xl mx-auto">
+                        <div className="text-center mb-20">
+                            <h2 className="text-3xl md:text-4xl font-medium text-white mb-6">
+                                Everything You Need
+                            </h2>
+                            <p className="text-white/60 text-lg max-w-2xl mx-auto">
+                                From job discovery to application submission, we've got you covered with cutting-edge AI tools.
+                            </p>
+                        </div>
+
+                        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            {features.map((feature, index) => (
+                                <div
+                                    key={feature.title}
+                                    className="glass p-8 rounded-3xl hover:bg-white/5 transition-all duration-300 group border border-white/10"
+                                >
+                                    <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform opacity-80`}>
+                                        <feature.icon className="w-6 h-6 text-white" />
+                                    </div>
+                                    <h3 className="text-lg font-medium text-white mb-3">
+                                        {feature.title}
+                                    </h3>
+                                    <p className="text-white/50 text-sm leading-relaxed">
+                                        {feature.description}
+                                    </p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+
+                {/* Benefits Section */}
+                <section id="benefits" className="py-32 px-4 bg-white/5 border-t border-white/5">
+                    <div className="max-w-7xl mx-auto">
+                        <div className="grid lg:grid-cols-2 gap-20 items-center">
+                            <div>
+                                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/20 bg-white/5 mb-8">
+                                    <Shield className="w-4 h-4 text-white" />
+                                    <span className="text-sm text-white/80">ATS Ready for 2026</span>
+                                </div>
+
+                                <h2 className="text-3xl md:text-4xl font-medium text-white mb-8 leading-tight">
+                                    Built for Modern Hiring Systems
+                                </h2>
+
+                                <p className="text-white/60 text-lg mb-10 leading-relaxed">
+                                    Our AI understands how modern ATS systems work with semantic parsing,
+                                    NLP-based matching, and skills-based filtering. Your resume will always
+                                    make it to human eyes.
+                                </p>
+
+                                <ul className="space-y-6">
+                                    {benefits.map((benefit, index) => (
+                                        <li
+                                            key={benefit}
+                                            className="flex items-start gap-4"
+                                        >
+                                            <div className="mt-1 w-5 h-5 rounded-full border border-white/30 flex items-center justify-center flex-shrink-0">
+                                                <CheckCircle className="w-3 h-3 text-white" />
+                                            </div>
+                                            <span className="text-white/70">{benefit}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+
+                            <div className="relative">
+                                <div className="glass p-10 rounded-[40px] border border-white/10 relative z-10 bg-black/40 backdrop-blur-xl">
+                                    <div className="flex items-center gap-6 mb-10">
+                                        <div className="w-20 h-20 rounded-3xl bg-white/10 flex items-center justify-center border border-white/10">
+                                            <TrendingUp className="w-8 h-8 text-white" />
+                                        </div>
+                                        <div>
+                                            <div className="text-4xl font-medium text-white mb-1">92%</div>
+                                            <div className="text-white/50 text-sm">ATS Compatibility Score</div>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-8">
+                                        {[
+                                            { label: 'Keywords Matched', score: '18/20', width: '90%', color: 'bg-white' },
+                                            { label: 'Skills Match', score: '15/16', width: '94%', color: 'bg-white/80' },
+                                            { label: 'Format Score', score: '100%', width: '100%', color: 'bg-white/60' }
+                                        ].map((item, i) => (
+                                            <div key={i}>
+                                                <div className="flex justify-between text-sm mb-3">
+                                                    <span className="text-white/60">{item.label}</span>
+                                                    <span className="text-white font-medium">{item.score}</span>
+                                                </div>
+                                                <div className="h-1 bg-white/10 rounded-full overflow-hidden">
+                                                    <div className={`h-full ${item.color} rounded-full`} style={{ width: item.width }} />
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Glow Effects */}
+                                <div className="absolute -top-10 -right-10 w-64 h-64 bg-primary-500/20 rounded-full blur-[100px]" />
+                                <div className="absolute -bottom-10 -left-10 w-64 h-64 bg-accent-500/20 rounded-full blur-[100px]" />
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* Footer CTA */}
+                <section className="py-32 px-4 text-center">
+                    <div className="max-w-3xl mx-auto">
+                        <Users className="w-12 h-12 text-white/50 mx-auto mb-8" />
+                        <h2 className="text-3xl md:text-5xl font-medium text-white mb-6 animate-slide-up">
+                            Ready to Land Your Dream Job?
+                        </h2>
+                        <p className="text-white/60 text-lg mb-10 leading-relaxed max-w-xl mx-auto">
+                            Join thousands of job seekers who've transformed their applications
+                            with AI-powered optimization.
+                        </p>
+                        <Link to="/auth" className="inline-block relative group">
+                            <div className="absolute inset-0 bg-white/30 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-full" />
+                            <button className="relative px-10 py-4 bg-white text-black rounded-full text-base font-medium hover:scale-105 transition-all duration-300">
+                                Get Started Free
+                            </button>
+                        </Link>
+                    </div>
+                </section>
+
+                {/* Footer */}
+                <footer className="py-12 px-6 border-t border-white/5">
+                    <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+                        <div className="flex items-center gap-2">
+                            <Sparkles className="w-4 h-4 text-white/50" />
+                            <span className="font-medium text-white/80">JobHunter</span>
+                        </div>
+                        <p className="text-white/30 text-sm">
+                            © 2026 JobHunter. All rights reserved.
+                        </p>
+                    </div>
+                </footer>
+            </main>
         </div>
     )
 }

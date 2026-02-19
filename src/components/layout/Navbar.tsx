@@ -17,7 +17,7 @@ import { useUserStore } from '../../stores'
 const navItems = [
     { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { path: '/jobs', label: 'Job Search', icon: Search },
-    { path: '/tracker', label: 'Career Tracker', icon: Kanban },
+    { path: '/tracker', label: 'Tracker', icon: Kanban },
     { path: '/analytics', label: 'Analytics', icon: BarChart3 },
     { path: '/alerts', label: 'Alerts', icon: Bell },
     { path: '/resume', label: 'Resume', icon: FileText },
@@ -35,21 +35,21 @@ export default function Navbar() {
     }
 
     return (
-        <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-surface-700/50">
+        <nav className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b border-white/10 bg-black/50 backdrop-blur-xl">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex items-center justify-between h-16">
+                <div className="flex items-center justify-between h-20">
                     {/* Logo */}
                     <Link to="/dashboard" className="flex items-center gap-2 group">
-                        <div className="w-9 h-9 rounded-xl gradient-bg flex items-center justify-center shadow-lg shadow-primary-500/20 group-hover:shadow-primary-500/40 transition-shadow">
-                            <Sparkles className="w-5 h-5 text-white" />
+                        <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-white/10 backdrop-blur-md border border-white/10 group-hover:bg-white/20 transition-colors">
+                            <Sparkles className="w-4 h-4 text-white" />
                         </div>
-                        <span className="font-display font-bold text-xl text-white hidden sm:block">
-                            Job<span className="gradient-text">Hunter</span>
+                        <span className="font-medium text-lg text-white tracking-wide hidden sm:block">
+                            JobHunter
                         </span>
                     </Link>
 
                     {/* Desktop Nav */}
-                    <div className="hidden md:flex items-center gap-1">
+                    <div className="hidden lg:flex items-center gap-1 bg-white/5 p-1 rounded-full border border-white/10 backdrop-blur-md">
                         {navItems.map((item) => {
                             const isActive = location.pathname === item.path
                             const Icon = item.icon
@@ -58,10 +58,10 @@ export default function Navbar() {
                                     key={item.path}
                                     to={item.path}
                                     className={`
-                    flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200
+                    flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300
                     ${isActive
-                                            ? 'bg-primary-500/20 text-primary-400 border border-primary-500/30'
-                                            : 'text-surface-400 hover:text-surface-100 hover:bg-surface-800/50'
+                                            ? 'bg-white text-black shadow-lg shadow-white/10'
+                                            : 'text-white/60 hover:text-white hover:bg-white/10'
                                         }
                   `}
                                 >
@@ -73,17 +73,17 @@ export default function Navbar() {
                     </div>
 
                     {/* User Menu */}
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-4">
                         {profile && (
-                            <div className="hidden sm:flex items-center gap-3">
+                            <div className="hidden sm:flex items-center gap-4 pl-4 border-l border-white/10">
                                 <div className="text-right">
-                                    <p className="text-sm font-medium text-surface-200">
+                                    <p className="text-sm font-medium text-white">
                                         {profile.full_name || 'User'}
                                     </p>
                                 </div>
                                 <button
                                     onClick={handleLogout}
-                                    className="p-2 rounded-lg text-surface-400 hover:text-surface-100 hover:bg-surface-800/50 transition-colors"
+                                    className="p-2 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-colors border border-transparent hover:border-white/10"
                                     title="Logout"
                                 >
                                     <LogOut className="w-5 h-5" />
@@ -94,7 +94,7 @@ export default function Navbar() {
                         {/* Mobile Menu Button */}
                         <button
                             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                            className="md:hidden p-2 rounded-lg text-surface-400 hover:text-surface-100 hover:bg-surface-800/50 transition-colors"
+                            className="lg:hidden p-2 rounded-lg text-white hover:bg-white/10 transition-colors"
                         >
                             {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
                         </button>
@@ -104,8 +104,8 @@ export default function Navbar() {
 
             {/* Mobile Menu */}
             {isMobileMenuOpen && (
-                <div className="md:hidden glass border-t border-surface-700/50">
-                    <div className="px-4 py-3 space-y-1">
+                <div className="lg:hidden bg-black/95 backdrop-blur-xl border-t border-white/10 min-h-screen fixed inset-0 top-20 z-40 p-4">
+                    <div className="space-y-2">
                         {navItems.map((item) => {
                             const isActive = location.pathname === item.path
                             const Icon = item.icon
@@ -115,10 +115,10 @@ export default function Navbar() {
                                     to={item.path}
                                     onClick={() => setIsMobileMenuOpen(false)}
                                     className={`
-                    flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200
+                    flex items-center gap-3 px-4 py-4 rounded-xl text-base font-medium transition-all duration-200
                     ${isActive
-                                            ? 'bg-primary-500/20 text-primary-400'
-                                            : 'text-surface-400 hover:text-surface-100 hover:bg-surface-800/50'
+                                            ? 'bg-white text-black'
+                                            : 'text-white/60 hover:text-white hover:bg-white/10'
                                         }
                   `}
                                 >
@@ -127,13 +127,15 @@ export default function Navbar() {
                                 </Link>
                             )
                         })}
-                        <button
-                            onClick={handleLogout}
-                            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-400 hover:bg-red-500/10 transition-colors"
-                        >
-                            <LogOut className="w-5 h-5" />
-                            Logout
-                        </button>
+                        <div className="pt-4 mt-4 border-t border-white/10">
+                            <button
+                                onClick={handleLogout}
+                                className="w-full flex items-center gap-3 px-4 py-4 rounded-xl text-base font-medium text-red-400 hover:bg-red-500/10 transition-colors"
+                            >
+                                <LogOut className="w-5 h-5" />
+                                Logout
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
