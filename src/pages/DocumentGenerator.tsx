@@ -17,7 +17,8 @@ import {
     Check,
     Plus,
     Link as LinkIcon,
-    Type
+    Type,
+    Save
 } from 'lucide-react'
 import { Button, Card, Input } from '../components/ui'
 import { useJobsStore, useResumeStore, useUserStore } from '../stores'

@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
+    Briefcase, MapPin, DollarSign, Calendar, Globe, ExternalLink,
     User, Mail, Phone, Linkedin, ChevronLeft, Save, Edit2,
     CheckCircle, List, Trophy, AlertCircle, FileText, Eye, Trash2, X
 } from 'lucide-react'
