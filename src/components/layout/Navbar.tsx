@@ -9,7 +9,8 @@ import {
     LogOut,
     Kanban,
     BarChart3,
-    Bell
+    Bell,
+    User
 } from 'lucide-react'
 import { useState } from 'react'
 import { useUserStore } from '../../stores'
@@ -75,15 +76,26 @@ export default function Navbar() {
                     {/* User Menu */}
                     <div className="flex items-center gap-4">
                         {profile && (
-                            <div className="hidden sm:flex items-center gap-4 pl-4 border-l border-white/10">
-                                <div className="text-right">
-                                    <p className="text-sm font-medium text-white">
-                                        {profile.full_name || 'User'}
-                                    </p>
-                                </div>
+                            <div className="hidden sm:flex items-center gap-2 pl-4 border-l border-white/10">
+                                <Link
+                                    to="/profile"
+                                    className="flex items-center gap-3 px-3 py-1.5 rounded-full hover:bg-white/5 transition-colors border border-transparent hover:border-white/10"
+                                >
+                                    <div className="text-right hidden md:block">
+                                        <p className="text-xs font-medium text-white/50 uppercase tracking-wider leading-none mb-1">
+                                            Account
+                                        </p>
+                                        <p className="text-sm font-medium text-white">
+                                            {profile.full_name?.split(' ')[0] || 'User'}
+                                        </p>
+                                    </div>
+                                    <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center border border-white/10">
+                                        <User className="w-4 h-4 text-white" />
+                                    </div>
+                                </Link>
                                 <button
                                     onClick={handleLogout}
-                                    className="p-2 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-colors border border-transparent hover:border-white/10"
+                                    className="p-2 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-colors border border-transparent hover:border-white/10 ml-1"
                                     title="Logout"
                                 >
                                     <LogOut className="w-5 h-5" />

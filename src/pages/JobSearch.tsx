@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import {
     Search,
     MapPin,
@@ -14,7 +14,8 @@ import {
     Sparkles,
     Trophy,
     BrainCircuit,
-    Loader2
+    Loader2,
+    Settings
 } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import { Button, Input, Card } from '../components/ui'
@@ -40,6 +41,19 @@ export default function JobSearch() {
     const [selectedJob, setSelectedJob] = useState<JobListing | null>(null)
     const [isSearching, setIsSearching] = useState(false)
     const [currentPage, setCurrentPage] = useState(1)
+    const { profile, preferences } = useUserStore()
+
+    // Apply global filters if toggled
+    useEffect(() => {
+        if (preferences?.use_global_filters) {
+            setFilters(prev => ({
+                ...prev,
+                salary_min: preferences.salary_min || prev.salary_min,
+                location: preferences.location || prev.location,
+                remote_only: preferences.remote_preference === 'remote' ? true : prev.remote_only
+            }))
+        }
+    }, [preferences])
 
     // Research State
     const [isResearching, setIsResearching] = useState(false)
@@ -49,7 +63,6 @@ export default function JobSearch() {
     const resultsPerPage = 20
 
     const { savedJobs, addSavedJob, removeSavedJob, setSearching } = useJobsStore()
-    const { profile, preferences } = useUserStore()
     const { primaryResume } = useResumeStore()
 
     const countries = [
@@ -389,7 +402,13 @@ export default function JobSearch() {
                             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                         />
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 items-center">
+                        {preferences?.use_global_filters && (
+                            <div className="hidden lg:flex items-center px-4 py-3 rounded-2xl bg-white/10 border border-white/20 text-[10px] text-white font-medium uppercase tracking-widest whitespace-nowrap">
+                                <Settings className="w-3 h-3 mr-2 text-white/60" />
+                                Global Filters Active
+                            </div>
+                        )}
                         <Button
                             variant="secondary"
                             onClick={() => setShowFilters(!showFilters)}

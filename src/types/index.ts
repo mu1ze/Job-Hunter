@@ -22,6 +22,7 @@ export interface JobPreferences {
     salary_min: number | null;
     salary_max: number | null;
     search_radius_miles: number;
+    use_global_filters: boolean;
     created_at: string;
     updated_at: string;
 }

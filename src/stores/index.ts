@@ -16,6 +16,8 @@ interface UserState {
     setAuthenticated: (status: boolean) => void
     setLoading: (status: boolean) => void
     fetchUserData: (userId: string) => Promise<void>
+    updateProfile: (profile: Partial<UserProfile>) => Promise<void>
+    updatePreferences: (preferences: Partial<JobPreferences>) => Promise<void>
     logout: () => void
 }
 
@@ -47,6 +49,39 @@ export const useUserStore = create<UserState>()(
                 } finally {
                     set({ isLoading: false })
                 }
+            },
+
+            updateProfile: async (updatedFields) => {
+                const { profile } = useUserStore.getState()
+                if (!profile) return
+
+                const { data, error } = await supabase
+                    .from('user_profiles')
+                    .update(updatedFields)
+                    .eq('id', profile.id)
+                    .select()
+                    .single()
+
+                if (error) throw error
+                if (data) set({ profile: data })
+            },
+
+            updatePreferences: async (updatedFields) => {
+                const { profile, preferences } = useUserStore.getState()
+                if (!profile) return
+
+                const { data, error } = await supabase
+                    .from('job_preferences')
+                    .upsert({
+                        ...preferences,
+                        ...updatedFields,
+                        user_id: profile.id
+                    }, { onConflict: 'user_id' })
+                    .select()
+                    .single()
+
+                if (error) throw error
+                if (data) set({ preferences: data })
             },
 
             logout: async () => {
