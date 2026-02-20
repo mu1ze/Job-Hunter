@@ -1,16 +1,15 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
-    Briefcase, MapPin, DollarSign, Calendar, Globe, ExternalLink,
     User, Mail, Phone, Linkedin, ChevronLeft, Save, Edit2,
-    CheckCircle, List, Trophy, AlertCircle
+    CheckCircle, List, Trophy, AlertCircle, FileText, Eye, Trash2, X
 } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import { useJobsStore, useResumeStore } from '../stores'
 import { Button, Card, Input } from '../components/ui'
 import { supabase } from '../lib/supabase'
 import { showToast } from '../utils/toast'
-import type { SavedJob } from '../types'
+import type { SavedJob, GeneratedDocument } from '../types'
 
 export default function JobDetails() {
     const { id } = useParams<{ id: string }>()
@@ -21,6 +20,9 @@ export default function JobDetails() {
     const [loading, setLoading] = useState(true)
     const [editing, setEditing] = useState(false)
     const [saving, setSaving] = useState(false)
+    const [documents, setDocuments] = useState<GeneratedDocument[]>([])
+    const [selectedDoc, setSelectedDoc] = useState<GeneratedDocument | null>(null)
+    const [isDeleting, setIsDeleting] = useState<string | null>(null)
 
     // Form state for editable fields
     const [formData, setFormData] = useState({
@@ -69,11 +71,28 @@ export default function JobDetails() {
                 notes: foundJob.notes || ''
             })
             setLoading(false)
+            fetchDocuments(id)
         } else {
             // Fallback fetch from DB if not in store (e.g. direct link)
             fetchJobFromDb(id)
+            fetchDocuments(id)
         }
     }, [id, savedJobs])
+
+    const fetchDocuments = async (jobId: string) => {
+        try {
+            const { data, error } = await supabase
+                .from('generated_documents')
+                .select('*')
+                .eq('job_id', jobId)
+                .order('created_at', { ascending: false })
+
+            if (error) throw error
+            setDocuments(data || [])
+        } catch (error) {
+            console.error('Error fetching documents:', error)
+        }
+    }
 
     const fetchJobFromDb = async (jobId: string) => {
         try {
@@ -137,6 +156,28 @@ export default function JobDetails() {
             showToast.error('Failed to update job')
         } finally {
             setSaving(false)
+        }
+    }
+
+    const handleDeleteDocument = async (docId: string) => {
+        if (!window.confirm('Are you sure you want to delete this document?')) return
+
+        setIsDeleting(docId)
+        try {
+            const { error } = await supabase
+                .from('generated_documents')
+                .delete()
+                .eq('id', docId)
+
+            if (error) throw error
+
+            setDocuments(prev => prev.filter(d => d.id !== docId))
+            showToast.success('Document deleted')
+        } catch (error) {
+            console.error('Error deleting document:', error)
+            showToast.error('Failed to delete document')
+        } finally {
+            setIsDeleting(null)
         }
     }
 
@@ -321,6 +362,86 @@ export default function JobDetails() {
                             </div>
                         )}
                     </Card>
+
+                    {/* Tailored Documents */}
+                    <Card className="border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-lg font-medium text-white flex items-center gap-2">
+                                <FileText className="w-5 h-5 text-white/50" />
+                                Tailored Documents
+                            </h3>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => navigate('/generator', { state: { jobId: job.id } })}
+                                className="text-white/60 hover:text-white"
+                            >
+                                + Generate New
+                            </Button>
+                        </div>
+
+                        {documents.length > 0 ? (
+                            <div className="grid gap-4">
+                                {documents.map((doc) => (
+                                    <div
+                                        key={doc.id}
+                                        className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/10 hover:border-white/20 transition-all group"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <div className={`p-2 rounded-lg ${doc.document_type === 'resume' ? 'bg-blue-500/10 text-blue-400' : 'bg-purple-500/10 text-purple-400'}`}>
+                                                <FileText className="w-5 h-5" />
+                                            </div>
+                                            <div>
+                                                <h4 className="font-medium text-white capitalize">
+                                                    {doc.document_type.replace('_', ' ')}
+                                                </h4>
+                                                <div className="flex items-center gap-2 text-xs text-white/40">
+                                                    <span>{new Date(doc.created_at).toLocaleDateString()}</span>
+                                                    {doc.ats_score && (
+                                                        <>
+                                                            <span>•</span>
+                                                            <span className="text-green-400/80">{doc.ats_score}% ATS Score</span>
+                                                        </>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => setSelectedDoc(doc)}
+                                                className="h-8 w-8 p-0 text-white/60 hover:text-white hover:bg-white/10"
+                                            >
+                                                <Eye className="w-4 h-4" />
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => handleDeleteDocument(doc.id)}
+                                                isLoading={isDeleting === doc.id}
+                                                className="h-8 w-8 p-0 text-red-400/60 hover:text-red-400 hover:bg-red-400/10"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="text-center py-8 bg-white/5 rounded-xl border border-dashed border-white/10">
+                                <p className="text-white/30 text-sm">No tailored documents yet.</p>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => navigate('/generator', { state: { jobId: job.id } })}
+                                    className="mt-2 text-white/50 hover:text-white"
+                                >
+                                    Generate your first resume or cover letter
+                                </Button>
+                            </div>
+                        )}
+                    </Card>
                 </div>
 
                 {/* Sidebar */}
@@ -487,6 +608,53 @@ export default function JobDetails() {
                     </Card>
                 </div>
             </div>
+
+            {/* Document Preview Modal */}
+            {selectedDoc && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
+                    <div className="bg-[#0A0A0A] border border-white/10 rounded-2xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+                        <div className="flex items-center justify-between p-6 border-b border-white/10">
+                            <div>
+                                <h3 className="text-xl font-semibold text-white capitalize">
+                                    {selectedDoc.document_type.replace('_', ' ')}
+                                </h3>
+                                <p className="text-sm text-white/40">Generated on {new Date(selectedDoc.created_at).toLocaleString()}</p>
+                            </div>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setSelectedDoc(null)}
+                                className="h-10 w-10 p-0 rounded-full hover:bg-white/10 text-white/60 hover:text-white"
+                            >
+                                <X className="w-6 h-6" />
+                            </Button>
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-8 prose prose-invert max-w-none prose-sm">
+                            <div className="bg-white/5 rounded-xl p-6 border border-white/5 whitespace-pre-wrap font-mono text-white/80 leading-relaxed text-sm">
+                                {selectedDoc.content}
+                            </div>
+                        </div>
+                        <div className="p-6 border-t border-white/10 flex justify-end gap-3">
+                            <Button
+                                variant="secondary"
+                                onClick={() => {
+                                    navigator.clipboard.writeText(selectedDoc.content)
+                                    showToast.success('Content copied to clipboard')
+                                }}
+                                className="bg-white/5 text-white border-white/10"
+                            >
+                                Copy Content
+                            </Button>
+                            <Button
+                                onClick={() => setSelectedDoc(null)}
+                                className="bg-white text-black hover:bg-white/90"
+                            >
+                                Close
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

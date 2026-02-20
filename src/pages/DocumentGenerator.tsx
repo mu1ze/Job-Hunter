@@ -58,6 +58,8 @@ export default function DocumentGenerator() {
     const [showImprovementModal, setShowImprovementModal] = useState(false)
     const [isReimproving, setIsReimproving] = useState(false)
     const [copied, setCopied] = useState(false)
+    const [isSaving, setIsSaving] = useState(false)
+    const [savedDocId, setSavedDocId] = useState<string | null>(null)
 
     const { savedJobs } = useJobsStore()
     const { primaryResume } = useResumeStore()
@@ -139,6 +141,7 @@ export default function DocumentGenerator() {
             setScoreBreakdown(null)
             setImprovementPlan(null)
             setShowImprovementModal(false)
+            setSavedDocId(null)
         }
 
         try {
@@ -194,6 +197,53 @@ export default function DocumentGenerator() {
         } finally {
             setIsGenerating(false)
             setIsReimproving(false)
+        }
+    }
+
+    const handleSaveDocument = async () => {
+        if (!generatedContent || !selectedJobId || !profile || !primaryResume) return
+
+        setIsSaving(true)
+        try {
+            // 1. Enforce limit: Max 2 of each type per job
+            const { count, error: countError } = await supabase
+                .from('generated_documents')
+                .select('*', { count: 'exact', head: true })
+                .eq('job_id', selectedJobId)
+                .eq('document_type', documentType)
+
+            if (countError) throw countError
+
+            if (count && count >= 2) {
+                showToast.error(`Limit reached: You can only save 2 ${documentType === 'resume' ? 'resumes' : 'cover letters'} per job.`)
+                return
+            }
+
+            // 2. Save document
+            const { data, error: saveError } = await supabase
+                .from('generated_documents')
+                .insert([{
+                    user_id: profile.id,
+                    job_id: selectedJobId,
+                    resume_id: primaryResume.id,
+                    document_type: documentType,
+                    content: generatedContent,
+                    ats_score: atsScore,
+                    matched_keywords: matchedKeywords,
+                    missing_keywords: missingKeywords,
+                }])
+                .select()
+                .single()
+
+            if (saveError) throw saveError
+
+            setSavedDocId(data.id)
+            showToast.success(`${documentType === 'resume' ? 'Resume' : 'Cover Letter'} saved to job details`)
+        } catch (error: any) {
+            console.error('Save failed:', error)
+            showToast.error('Failed to save document')
+        } finally {
+            setIsSaving(false)
         }
     }
 
@@ -617,6 +667,18 @@ export default function DocumentGenerator() {
                                         <Download className="w-4 h-4 mr-1" />
                                         Download
                                     </Button>
+                                    {inputType === 'saved' && (
+                                        <Button
+                                            onClick={handleSaveDocument}
+                                            isLoading={isSaving}
+                                            disabled={!!savedDocId}
+                                            size="sm"
+                                            className="bg-white text-black hover:bg-white/90"
+                                        >
+                                            <Save className="w-4 h-4 mr-1" />
+                                            {savedDocId ? 'Saved' : 'Save to Job'}
+                                        </Button>
+                                    )}
                                 </div>
                             )}
                         </div>
