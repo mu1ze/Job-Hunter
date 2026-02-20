@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
 import {
     Sparkles,
     FileText,
@@ -33,6 +34,16 @@ type InputType = 'saved' | 'custom'
 export default function DocumentGenerator() {
     const [inputType, setInputType] = useState<InputType>('saved')
     const [selectedJobId, setSelectedJobId] = useState<string>('')
+    const location = useLocation()
+
+    // Handle initial jobId from navigation state
+    useEffect(() => {
+        const state = location.state as { jobId?: string }
+        if (state?.jobId) {
+            setSelectedJobId(state.jobId)
+            setInputType('saved')
+        }
+    }, [location.state])
 
     // Custom Job State
     const [customJobTitle, setCustomJobTitle] = useState('')
@@ -674,9 +685,9 @@ export default function DocumentGenerator() {
                                             isLoading={isSaving}
                                             disabled={!!savedDocId}
                                             size="sm"
-                                            className="bg-white text-black hover:bg-white/90"
+                                            className="bg-white/10 text-white border-white/10 hover:bg-white/20"
                                         >
-                                            <Save className="w-4 h-4 mr-1" />
+                                            <Save className="w-4 h-4 mr-2" />
                                             {savedDocId ? 'Saved' : 'Save to Job'}
                                         </Button>
                                     )}

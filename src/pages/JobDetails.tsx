@@ -15,7 +15,7 @@ import type { SavedJob, GeneratedDocument } from '../types'
 export default function JobDetails() {
     const { id } = useParams<{ id: string }>()
     const navigate = useNavigate()
-    const { savedJobs, updateJob } = useJobsStore()
+    const { savedJobs, updateJob, removeSavedJob } = useJobsStore()
     const { primaryResume } = useResumeStore()
     const [job, setJob] = useState<SavedJob | null>(null)
     const [loading, setLoading] = useState(true)
@@ -182,6 +182,38 @@ export default function JobDetails() {
         }
     }
 
+    const handleDeleteJob = async () => {
+        if (!job) return;
+        const confirmMsg = "Are you sure you want to delete this job? This will also permanently remove all tailored resumes and cover letters associated with it.";
+        if (!window.confirm(confirmMsg)) return;
+
+        setSaving(true);
+        try {
+            // First delete associated documents (safety if no cascade)
+            await supabase
+                .from('generated_documents')
+                .delete()
+                .eq('job_id', job.id);
+
+            // Then delete the job
+            const { error } = await supabase
+                .from('saved_jobs')
+                .delete()
+                .eq('id', job.id);
+
+            if (error) throw error;
+
+            removeSavedJob(job.id);
+            showToast.success('Job and documents deleted successfully');
+            navigate('/jobs');
+        } catch (error) {
+            console.error('Error deleting job:', error);
+            showToast.error('Failed to delete job');
+        } finally {
+            setSaving(false);
+        }
+    };
+
     if (loading) {
         return (
             <div className="min-h-[60vh] flex items-center justify-center text-white/40">
@@ -207,14 +239,24 @@ export default function JobDetails() {
 
                 <div className="flex gap-2">
                     {!editing ? (
-                        <Button
-                            variant="secondary"
-                            onClick={() => setEditing(true)}
-                            className="bg-white/5 border border-white/10 text-white"
-                        >
-                            <Edit2 className="w-4 h-4 mr-2" />
-                            Edit Details
-                        </Button>
+                        <>
+                            <Button
+                                variant="secondary"
+                                onClick={() => setEditing(true)}
+                                className="bg-white/5 border border-white/10 text-white"
+                            >
+                                <Edit2 className="w-4 h-4 mr-2" />
+                                Edit Details
+                            </Button>
+                            <Button
+                                variant="secondary"
+                                onClick={handleDeleteJob}
+                                className="bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20"
+                            >
+                                <Trash2 className="w-4 h-4 mr-2" />
+                                Delete Job
+                            </Button>
+                        </>
                     ) : (
                         <div className="flex gap-2">
                             <Button
@@ -372,10 +414,10 @@ export default function JobDetails() {
                                 Tailored Documents
                             </h3>
                             <Button
-                                variant="ghost"
+                                variant="secondary"
                                 size="sm"
-                                onClick={() => navigate('/generator', { state: { jobId: job.id } })}
-                                className="text-white/60 hover:text-white"
+                                onClick={() => navigate('/generate', { state: { jobId: job.id } })}
+                                className="bg-white/10 text-white border-white/10 hover:bg-white/20 h-8 px-3 text-xs"
                             >
                                 + Generate New
                             </Button>
@@ -407,24 +449,26 @@ export default function JobDetails() {
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
+                                        <div className="flex items-center gap-2">
+                                            <button
                                                 onClick={() => setSelectedDoc(doc)}
-                                                className="h-8 w-8 p-0 text-white/60 hover:text-white hover:bg-white/10"
+                                                className="h-9 w-9 flex items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors border border-white/10"
+                                                title="View Document"
                                             >
-                                                <Eye className="w-4 h-4" />
-                                            </Button>
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
+                                                <Eye className="w-5 h-5" />
+                                            </button>
+                                            <button
                                                 onClick={() => handleDeleteDocument(doc.id)}
-                                                isLoading={isDeleting === doc.id}
-                                                className="h-8 w-8 p-0 text-red-400/60 hover:text-red-400 hover:bg-red-400/10"
+                                                disabled={!!isDeleting}
+                                                className="h-9 w-9 flex items-center justify-center rounded-full bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors border border-red-500/20 disabled:opacity-50"
+                                                title="Delete Document"
                                             >
-                                                <Trash2 className="w-4 h-4" />
-                                            </Button>
+                                                {isDeleting === doc.id ? (
+                                                    <div className="w-4 h-4 border-2 border-red-400/30 border-t-red-400 rounded-full animate-spin" />
+                                                ) : (
+                                                    <Trash2 className="w-5 h-5" />
+                                                )}
+                                            </button>
                                         </div>
                                     </div>
                                 ))}
@@ -433,10 +477,10 @@ export default function JobDetails() {
                             <div className="text-center py-8 bg-white/5 rounded-xl border border-dashed border-white/10">
                                 <p className="text-white/30 text-sm">No tailored documents yet.</p>
                                 <Button
-                                    variant="ghost"
+                                    variant="secondary"
                                     size="sm"
-                                    onClick={() => navigate('/generator', { state: { jobId: job.id } })}
-                                    className="mt-2 text-white/50 hover:text-white"
+                                    onClick={() => navigate('/generate', { state: { jobId: job.id } })}
+                                    className="mt-4 bg-white/10 text-white border-white/10 hover:bg-white/20"
                                 >
                                     Generate your first resume or cover letter
                                 </Button>
