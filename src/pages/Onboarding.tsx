@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
     User,
@@ -70,7 +70,46 @@ export default function Onboarding() {
     })
 
     const navigate = useNavigate()
-    const { setProfile, setPreferences, profile } = useUserStore()
+    const { setProfile, setPreferences, profile: userProfile } = useUserStore()
+
+    // Load existing data if available
+    useEffect(() => {
+        const loadInitialData = async () => {
+            try {
+                const { data: { user } } = await supabase.auth.getUser()
+                if (!user) return
+
+                const [profileRes, prefRes] = await Promise.all([
+                    supabase.from('user_profiles').select('*').eq('id', user.id).maybeSingle(),
+                    supabase.from('job_preferences').select('*').eq('user_id', user.id).maybeSingle()
+                ])
+
+                if (profileRes.data) {
+                    setData(prev => ({
+                        ...prev,
+                        full_name: profileRes.data.full_name || '',
+                        location: profileRes.data.location || '',
+                    }))
+                }
+
+                if (prefRes.data) {
+                    setData(prev => ({
+                        ...prev,
+                        target_roles: prefRes.data.target_roles || [],
+                        target_industries: prefRes.data.target_industries || [],
+                        remote_preference: prefRes.data.remote_preference || 'any',
+                        salary_min: prefRes.data.salary_min || undefined,
+                        salary_max: prefRes.data.salary_max || undefined,
+                        location: prefRes.data.location || profileRes.data?.location || ''
+                    }))
+                }
+            } catch (error) {
+                console.error('Error loading onboarding data:', error)
+            }
+        }
+
+        loadInitialData()
+    }, [])
 
     const toggleRole = (role: string) => {
         setData(prev => ({
@@ -116,7 +155,7 @@ export default function Onboarding() {
             const { error: profileError } = await supabase
                 .from('user_profiles')
                 .update({
-                    full_name: data.full_name || (profile?.full_name ?? ''),
+                    full_name: data.full_name || (userProfile?.full_name ?? ''),
                     location: data.location,
                 })
                 .eq('id', userId)
@@ -141,10 +180,10 @@ export default function Onboarding() {
             if (prefError) throw prefError
 
             // Update local state
-            if (profile) {
+            if (userProfile) {
                 setProfile({
-                    ...profile,
-                    full_name: data.full_name || profile.full_name,
+                    ...userProfile,
+                    full_name: data.full_name || userProfile.full_name,
                     location: data.location,
                 })
             }

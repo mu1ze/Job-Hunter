@@ -83,16 +83,15 @@ export default function Auth() {
             setProfile(profileData)
             setAuthenticated(true)
 
-            // Check if onboarding is truly complete (e.g. has target roles or resume)
-            const { data: resumeData } = await supabase
-                .from('resumes')
-                .select('id')
+            // Check job preferences to see if onboarding was done
+            const { data: prefData } = await supabase
+                .from('job_preferences')
+                .select('target_roles')
                 .eq('user_id', userId)
-                .limit(1);
+                .maybeSingle()
 
-            // Simple check: if no target roles in profile OR no resume, send to onboarding
-            // You might want to add a 'onboarding_completed' flag to user_profiles for robustness
-            if (!profileData.target_roles || profileData.target_roles.length === 0 || !resumeData?.length) {
+            // If no target roles in preferences, they haven't finished onboarding
+            if (!prefData?.target_roles || prefData.target_roles.length === 0) {
                 navigate('/onboarding');
             } else {
                 navigate('/dashboard');

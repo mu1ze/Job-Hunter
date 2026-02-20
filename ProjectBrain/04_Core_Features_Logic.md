@@ -42,10 +42,16 @@ The app aggregates jobs from multiple sources (primarily via Adzuna API proxy).
 -   **Caching**: Search results are cached in `localStorage` (`job-search:{filters}`) for 5 minutes (`5 * 60 * 1000`) to reduce API calls and improve speed.
 -   **Optimistic UI**: When saving a job, it's added to the local store immediately ("Optimistic Save") before the backend request completes. If the backend fails, the change is rolled back with a toast notification.
 
-## 4. Career Improvement Plan
+## 5. Usage Limits & Persistence
 
-During document generation or analytics reviews, the system suggests career growth items:
+To manage resources and maintain application quality, the system enforces the following limits:
 
--   **Certifications**: Specific certs found in job descriptions that the user lacks.
--   **Stepping Stone Roles**: Intermediate job titles that bridge the gap between fresh experience and target roles.
--   **Logic**: Parses "Requirements" sections of job postings to find frequent proper nouns (certs) or job titles that appear in "Preferred Qualifications".
+-   **30 Saved Jobs**: Users are limited to 30 jobs in their tracker. This prevents overflow and encourages active management of the application pipeline.
+-   **Document Cap**: Each saved job can have a maximum of **2 Tailored Resumes** and **2 Tailored Cover Letters**.
+-   **Persistence**: Documents are stored in the `generated_documents` table, linked to both the user and the specific job opportunity.
+
+### Document Saving Workflow:
+1.  **Selection**: The user generates a document for a "Saved Job".
+2.  **Validation**: Clicking "Save to Job" triggers a server-side check of existing document counts for that job.
+3.  **Storage**: Valid documents are saved with their ATS scores, matched/missing keywords, and the specific version of the resume used.
+4.  **Retrieval**: Saved documents are displayed in a dedicated "Tailored Documents" card within the **Job Details** page, allowing for easy viewing and deletion.
