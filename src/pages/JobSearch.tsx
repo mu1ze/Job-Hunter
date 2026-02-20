@@ -224,6 +224,12 @@ export default function JobSearch() {
                 }
             }
         } else {
+            // Check for job limit
+            if (savedJobs.length >= 30) {
+                showToast.error('You can only save up to 30 jobs. Please remove some to save more.')
+                return
+            }
+
             const optimisticJob: SavedJob = {
                 id: `temp-${Date.now()}`,
                 user_id: profile.id,
