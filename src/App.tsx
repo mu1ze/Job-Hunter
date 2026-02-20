@@ -13,6 +13,7 @@ import Onboarding from './pages/Onboarding'
 import ApplicationTracker from './pages/ApplicationTracker'
 import Analytics from './pages/Analytics'
 import AlertsManager from './pages/AlertsManager'
+import Profile from './pages/Profile'
 import MainLayout from './components/layout/MainLayout'
 import { Toaster } from 'react-hot-toast'
 
@@ -78,6 +79,7 @@ function App() {
                     <Route path="/tracker" element={<ApplicationTracker />} />
                     <Route path="/analytics" element={<Analytics />} />
                     <Route path="/alerts" element={<AlertsManager />} />
+                    <Route path="/profile" element={<Profile />} />
                 </Route>
             </Routes>
         </BrowserRouter>

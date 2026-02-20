@@ -164,7 +164,8 @@ export default function DocumentGenerator() {
                     jobDescription: jobDescription,
                     documentType,
                     focusKeywords,
-                    jobTitle: jobTitle
+                    jobTitle: jobTitle,
+                    userProfile: profile
                 }
             })
 

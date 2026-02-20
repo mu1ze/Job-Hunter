@@ -70,7 +70,7 @@ export default function Onboarding() {
     })
 
     const navigate = useNavigate()
-    const { setProfile, setPreferences, profile: userProfile } = useUserStore()
+    const { updateProfile, updatePreferences } = useUserStore()
 
     // Load existing data if available
     useEffect(() => {
@@ -147,50 +147,19 @@ export default function Onboarding() {
         setIsLoading(true)
 
         try {
-            const { data: { user } } = await supabase.auth.getUser()
-            const userId = user?.id
-            if (!userId) throw new Error('User not authenticated')
+            await updateProfile({
+                full_name: data.full_name,
+                location: data.location,
+            })
 
-            // Update profile
-            const { error: profileError } = await supabase
-                .from('user_profiles')
-                .update({
-                    full_name: data.full_name || (userProfile?.full_name ?? ''),
-                    location: data.location,
-                })
-                .eq('id', userId)
-
-            if (profileError) throw profileError
-
-            // Update preferences
-            const { data: prefData, error: prefError } = await supabase
-                .from('job_preferences')
-                .upsert({
-                    user_id: userId,
-                    target_roles: data.target_roles,
-                    target_industries: data.target_industries,
-                    location: data.location,
-                    remote_preference: data.remote_preference,
-                    salary_min: data.salary_min || null,
-                    salary_max: data.salary_max || null,
-                }, { onConflict: 'user_id' })
-                .select()
-                .maybeSingle()
-
-            if (prefError) throw prefError
-
-            // Update local state
-            if (userProfile) {
-                setProfile({
-                    ...userProfile,
-                    full_name: data.full_name || userProfile.full_name,
-                    location: data.location,
-                })
-            }
-
-            if (prefData) {
-                setPreferences(prefData)
-            }
+            await updatePreferences({
+                target_roles: data.target_roles,
+                target_industries: data.target_industries,
+                location: data.location,
+                remote_preference: data.remote_preference,
+                salary_min: data.salary_min || null,
+                salary_max: data.salary_max || null,
+            })
 
             navigate('/dashboard')
         } catch (error: any) {
