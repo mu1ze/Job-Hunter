@@ -10,6 +10,7 @@ Extended profile information linked to `auth.users`.
 -   **`full_name`, `email`, `phone`, `location`**: basic contact info.
 -   **`linkedin_url`, `portfolio_url`**: social/professional links.
 
+
 ### 2. `job_preferences`
 Stores criteria for job searches and matching.
 -   **`user_id`** (UUID, FK): References `auth.users`.
@@ -37,14 +38,16 @@ Stores parsed resume data.
 -   **`is_primary`** (Boolean): Marks the resume used for Deep Match.
 
 ### 5. `generated_documents`
-Stores AI-generated tailored documents.
+Stores AI-generated tailored documents linked to specific job applications.
 -   **`id`** (UUID, PK).
--   **`user_id`** (UUID, FK).
--   **`job_id`** (UUID, FK, Optional): Link to a `saved_job`.
+-   **`user_id`** (UUID, FK): References `auth.users(id)`.
+-   **`job_id`** (UUID, FK): References `saved_jobs(id)`.
+-   **`resume_id`** (UUID, FK): The resume version used for generation.
 -   **`document_type`**: `resume` or `cover_letter`.
--   **`content`**: The generated markdown/text.
--   **`ats_score`** (Integer): Calculated compatibility score.
+-   **`content`** (Text): The raw generated text/markdown.
+-   **`ats_score`** (Integer).
 -   **`matched_keywords`**, **`missing_keywords`** (Arrays).
+-   **`created_at`** (TIMESTAMPTZ).
 
 ### 6. `job_market_analytics`
 (Likely used for caching market insights).

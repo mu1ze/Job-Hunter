@@ -37,11 +37,15 @@ The app uses `react-router-dom` with a mix of public and protected routes.
     -   Displays `JobListing` cards.
     -   Master-detail view (List on left, Detail panel on right).
     -   Integrates `useJobsStore` for saving jobs.
+-   **`JobDetails.tsx`**:
+    -   Displays comprehensive job information, notes, and skill matches.
+    -   **Tailored Documents Card**: Dynamic list of saved resumes/cover letters. Supports viewing (modal) and deletion.
+    -   **Actions**: "Edit Details", "Delete Job" (with associated data cleanup), and "+ Generate New" navigation.
 -   **`DocumentGenerator.tsx`**:
     -   Two-pane layout: Configuration (left), Preview (right).
-    -   Connects to saved jobs or custom text input.
-    -   Calls `generate-document` Edge Function.
-    -   Visualizes ATS score with progress bars.
+    -   **Context Awareness**: Handles `jobId` from routing state to pre-select jobs.
+    -   **Persistence**: "Save to Job" functionality integrates with usage limit validation.
+    -   Visualizes ATS score and keyword analysis.
 
 ### 4. Application Tracker (`ApplicationTracker.tsx`)
 -   Uses `@dnd-kit/core` for drag-and-drop functionality.
