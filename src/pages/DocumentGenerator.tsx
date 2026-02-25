@@ -121,14 +121,14 @@ export default function DocumentGenerator() {
         if (inputType === 'saved') {
             const selectedJob = savedJobs.find(j => j.id === selectedJobId)
             if (!selectedJob) {
-                alert('Please select a saved job')
+                showToast.error('Please select a saved job before generating.')
                 return
             }
             jobDescription = selectedJob.description
             jobTitle = selectedJob.title
         } else {
             if (!customJobDescription) {
-                alert('Please enter a job description')
+                showToast.error('Please enter a job description before generating.')
                 return
             }
             jobDescription = customJobDescription
@@ -139,7 +139,7 @@ export default function DocumentGenerator() {
         }
 
         if (!primaryResume) {
-            alert('Please upload a resume first')
+            showToast.error('Please upload a resume first.')
             return
         }
 

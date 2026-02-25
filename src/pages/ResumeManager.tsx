@@ -223,7 +223,7 @@ export default function ResumeManager() {
                 setResumes(resumes.filter(r => r.id !== resumeId))
             }
         } catch (error: any) {
-            alert(error.message)
+            showToast.error(error.message || 'Failed to delete resume.')
         }
     }
 
@@ -233,7 +233,7 @@ export default function ResumeManager() {
             await supabase.from('resumes').update({ is_primary: true }).eq('id', resumeId)
             setPrimaryResume(resumeId)
         } catch (error: any) {
-            alert(error.message)
+            showToast.error(error.message || 'Failed to update primary resume.')
         }
     }
 

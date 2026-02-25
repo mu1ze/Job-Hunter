@@ -4,6 +4,7 @@ import { Sparkles, Mail, Lock, User, ArrowRight, Eye, EyeOff } from 'lucide-reac
 import { Button, Input } from '../components/ui'
 import { useUserStore } from '../stores'
 import { supabase } from '../lib/supabase'
+import { showToast, toastMessages } from '../utils/toast'
 
 type AuthMode = 'signin' | 'signup'
 
@@ -24,7 +25,7 @@ export default function Auth() {
 
     const handleResendCode = async () => {
         if (!pendingEmail) {
-            alert('We could not find the email to resend the code. Please start signup again.')
+            showToast.error('We could not find the email to resend the code. Please start signup again.')
             return
         }
 
@@ -35,9 +36,9 @@ export default function Auth() {
                 email: pendingEmail,
             })
             if (error) throw error
-            alert('We\'ve sent a new verification code to your email.')
+            showToast.success('We\'ve sent a new verification code to your email.')
         } catch (error: any) {
-            alert(error.message || 'Failed to resend verification code')
+            showToast.error(error.message || 'Failed to resend verification code')
         } finally {
             setIsLoading(false)
         }
@@ -86,7 +87,7 @@ export default function Auth() {
                         setPendingEmail(formData.email)
                         setIsVerifyingEmail(true)
                         setVerificationCode('')
-                        alert("We've emailed you a verification code. Enter it below to verify your account.");
+                        showToast.success("We've emailed you a verification code. Enter it below to verify your account.");
                     } else {
                         // User verified immediately (unlikely in prod without auto-confirm) or auto-confirm is on
                         await handlePostLogin(authData.user.id);
@@ -110,7 +111,7 @@ export default function Auth() {
                 }
             }
         } catch (error: any) {
-            alert(error.message || 'An error occurred during authentication')
+            showToast.error(error.message || toastMessages.error.generic)
         } finally {
             setIsLoading(false)
         }

@@ -15,6 +15,7 @@ import {
 import { Button, Input, Card } from '../components/ui'
 import { useUserStore } from '../stores'
 import { supabase } from '../lib/supabase'
+import { showToast, toastMessages } from '../utils/toast'
 import type { OnboardingData } from '../types'
 
 const steps = [
@@ -163,7 +164,7 @@ export default function Onboarding() {
 
             navigate('/dashboard')
         } catch (error: any) {
-            alert(error.message || 'Failed to save preferences')
+            showToast.error(error.message || toastMessages.general.updateFailed)
         } finally {
             setIsLoading(false)
         }
