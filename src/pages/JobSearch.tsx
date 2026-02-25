@@ -238,8 +238,8 @@ export default function JobSearch() {
             }
         } else {
             // Check for job limit
-            if (savedJobs.length >= 30) {
-                showToast.error('You can only save up to 30 jobs. Please remove some to save more.')
+            if (savedJobs.length >= 100) {
+                showToast.error('You can only save up to 100 jobs. Please remove some to save more.')
                 return
             }
 

@@ -46,7 +46,7 @@ The app aggregates jobs from multiple sources (primarily via Adzuna API proxy).
 
 To manage resources and maintain application quality, the system enforces the following limits:
 
--   **30 Saved Jobs**: Users are limited to 30 jobs in their tracker. This prevents overflow and encourages active management of the application pipeline.
+-   **100 Saved Jobs**: Users are limited to 100 jobs in their tracker. This provides plenty of room while still encouraging active management of the application pipeline.
 -   **Document Cap**: Each saved job can have a maximum of **2 Tailored Resumes** and **2 Tailored Cover Letters**.
 -   **Persistence**: Documents are stored in the `generated_documents` table, linked to both the user and the specific job opportunity.
 
