@@ -67,3 +67,7 @@ Use the following prompt to recreate the Web3 landing page hero section design:
 *   Ensure text scales down on mobile.
 *   Adjust padding (200px top on mobile).
 *   Hide nav links on mobile.
+
+
+
+Eats-r01s42qn7y

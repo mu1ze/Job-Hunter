@@ -10,7 +10,8 @@ import {
     Kanban,
     BarChart3,
     Bell,
-    User
+    User,
+    Info
 } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
 import { useUserStore } from '../../stores'
@@ -28,6 +29,7 @@ const navItems = [
 export default function Navbar() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
     const [isExpanded, setIsExpanded] = useState(false)
+    const [showInfo, setShowInfo] = useState(false)
     const location = useLocation()
     const { profile, logout } = useUserStore()
     const navRef = useRef<HTMLDivElement>(null)
@@ -35,6 +37,43 @@ export default function Navbar() {
     const handleLogout = () => {
         logout()
         window.location.href = '/'
+    }
+
+    const getInfoMessage = () => {
+        const path = location.pathname
+
+        if (path === '/' || path === '/auth') {
+            return 'Get started by creating an account or signing in. JobHunter helps you track applications, search smarter, and generate tailored documents.'
+        }
+        if (path.startsWith('/dashboard')) {
+            return 'Your dashboard gives you a quick overview of your pipeline, recent applications, and shortcuts to key tools in JobHunter.'
+        }
+        if (path.startsWith('/jobs')) {
+            return 'Use Jobs to search roles, apply Deep Match, and save positions you care about so they flow into your tracker.'
+        }
+        if (path.startsWith('/tracker')) {
+            return 'The Tracker lets you organize applications by stage, keep notes, and never lose track of where you are in each process.'
+        }
+        if (path.startsWith('/analytics')) {
+            return 'Analytics surfaces trends in your job search so you can see what is working, where you get interviews, and where to adjust.'
+        }
+        if (path.startsWith('/alerts')) {
+            return 'Alerts keep you notified about new roles that match your preferences so you can apply early and stay ahead.'
+        }
+        if (path.startsWith('/resume')) {
+            return 'The Resume area is where you upload, parse, and manage resumes that power Deep Match and tailored document generation.'
+        }
+        if (path.startsWith('/generate')) {
+            return 'AI generates tailored resumes and cover letters using your profile, resumes, and the specific job description you provide.'
+        }
+        if (path.startsWith('/onboarding')) {
+            return 'Onboarding collects your goals, location, and preferences so JobHunter can personalize search, alerts, and recommendations.'
+        }
+        if (path.startsWith('/profile')) {
+            return 'Your profile stores your core details and preferences that power smarter recommendations across the app.'
+        }
+
+        return 'Navigate with the tabs to explore JobHunter—search jobs, track applications, analyze your pipeline, and generate tailored documents.'
     }
 
     // Stable hover: detect if mouse is within a slightly larger hit area or the pill itself
@@ -63,6 +102,11 @@ export default function Navbar() {
         window.addEventListener('mousemove', handleMouseMove)
         return () => window.removeEventListener('mousemove', handleMouseMove)
     }, [isExpanded])
+
+    // Close info panel when route changes or mobile menu toggles
+    useEffect(() => {
+        setShowInfo(false)
+    }, [location.pathname, isMobileMenuOpen])
 
     return (
         <div className="fixed top-6 left-0 right-0 z-50 flex justify-center px-4 pointer-events-none">
@@ -181,14 +225,42 @@ export default function Navbar() {
                     </>
                 )}
 
-                {/* Mobile Menu Toggle */}
-                <button
-                    onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                    className="lg:hidden p-2 rounded-full text-white hover:bg-white/10 transition-colors shrink-0"
-                >
-                    {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-                </button>
+                {/* Info & Mobile Menu Toggle */}
+                <div className="flex items-center gap-1">
+                    <button
+                        onClick={() => setShowInfo((prev) => !prev)}
+                        className="p-2 rounded-full text-white/70 hover:text-white hover:bg-white/10 transition-colors shrink-0"
+                        title="What is this page?"
+                    >
+                        <Info className="w-4 h-4" />
+                    </button>
+
+                    <button
+                        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                        className="lg:hidden p-2 rounded-full text-white hover:bg-white/10 transition-colors shrink-0"
+                    >
+                        {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                    </button>
+                </div>
             </nav>
+
+            {/* Contextual Info Panel */}
+            {showInfo && (
+                <div className="fixed top-[88px] inset-x-0 z-40 flex justify-center px-4 pointer-events-none">
+                    <div className="max-w-xl w-full pointer-events-auto">
+                        <div className="bg-black/95 border border-white/15 rounded-3xl px-5 py-4 shadow-2xl backdrop-blur-2xl text-sm text-white/80 animate-fade-in">
+                            <div className="flex items-start gap-3">
+                                <div className="mt-0.5">
+                                    <Info className="w-4 h-4 text-white/60" />
+                                </div>
+                                <p className="leading-relaxed">
+                                    {getInfoMessage()}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Mobile Menu Backdrop */}
             {isMobileMenuOpen && (

@@ -11,6 +11,9 @@ export default function Auth() {
     const [mode, setMode] = useState<AuthMode>('signup')
     const [showPassword, setShowPassword] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
+    const [isVerifyingEmail, setIsVerifyingEmail] = useState(false)
+    const [verificationCode, setVerificationCode] = useState('')
+    const [pendingEmail, setPendingEmail] = useState<string | null>(null)
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -19,12 +22,52 @@ export default function Auth() {
     const navigate = useNavigate()
     const { setProfile, setAuthenticated } = useUserStore()
 
+    const handleResendCode = async () => {
+        if (!pendingEmail) {
+            alert('We could not find the email to resend the code. Please start signup again.')
+            return
+        }
+
+        try {
+            setIsLoading(true)
+            const { error } = await supabase.auth.resend({
+                type: 'signup',
+                email: pendingEmail,
+            })
+            if (error) throw error
+            alert('We\'ve sent a new verification code to your email.')
+        } catch (error: any) {
+            alert(error.message || 'Failed to resend verification code')
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setIsLoading(true)
 
         try {
-            if (mode === 'signup') {
+            if (isVerifyingEmail) {
+                if (!pendingEmail) {
+                    throw new Error('No email found for verification. Please sign up again.')
+                }
+
+                const { data, error } = await supabase.auth.verifyOtp({
+                    email: pendingEmail,
+                    token: verificationCode,
+                    type: 'signup',
+                })
+
+                if (error) throw error
+
+                if (data.user) {
+                    await handlePostLogin(data.user.id)
+                    setIsVerifyingEmail(false)
+                    setVerificationCode('')
+                    setPendingEmail(null)
+                }
+            } else if (mode === 'signup') {
                 const { data: authData, error } = await supabase.auth.signUp({
                     email: formData.email,
                     password: formData.password,
@@ -40,8 +83,10 @@ export default function Auth() {
                 if (authData.user) {
                     // Check if email confirmation is required (implied if identities exists and updated_at matches created_at roughly, or session is null)
                     if (!authData.session) {
-                        alert("Please check your email (and spam folder) to verify your account before logging in!");
-                        setMode('signin');
+                        setPendingEmail(formData.email)
+                        setIsVerifyingEmail(true)
+                        setVerificationCode('')
+                        alert("We've emailed you a verification code. Enter it below to verify your account.");
                     } else {
                         // User verified immediately (unlikely in prod without auto-confirm) or auto-confirm is on
                         await handlePostLogin(authData.user.id);
@@ -134,12 +179,14 @@ export default function Auth() {
                         </div>
                     </div>
                     <h1 className="font-medium text-3xl text-white mb-2 tracking-tight">
-                        {mode === 'signin' ? 'Welcome Back' : 'Create Account'}
+                        {isVerifyingEmail ? 'Verify your email' : mode === 'signin' ? 'Welcome Back' : 'Create Account'}
                     </h1>
                     <p className="text-white/60">
-                        {mode === 'signin'
-                            ? 'Sign in to continue your job search'
-                            : 'Start your journey to landing your dream job'
+                        {isVerifyingEmail
+                            ? 'Enter the verification code we sent to your email.'
+                            : mode === 'signin'
+                                ? 'Sign in to continue your job search'
+                                : 'Start your journey to landing your dream job'
                         }
                     </p>
                 </div>
@@ -147,56 +194,84 @@ export default function Auth() {
                 {/* Auth Card */}
                 <div className="glass rounded-3xl p-8 border border-white/10 bg-black/40 backdrop-blur-xl">
                     <form onSubmit={handleSubmit} className="space-y-5">
-                        {mode === 'signup' && (
-                            <Input
-                                label="Full Name"
-                                placeholder="John Doe"
-                                icon={<User className="w-5 h-5" />}
-                                value={formData.name}
-                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                required
-                            />
-                        )}
+                        {isVerifyingEmail ? (
+                            <>
+                                <p className="text-white/70 text-sm">
+                                    We've sent a verification code to {pendingEmail}. Enter it below to activate your account.
+                                </p>
+                                <Input
+                                    label="Verification Code"
+                                    placeholder="123456"
+                                    value={verificationCode}
+                                    onChange={(e) => setVerificationCode(e.target.value)}
+                                    required
+                                />
+                                <div className="flex items-center justify-between text-xs text-white/50 mt-1">
+                                    <span>Codes expire after a short time for security.</span>
+                                    <button
+                                        type="button"
+                                        onClick={handleResendCode}
+                                        disabled={isLoading}
+                                        className="text-white/80 hover:text-white underline underline-offset-2 disabled:opacity-50"
+                                    >
+                                        Resend code
+                                    </button>
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                {mode === 'signup' && (
+                                    <Input
+                                        label="Full Name"
+                                        placeholder="John Doe"
+                                        icon={<User className="w-5 h-5" />}
+                                        value={formData.name}
+                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                        required
+                                    />
+                                )}
 
-                        <Input
-                            label="Email Address"
-                            type="email"
-                            placeholder="you@example.com"
-                            icon={<Mail className="w-5 h-5" />}
-                            value={formData.email}
-                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                            required
-                        />
+                                <Input
+                                    label="Email Address"
+                                    type="email"
+                                    placeholder="you@example.com"
+                                    icon={<Mail className="w-5 h-5" />}
+                                    value={formData.email}
+                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                    required
+                                />
 
-                        <div className="relative">
-                            <Input
-                                label="Password"
-                                type={showPassword ? 'text' : 'password'}
-                                placeholder="••••••••"
-                                icon={<Lock className="w-5 h-5" />}
-                                value={formData.password}
-                                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                required
-                            />
-                            <button
-                                type="button"
-                                onClick={() => setShowPassword(!showPassword)}
-                                className="absolute right-4 top-[42px] text-white/40 hover:text-white transition-colors"
-                            >
-                                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                            </button>
-                        </div>
+                                <div className="relative">
+                                    <Input
+                                        label="Password"
+                                        type={showPassword ? 'text' : 'password'}
+                                        placeholder="••••••••"
+                                        icon={<Lock className="w-5 h-5" />}
+                                        value={formData.password}
+                                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                        required
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-4 top-[42px] text-white/40 hover:text-white transition-colors"
+                                    >
+                                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                    </button>
+                                </div>
 
-                        {mode === 'signin' && (
-                            <div className="text-right">
-                                <button type="button" className="text-sm text-white/60 hover:text-white transition-colors">
-                                    Forgot password?
-                                </button>
-                            </div>
+                                {mode === 'signin' && (
+                                    <div className="text-right">
+                                        <button type="button" className="text-sm text-white/60 hover:text-white transition-colors">
+                                            Forgot password?
+                                        </button>
+                                    </div>
+                                )}
+                            </>
                         )}
 
                         <Button type="submit" size="lg" className="w-full group rounded-full" isLoading={isLoading}>
-                            {mode === 'signin' ? 'Sign In' : 'Create Account'}
+                            {isVerifyingEmail ? 'Verify Email' : mode === 'signin' ? 'Sign In' : 'Create Account'}
                             <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                         </Button>
                     </form>
@@ -233,7 +308,12 @@ export default function Auth() {
                     {mode === 'signin' ? "Don't have an account? " : 'Already have an account? '}
                     <button
                         type="button"
-                        onClick={() => setMode(mode === 'signin' ? 'signup' : 'signin')}
+                        onClick={() => {
+                            setMode(mode === 'signin' ? 'signup' : 'signin')
+                            setIsVerifyingEmail(false)
+                            setVerificationCode('')
+                            setPendingEmail(null)
+                        }}
                         className="text-white hover:text-white/80 font-medium transition-colors border-b border-white/20 hover:border-white"
                     >
                         {mode === 'signin' ? 'Sign Up' : 'Sign In'}
