@@ -9,7 +9,7 @@ import ReactMarkdown from 'react-markdown'
 import { useJobsStore, useResumeStore } from '../stores'
 import { Button, Card, Input } from '../components/ui'
 import { supabase } from '../lib/supabase'
-import { showToast } from '../utils/toast'
+import { showToast, toastMessages } from '../utils/toast'
 import type { SavedJob, GeneratedDocument } from '../types'
 
 export default function JobDetails() {

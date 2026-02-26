@@ -9,7 +9,11 @@ import {
     Calendar,
     DollarSign,
     Briefcase,
-    Award
+    Award,
+    Clock,
+    CheckCircle,
+    XCircle,
+    Users
 } from 'lucide-react'
 import { Card } from '../components/ui'
 import { useJobsStore } from '../stores'
@@ -128,6 +132,63 @@ export default function Analytics() {
             .sort(([, a], [, b]) => b - a)
             .slice(0, 5)
             .map(([company, count]) => ({ company, count }))
+    }, [savedJobs])
+
+    // Application timeline - recent activity sorted by date
+    const applicationTimeline = useMemo(() => {
+        const events: Array<{
+            id: string
+            title: string
+            company: string
+            date: string
+            type: 'applied' | 'interview' | 'offer' | 'rejected'
+            status: string
+        }> = []
+
+        savedJobs.forEach(job => {
+            if (job.applied_date) {
+                events.push({
+                    id: `${job.id}-applied`,
+                    title: job.title,
+                    company: job.company,
+                    date: job.applied_date,
+                    type: 'applied',
+                    status: 'Applied'
+                })
+            }
+            if (job.interview_date) {
+                events.push({
+                    id: `${job.id}-interview`,
+                    title: job.title,
+                    company: job.company,
+                    date: job.interview_date,
+                    type: 'interview',
+                    status: 'Interview'
+                })
+            }
+            if (job.offer_date) {
+                events.push({
+                    id: `${job.id}-offer`,
+                    title: job.title,
+                    company: job.company,
+                    date: job.offer_date,
+                    type: 'offer',
+                    status: 'Offer Received'
+                })
+            }
+            if (job.rejected_date) {
+                events.push({
+                    id: `${job.id}-rejected`,
+                    title: job.title,
+                    company: job.company,
+                    date: job.rejected_date,
+                    type: 'rejected',
+                    status: 'Rejected'
+                })
+            }
+        })
+
+        return events.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 8)
     }, [savedJobs])
 
     return (
@@ -288,6 +349,48 @@ export default function Analytics() {
                     )}
                 </Card>
             </div>
+
+            {/* Application Timeline */}
+            {applicationTimeline.length > 0 && (
+                <Card className="border border-white/10 bg-white/5">
+                    <h3 className="font-medium text-white mb-6 flex items-center gap-2">
+                        <Clock className="w-5 h-5 text-white/60" />
+                        Application Timeline
+                    </h3>
+                    <div className="relative">
+                        <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-white/10" />
+                        <div className="space-y-4">
+                            {applicationTimeline.map((event) => (
+                                <div key={event.id} className="flex items-start gap-4 relative">
+                                    <div className={`
+                                        w-8 h-8 rounded-full flex items-center justify-center shrink-0 z-10
+                                        ${event.type === 'applied' ? 'bg-purple-500/20 text-purple-400' : ''}
+                                        ${event.type === 'interview' ? 'bg-yellow-500/20 text-yellow-400' : ''}
+                                        ${event.type === 'offer' ? 'bg-green-500/20 text-green-400' : ''}
+                                        ${event.type === 'rejected' ? 'bg-red-500/20 text-red-400' : ''}
+                                    `}>
+                                        {event.type === 'applied' && <Briefcase className="w-4 h-4" />}
+                                        {event.type === 'interview' && <Users className="w-4 h-4" />}
+                                        {event.type === 'offer' && <CheckCircle className="w-4 h-4" />}
+                                        {event.type === 'rejected' && <XCircle className="w-4 h-4" />}
+                                    </div>
+                                    <div className="flex-1 pb-4">
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <p className="font-medium text-white">{event.status}</p>
+                                                <p className="text-sm text-white/60">{event.title} at {event.company}</p>
+                                            </div>
+                                            <span className="text-xs text-white/40 whitespace-nowrap">
+                                                {new Date(event.date).toLocaleDateString()}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </Card>
+            )}
         </div>
     )
 }

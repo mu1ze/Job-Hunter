@@ -7,6 +7,7 @@ export interface UserProfile {
     location: string | null;
     linkedin_url: string | null;
     portfolio_url: string | null;
+    avatar_url: string | null;
     created_at: string;
     updated_at: string;
 }

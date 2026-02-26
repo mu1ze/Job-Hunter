@@ -75,7 +75,7 @@ serve(async (req) => {
 
       // Get user profile
       const { data: profile } = await supabase
-        .from('profiles')
+        .from('user_profiles')
         .select('email, full_name')
         .eq('id', alert.user_id)
         .single()

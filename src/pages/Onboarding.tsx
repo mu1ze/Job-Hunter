@@ -395,15 +395,26 @@ export default function Onboarding() {
 
                     {/* Navigation */}
                     <div className="flex items-center justify-between mt-8 pt-6 border-t border-white/10">
-                        <Button
-                            variant="ghost"
-                            onClick={handleBack}
-                            disabled={currentStep === 1}
-                            className={`${currentStep === 1 ? 'invisible' : ''} text-white/50 hover:text-white`}
-                        >
-                            <ArrowLeft className="w-4 h-4 mr-2" />
-                            Back
-                        </Button>
+                        <div className="flex items-center gap-4">
+                            <Button
+                                variant="ghost"
+                                onClick={handleBack}
+                                disabled={currentStep === 1}
+                                className={`${currentStep === 1 ? 'invisible' : ''} text-white/50 hover:text-white`}
+                            >
+                                <ArrowLeft className="w-4 h-4 mr-2" />
+                                Back
+                            </Button>
+                            {currentStep === 1 && (
+                                <Button
+                                    variant="ghost"
+                                    onClick={() => navigate('/dashboard')}
+                                    className="text-white/40 hover:text-white"
+                                >
+                                    Skip for now
+                                </Button>
+                            )}
+                        </div>
 
                         <Button
                             onClick={handleNext}

@@ -18,7 +18,8 @@ import {
     Settings
 } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
-import { Button, Input, Card } from '../components/ui'
+import { Button, Input, Card, NoResults } from '../components/ui'
+import { SkeletonList } from '../components/Skeleton'
 import { useJobsStore, useUserStore, useResumeStore } from '../stores'
 import { adzunaService } from '../services/adzuna'
 import { perplexityService } from '../services/perplexity'
@@ -668,19 +669,23 @@ export default function JobSearch() {
                             )}
                         </>
                     ) : (
-                        <Card className="text-center py-20 bg-white/5 border border-white/10">
+                        <Card className="bg-white/5 border border-white/10">
                             {isSearching ? (
-                                <div className="space-y-6">
-                                    <div className="w-12 h-12 border-4 border-white/10 border-t-white rounded-full animate-spin mx-auto" />
-                                    <p className="text-white/60">Searching live jobs...</p>
-                                </div>
+                                <SkeletonList count={5} type="job" />
                             ) : (
-                                <>
-                                    <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center mx-auto mb-6">
-                                        <Search className="w-8 h-8 text-white/20" />
-                                    </div>
-                                    <p className="text-white/60">No jobs found. Try adjusting your search filters.</p>
-                                </>
+                                <NoResults 
+                                    onClearFilters={() => {
+                                        setFilters({
+                                            query: '',
+                                            location: '',
+                                            radius: 50,
+                                            remote_only: false,
+                                            sort_by: 'relevance',
+                                            country: 'us'
+                                        })
+                                        handleSearch()
+                                    }}
+                                />
                             )}
                         </Card>
                     )}

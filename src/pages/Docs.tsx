@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
     BookOpen,
@@ -16,7 +16,6 @@ import {
     X,
     ChevronLeft,
     ChevronRight,
-    CheckCircle2,
     ArrowUpRight
 } from 'lucide-react'
 

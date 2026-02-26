@@ -23,7 +23,7 @@ import {
     Check
 } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
-import { Card } from '../components/ui'
+import { Card, EmptyColumn } from '../components/ui'
 import { useJobsStore, useUserStore } from '../stores'
 import { useCareerStore } from '../stores/career'
 import { supabase } from '../lib/supabase'
@@ -603,9 +603,10 @@ function KanbanColumn({ column, jobs }: {
 
             <div className="space-y-3 flex-1">
                 {jobs.length === 0 ? (
-                    <div className="text-center py-12 text-white/20 text-sm border-2 border-dashed border-white/5 rounded-2xl">
-                        No jobs yet
-                    </div>
+                    <EmptyColumn 
+                        title="No jobs yet" 
+                        description="Drag jobs here"
+                    />
                 ) : (
                     jobs.map(job => (
                         <JobCard

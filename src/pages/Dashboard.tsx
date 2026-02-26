@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
     Search,
@@ -9,9 +9,10 @@ import {
     Clock,
     Target,
     ArrowRight,
-    Plus
+    Upload
 } from 'lucide-react'
-import { Button, Card } from '../components/ui'
+import { Button, Card, EmptyState } from '../components/ui'
+import { StatsSkeleton } from '../components/Skeleton'
 import { useUserStore, useJobsStore, useResumeStore } from '../stores'
 import { supabase } from '../lib/supabase'
 
@@ -40,9 +41,11 @@ export default function Dashboard() {
     const { profile, preferences, fetchUserData } = useUserStore()
     const { savedJobs, setSavedJobs } = useJobsStore()
     const { primaryResume, setResumes } = useResumeStore()
+    const [isLoading, setIsLoading] = useState(true)
 
     useEffect(() => {
         const initDashboard = async () => {
+            setIsLoading(true)
             const { data: { user } } = await supabase.auth.getUser()
             if (user) {
                 // Fetch user profile and prefs
@@ -66,6 +69,7 @@ export default function Dashboard() {
 
                 if (resumes) setResumes(resumes)
             }
+            setIsLoading(false)
         }
 
         initDashboard()
@@ -103,24 +107,28 @@ export default function Dashboard() {
             </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-                {stats.map((stat) => {
-                    const Icon = stat.icon
-                    return (
-                        <Card key={stat.label} className="relative overflow-hidden border border-white/10 bg-white/5 backdrop-blur-sm">
-                            <div className="flex items-start justify-between">
-                                <div className="min-w-0">
-                                    <p className="text-white/50 text-xs md:text-sm mb-1 uppercase tracking-wider truncate">{stat.label}</p>
-                                    <p className="font-medium text-2xl md:text-3xl text-white">{stat.value}</p>
+            {isLoading ? (
+                <StatsSkeleton />
+            ) : (
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+                    {stats.map((stat) => {
+                        const Icon = stat.icon
+                        return (
+                            <Card key={stat.label} className="relative overflow-hidden border border-white/10 bg-white/5 backdrop-blur-sm">
+                                <div className="flex items-start justify-between">
+                                    <div className="min-w-0">
+                                        <p className="text-white/50 text-xs md:text-sm mb-1 uppercase tracking-wider truncate">{stat.label}</p>
+                                        <p className="font-medium text-2xl md:text-3xl text-white">{stat.value}</p>
+                                    </div>
+                                    <div className={`p-1.5 md:p-2 rounded-lg bg-white/5 text-white/80 shrink-0`}>
+                                        <Icon className="w-4 h-4 md:w-5 md:h-5" />
+                                    </div>
                                 </div>
-                                <div className={`p-1.5 md:p-2 rounded-lg bg-white/5 text-white/80 shrink-0`}>
-                                    <Icon className="w-4 h-4 md:w-5 md:h-5" />
-                                </div>
-                            </div>
-                        </Card>
-                    )
-                })}
-            </div>
+                            </Card>
+                        )
+                    })}
+                </div>
+            )}
 
             {/* Quick Actions */}
             <div>
@@ -196,15 +204,15 @@ export default function Dashboard() {
                             )}
                         </div>
                     ) : (
-                        <div className="text-center py-8 md:py-12">
-                            <div className="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-white/5 flex items-center justify-center mx-auto mb-4 md:mb-6 border border-white/10">
-                                <Plus className="w-6 h-6 md:w-8 md:h-8 text-white/40" />
-                            </div>
-                            <p className="text-white/60 mb-4 md:mb-6">No resume uploaded yet</p>
-                            <Link to="/resume">
-                                <Button variant="outline" className="rounded-full w-full sm:w-auto">Upload Resume</Button>
-                            </Link>
-                        </div>
+                        <EmptyState
+                            icon={<Upload className="w-8 h-8 text-white/40" />}
+                            title="No resume uploaded yet"
+                            description="Upload your resume to get AI-powered insights and tailored job recommendations."
+                            action={{
+                                label: 'Upload Resume',
+                                href: '/resume'
+                            }}
+                        />
                     )}
                 </Card>
 
@@ -252,15 +260,15 @@ export default function Dashboard() {
                             ))}
                         </div>
                     ) : (
-                        <div className="text-center py-8 md:py-12">
-                            <div className="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-white/5 flex items-center justify-center mx-auto mb-4 md:mb-6 border border-white/10">
-                                <Briefcase className="w-6 h-6 md:w-8 md:h-8 text-white/40" />
-                            </div>
-                            <p className="text-white/60 mb-4 md:mb-6">No saved jobs yet</p>
-                            <Link to="/jobs">
-                                <Button variant="outline" className="rounded-full w-full sm:w-auto">Start Searching</Button>
-                            </Link>
-                        </div>
+                        <EmptyState
+                            icon={<Briefcase className="w-8 h-8 text-white/40" />}
+                            title="No saved jobs yet"
+                            description="Start your job search and save positions that interest you."
+                            action={{
+                                label: 'Start Searching',
+                                href: '/jobs'
+                            }}
+                        />
                     )}
                 </Card>
             </div>

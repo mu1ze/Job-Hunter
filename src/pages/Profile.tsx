@@ -1,12 +1,15 @@
-import { useState } from 'react'
-import { User, Mail, Phone, MapPin, Linkedin, Link as LinkIcon, Briefcase, DollarSign, Settings, Save } from 'lucide-react'
+import { useState, useRef } from 'react'
+import { User, Mail, Phone, MapPin, Linkedin, Link as LinkIcon, Briefcase, DollarSign, Settings, Save, Camera, Loader2 } from 'lucide-react'
 import { useUserStore } from '../stores'
 import { Button, Input, Card } from '../components/ui'
+import { supabase } from '../lib/supabase'
 import { toast } from 'react-hot-toast'
 
 export default function Profile() {
     const { profile, preferences, updateProfile, updatePreferences } = useUserStore()
     const [isSaving, setIsSaving] = useState(false)
+    const [isUploadingAvatar, setIsUploadingAvatar] = useState(false)
+    const avatarInputRef = useRef<HTMLInputElement>(null)
 
     const [profileData, setProfileData] = useState({
         full_name: profile?.full_name || '',
@@ -15,6 +18,7 @@ export default function Profile() {
         location: profile?.location || '',
         linkedin_url: profile?.linkedin_url || '',
         portfolio_url: profile?.portfolio_url || '',
+        avatar_url: profile?.avatar_url || '',
     })
 
     const [prefData, setPrefData] = useState({
@@ -23,6 +27,50 @@ export default function Profile() {
         remote_preference: preferences?.remote_preference || 'any',
         use_global_filters: preferences?.use_global_filters || false,
     })
+
+    const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (!file) return
+
+        if (!file.type.startsWith('image/')) {
+            toast.error('Please select an image file')
+            return
+        }
+
+        if (file.size > 2 * 1024 * 1024) {
+            toast.error('Image must be less than 2MB')
+            return
+        }
+
+        setIsUploadingAvatar(true)
+
+        try {
+            const { data: { user } } = await supabase.auth.getUser()
+            if (!user) throw new Error('Not authenticated')
+
+            const fileExt = file.name.split('.').pop()
+            const fileName = `${user.id}-${Date.now()}.${fileExt}`
+            const filePath = `avatars/${fileName}`
+
+            const { error: uploadError } = await supabase.storage
+                .from('user-content')
+                .upload(filePath, file, { upsert: true })
+
+            if (uploadError) throw uploadError
+
+            const { data: { publicUrl } } = supabase.storage
+                .from('user-content')
+                .getPublicUrl(filePath)
+
+            setProfileData(prev => ({ ...prev, avatar_url: publicUrl }))
+            toast.success('Profile picture updated')
+        } catch (error: any) {
+            console.error('Avatar upload error:', error)
+            toast.error(error.message || 'Failed to upload image')
+        } finally {
+            setIsUploadingAvatar(false)
+        }
+    }
 
     const handleSave = async () => {
         setIsSaving(true)
@@ -67,6 +115,45 @@ export default function Profile() {
                                 <User className="w-5 h-5 text-white" />
                             </div>
                             <h2 className="font-medium text-xl text-white">Personal Information</h2>
+                        </div>
+
+                        {/* Avatar Upload */}
+                        <div className="flex items-center gap-6 mb-8 pb-8 border-b border-white/10">
+                            <div className="relative">
+                                <div className="w-24 h-24 rounded-full bg-white/10 border-2 border-white/20 overflow-hidden flex items-center justify-center">
+                                    {profileData.avatar_url ? (
+                                        <img 
+                                            src={profileData.avatar_url} 
+                                            alt="Profile" 
+                                            className="w-full h-full object-cover"
+                                        />
+                                    ) : (
+                                        <User className="w-10 h-10 text-white/30" />
+                                    )}
+                                </div>
+                                <button
+                                    onClick={() => avatarInputRef.current?.click()}
+                                    disabled={isUploadingAvatar}
+                                    className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-white text-black flex items-center justify-center hover:bg-white/90 transition-colors shadow-lg"
+                                >
+                                    {isUploadingAvatar ? (
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                    ) : (
+                                        <Camera className="w-4 h-4" />
+                                    )}
+                                </button>
+                                <input
+                                    ref={avatarInputRef}
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleAvatarUpload}
+                                    className="hidden"
+                                />
+                            </div>
+                            <div>
+                                <h3 className="font-medium text-white">Profile Photo</h3>
+                                <p className="text-sm text-white/50">Click the camera icon to upload</p>
+                            </div>
                         </div>
 
                         <div className="grid md:grid-cols-2 gap-6">

@@ -87,7 +87,7 @@ export default function AlertsManager() {
     const [isCreating, setIsCreating] = useState(false)
     const [editingId, setEditingId] = useState<string | null>(null)
     const [loading, setLoading] = useState(true)
-    const [showComingSoon] = useState(true) // Toggle to enable/disable Coming Soon
+    const [showComingSoon] = useState(false) // Toggle to enable/disable Coming Soon
 
     // Show Coming Soon for now
     if (showComingSoon) {

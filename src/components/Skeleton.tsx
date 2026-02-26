@@ -110,6 +110,48 @@ export function ResumeCardSkeleton() {
 }
 
 /**
+ * Skeleton for dashboard/stats cards
+ */
+export function StatsSkeleton() {
+    return (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="p-6 rounded-2xl bg-white/5 border border-white/10 animate-pulse">
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="w-10 h-10 rounded-xl bg-surface-700/50" />
+                        <div className="w-8 h-8 rounded-lg bg-surface-700/50" />
+                    </div>
+                    <div className="h-8 bg-surface-700/50 rounded w-16 mb-2" />
+                    <div className="h-4 bg-surface-700/50 rounded w-24" />
+                </div>
+            ))}
+        </div>
+    )
+}
+
+/**
+ * Skeleton for table rows (application tracker, alerts list)
+ */
+export function TableRowSkeleton({ columns = 4 }: { columns?: number }) {
+    return (
+        <div className="flex items-center gap-4 p-4 rounded-xl border border-white/5 bg-white/5 animate-pulse">
+            <div className="w-8 h-8 rounded-lg bg-surface-700/50 shrink-0" />
+            <div className="flex-1 space-y-2">
+                <div className="h-5 bg-surface-700/50 rounded w-3/4" />
+                <div className="h-4 bg-surface-700/50 rounded w-1/2" />
+            </div>
+            {Array.from({ length: columns - 2 }).map((_, i) => (
+                <div key={i} className="h-4 bg-surface-700/50 rounded w-20 hidden md:block" />
+            ))}
+            <div className="flex gap-2 shrink-0">
+                <div className="w-8 h-8 rounded-lg bg-surface-700/50" />
+                <div className="w-8 h-8 rounded-lg bg-surface-700/50" />
+            </div>
+        </div>
+    )
+}
+
+/**
  * Multi-skeleton loader for lists
  */
 export function SkeletonList({ count = 3, type = 'job' }: { count?: number; type?: 'job' | 'resume' | 'detail' }) {
