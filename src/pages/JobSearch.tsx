@@ -68,18 +68,10 @@ export default function JobSearch() {
     const countries = [
         { code: 'us', name: 'United States' },
         { code: 'ca', name: 'Canada' },
-        { code: 'gb', name: 'United Kingdom' },
-        { code: 'au', name: 'Australia' },
-        { code: 'in', name: 'India' },
-        { code: 'sg', name: 'Singapore' },
-        { code: 'ng', name: 'Nigeria' },
-        { code: 'za', name: 'South Africa' },
-        { code: 'nz', name: 'New Zealand' },
-        { code: 'fr', name: 'France' },
-        { code: 'de', name: 'Germany' },
-        { code: 'nl', name: 'Netherlands' },
-        { code: 'pl', name: 'Poland' },
     ]
+
+    // Expandable input state
+    const [expandedInput, setExpandedInput] = useState<string | null>(null)
 
     // Compatibility score for each job
     const [matchScores, setMatchScores] = useState<Record<string, number>>({})
@@ -370,11 +362,12 @@ export default function JobSearch() {
 
             {/* Search Bar */}
             <Card className="mb-8 border border-white/10 bg-white/5">
-                <div className="flex flex-col md:flex-row gap-4">
-                    <div className="w-full md:w-48 shrink-0">
+                <div className="flex flex-col md:flex-row gap-3 md:gap-4 items-stretch md:items-center">
+                    {/* Country Selector */}
+                    <div className="w-full md:w-36 lg:w-40 shrink-0">
                         <div className="relative">
                             <select
-                                className="w-full px-4 py-3 rounded-2xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-white/30 appearance-none cursor-pointer hover:bg-white/10 transition-colors"
+                                className="w-full px-3 md:px-4 py-2.5 md:py-3 rounded-xl md:rounded-2xl bg-white/5 border border-white/10 text-white text-sm md:text-base focus:outline-none focus:border-white/30 appearance-none cursor-pointer hover:bg-white/10 transition-colors"
                                 value={filters.country}
                                 onChange={(e) => setFilters({ ...filters, country: e.target.value })}
                             >
@@ -382,27 +375,46 @@ export default function JobSearch() {
                                     <option key={c.code} value={c.code} className="bg-black text-white">{c.name}</option>
                                 ))}
                             </select>
+                            <Globe className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 pointer-events-none" />
                         </div>
                     </div>
-                    <div className="flex-1">
+                    
+                    {/* Job Title/Keywords Input - Expandable */}
+                    <div className={`
+                        relative transition-all duration-300 ease-out
+                        ${expandedInput === 'query' ? 'flex-1 order-1 md:order-2' : 'flex-1'}
+                    `}>
                         <Input
                             placeholder="Job title, keywords, or company"
                             icon={<Search className="w-5 h-5" />}
                             value={filters.query}
+                            onFocus={() => setExpandedInput('query')}
+                            onBlur={() => setExpandedInput(null)}
                             onChange={(e) => setFilters({ ...filters, query: e.target.value })}
                             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                            className="w-full"
                         />
                     </div>
-                    <div className="flex-1">
+                    
+                    {/* Location Input - Expandable */}
+                    <div className={`
+                        relative transition-all duration-300 ease-out
+                        ${expandedInput === 'location' ? 'flex-1 order-2 md:order-3' : 'flex-1'}
+                    `}>
                         <Input
                             placeholder="City, state, or remote"
                             icon={<MapPin className="w-5 h-5" />}
                             value={filters.location}
+                            onFocus={() => setExpandedInput('location')}
+                            onBlur={() => setExpandedInput(null)}
                             onChange={(e) => setFilters({ ...filters, location: e.target.value })}
                             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                            className="w-full"
                         />
                     </div>
-                    <div className="flex gap-2 items-center">
+                    
+                    {/* Action Buttons */}
+                    <div className="flex gap-2 items-center order-3 md:order-4 shrink-0">
                         {preferences?.use_global_filters && (
                             <div className="hidden lg:flex items-center px-4 py-3 rounded-2xl bg-white/10 border border-white/20 text-[10px] text-white font-medium uppercase tracking-widest whitespace-nowrap">
                                 <Settings className="w-3 h-3 mr-2 text-white/60" />

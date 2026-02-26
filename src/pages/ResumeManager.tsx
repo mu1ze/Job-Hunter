@@ -250,10 +250,10 @@ export default function ResumeManager() {
         <div className="animate-fade-in relative font-['General_Sans',_sans-serif]">
             {/* Analysis Modal Removed - Redirecting to Tracker instead */}
 
-            <div className="mb-6 text-center lg:text-left flex flex-col md:flex-row md:items-end justify-between gap-4">
-                <div>
-                    <h1 className="font-medium text-3xl text-white mb-2 tracking-tight">Resume Manager</h1>
-                    <p className="text-white/60">
+            <div className="mb-6 text-center md:text-left flex flex-col md:flex-row md:items-end justify-between gap-4">
+                <div className="text-left">
+                    <h1 className="font-medium text-2xl md:text-3xl text-white mb-2 tracking-tight">Resume Manager</h1>
+                    <p className="text-white/60 text-sm md:text-base">
                         Upload and manage your resumes. We'll extract skills and experience for better matching.
                     </p>
                 </div>
@@ -262,7 +262,7 @@ export default function ResumeManager() {
                     <Button
                         onClick={handleAnalyzeCareer}
                         disabled={isAnalyzing}
-                        className="bg-white text-black hover:bg-white/90 border-none shadow-lg shadow-white/10 disabled:opacity-70 disabled:cursor-not-allowed group rounded-full"
+                        className="bg-white text-black hover:bg-white/90 border-none shadow-lg shadow-white/10 disabled:opacity-70 disabled:cursor-not-allowed group rounded-full w-full md:w-auto text-sm md:text-base"
                     >
                         {isAnalyzing ? (
                             <>
@@ -271,7 +271,7 @@ export default function ResumeManager() {
                             </>
                         ) : (
                             <>
-                                <Sparkles className="w-5 h-5 mr-2 text-black/60 group-hover:text-black" />
+                                <Sparkles className="w-4 h-4 md:w-5 md:h-5 mr-2 text-black/60 group-hover:text-black" />
                                 Analyze Career Path
                             </>
                         )}
@@ -279,10 +279,10 @@ export default function ResumeManager() {
                 )}
             </div>
 
-            <div className="grid lg:grid-cols-3 gap-6">
+            <div className="grid md:grid-cols-3 gap-6">
                 {/* Left Column: Upload & List */}
-                <div className="lg:col-span-1 space-y-4">
-                    <Card className="p-6 border border-white/10 bg-white/5">
+                <div className="md:col-span-1 space-y-4">
+                    <Card className="p-4 md:p-6 border border-white/10 bg-white/5">
                         <h3 className="font-medium text-lg text-white mb-4">Upload New</h3>
                         <div
                             onDragEnter={handleDrag}
@@ -291,7 +291,7 @@ export default function ResumeManager() {
                             onDrop={handleDrop}
                             onClick={() => fileInputRef.current?.click()}
                             className={`
-                relative border-2 border-dashed rounded-xl p-8 text-center transition-all cursor-pointer
+                relative border-2 border-dashed rounded-xl p-6 md:p-8 text-center transition-all cursor-pointer
                 ${dragActive ? 'border-white bg-white/10' : 'border-white/10 hover:border-white/20 bg-white/5'}
               `}
                         >
@@ -304,14 +304,14 @@ export default function ResumeManager() {
                             />
                             {isUploading ? (
                                 <div className="space-y-3">
-                                    <div className="w-12 h-12 rounded-full border-2 border-white/50 border-t-transparent animate-spin mx-auto" />
+                                    <div className="w-10 h-10 md:w-12 md:h-12 rounded-full border-2 border-white/50 border-t-transparent animate-spin mx-auto" />
                                     <p className="text-white text-sm font-medium">Processing... {uploadProgress}%</p>
                                 </div>
                             ) : (
                                 <div className="space-y-2">
-                                    <Upload className="w-10 h-10 text-white/40 mx-auto" />
-                                    <p className="text-white font-medium">Drop Resume or Click</p>
-                                    <p className="text-white/40 text-xs text-nowrap">PDF or DOCX allowed</p>
+                                    <Upload className="w-8 h-8 md:w-10 md:h-10 text-white/40 mx-auto" />
+                                    <p className="text-white font-medium text-sm md:text-base">Drop Resume or Click</p>
+                                    <p className="text-white/40 text-xs">PDF or DOCX allowed</p>
                                 </div>
                             )}
                         </div>
@@ -323,9 +323,9 @@ export default function ResumeManager() {
                         )}
                     </Card>
 
-                    <Card className="p-6 border border-white/10 bg-white/5">
+                    <Card className="p-4 md:p-6 border border-white/10 bg-white/5 overflow-hidden">
                         <h3 className="font-medium text-lg text-white mb-4">Your Resumes</h3>
-                        <div className="space-y-2">
+                        <div className="space-y-2 max-h-[300px] overflow-y-auto -mx-2 px-2">
                             {resumes.length === 0 ? (
                                 <p className="text-white/40 text-sm text-center py-4 italic">No resumes uploaded yet</p>
                             ) : (
@@ -338,14 +338,14 @@ export default function ResumeManager() {
                     `}
                                         onClick={() => handleSetPrimary(resume.id)}
                                     >
-                                        <div className="flex items-center gap-3 overflow-hidden">
+                                        <div className="flex items-center gap-3 overflow-hidden min-w-0">
                                             <FileText className={`w-5 h-5 shrink-0 ${resume.is_primary ? 'text-black' : 'text-white/40'}`} />
                                             <div className="min-w-0">
                                                 <p className="text-sm font-medium truncate">{resume.original_filename}</p>
                                                 <p className={`text-[10px] ${resume.is_primary ? 'text-black/60' : 'text-white/40'}`}>Uploaded {new Date(resume.created_at || '').toLocaleDateString()}</p>
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation()
@@ -364,16 +364,16 @@ export default function ResumeManager() {
                 </div>
 
                 {/* Right Column: Details Rendering */}
-                <div className="lg:col-span-2 space-y-6">
+                <div className="md:col-span-2 space-y-4 md:space-y-6">
                     {currentResume ? (
                         <>
                             {/* Summary Card */}
-                            <Card className="p-6 border border-white/10 bg-white/5">
-                                <div className="flex items-start gap-4">
-                                    <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center shrink-0 border border-white/5">
-                                        <Sparkles className="w-6 h-6 text-white" />
+                            <Card className="p-4 md:p-6 border border-white/10 bg-white/5">
+                                <div className="flex items-start gap-3 md:gap-4">
+                                    <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-white/10 flex items-center justify-center shrink-0 border border-white/5">
+                                        <Sparkles className="w-5 h-5 md:w-6 md:h-6 text-white" />
                                     </div>
-                                    <div>
+                                    <div className="min-w-0">
                                         <h3 className="text-lg font-medium text-white mb-2">AI Insight Summary</h3>
                                         <p className="text-white/60 text-sm leading-relaxed">{currentResume.summary}</p>
                                     </div>
@@ -381,8 +381,8 @@ export default function ResumeManager() {
                             </Card>
 
                             {/* Skills Card */}
-                            <Card className="p-6 border border-white/10 bg-white/5">
-                                <div className="flex items-center gap-2 mb-6">
+                            <Card className="p-4 md:p-6 border border-white/10 bg-white/5">
+                                <div className="flex items-center gap-2 mb-4 md:mb-6">
                                     <Code className="w-5 h-5 text-white/60" />
                                     <h3 className="font-medium text-lg text-white">Core Skills Identified</h3>
                                 </div>
@@ -396,17 +396,17 @@ export default function ResumeManager() {
                             </Card>
 
                             {/* Experience Card */}
-                            <Card className="p-6 border border-white/10 bg-white/5">
-                                <div className="flex items-center gap-2 mb-6">
+                            <Card className="p-4 md:p-6 border border-white/10 bg-white/5">
+                                <div className="flex items-center gap-2 mb-4 md:mb-6">
                                     <Briefcase className="w-5 h-5 text-white/60" />
                                     <h3 className="font-medium text-lg text-white">Work Experience</h3>
                                 </div>
-                                <div className="space-y-8">
+                                <div className="space-y-6 md:space-y-8">
                                     {currentResume.work_experience?.map((exp, i) => (
-                                        <div key={i} className="relative pl-6 border-l border-white/10 last:border-transparent">
+                                        <div key={i} className="relative pl-4 md:pl-6 border-l border-white/10 last:border-transparent">
                                             <div className="absolute -left-[5px] top-2 w-2.5 h-2.5 rounded-full bg-white/20 ring-4 ring-black" />
-                                            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-2 mb-3">
-                                                <div>
+                                            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-3">
+                                                <div className="min-w-0">
                                                     <h4 className="font-medium text-white text-lg leading-tight">{exp.title}</h4>
                                                     <p className="text-white/60 font-medium">{exp.company}</p>
                                                 </div>
@@ -431,12 +431,12 @@ export default function ResumeManager() {
                             </Card>
 
                             {/* Education Card */}
-                            <Card className="p-6 border border-white/10 bg-white/5">
-                                <div className="flex items-center gap-2 mb-6">
+                            <Card className="p-4 md:p-6 border border-white/10 bg-white/5">
+                                <div className="flex items-center gap-2 mb-4 md:mb-6">
                                     <GraduationCap className="w-5 h-5 text-white/60" />
                                     <h3 className="font-medium text-lg text-white">Education</h3>
                                 </div>
-                                <div className="grid md:grid-cols-2 gap-4">
+                                <div className="grid sm:grid-cols-2 gap-4">
                                     {currentResume.education?.map((edu, i) => (
                                         <div key={i} className="p-4 rounded-xl bg-white/5 border border-white/10">
                                             <h4 className="font-medium text-white leading-tight">{edu.degree}</h4>
@@ -448,8 +448,8 @@ export default function ResumeManager() {
                             </Card>
                         </>
                     ) : (
-                        <div className="h-full min-h-[400px] flex flex-col items-center justify-center border-2 border-dashed border-white/10 rounded-3xl p-12 text-center opacity-70 bg-white/5">
-                            <FileUp className="w-16 h-16 text-white/20 mb-4" />
+                        <div className="h-full min-h-[300px] md:min-h-[400px] flex flex-col items-center justify-center border-2 border-dashed border-white/10 rounded-3xl p-6 md:p-12 text-center opacity-70 bg-white/5">
+                            <FileUp className="w-12 h-12 md:w-16 md:h-16 text-white/20 mb-4" />
                             <h3 className="text-xl font-medium text-white mb-2">No Resume Selected</h3>
                             <p className="text-white/50 max-w-sm">
                                 Upload a resume to see your parsed profile information and start tailoring your applications.
