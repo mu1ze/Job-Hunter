@@ -1,4 +1,4 @@
-import { Outlet } from 'react-router-dom'
+import { Outlet, Link } from 'react-router-dom'
 import Navbar from './Navbar'
 
 export default function MainLayout() {
@@ -12,11 +12,27 @@ export default function MainLayout() {
 
             <Navbar />
 
-            <main className="relative z-10 pt-24 pb-12 px-4 sm:px-6 lg:px-8">
-                <div className="max-w-7xl mx-auto">
-                    <Outlet />
-                </div>
-            </main>
+            <div className="relative z-10 flex flex-col min-h-screen pt-24">
+                <main className="flex-1 pb-12 px-4 sm:px-6 lg:px-8">
+                    <div className="max-w-7xl mx-auto">
+                        <Outlet />
+                    </div>
+                </main>
+
+                <footer className="border-t border-white/10 px-4 sm:px-6 lg:px-8 py-4 text-xs text-white/40">
+                    <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+                        <span>© {new Date().getFullYear()} JobHunter. All rights reserved.</span>
+                        <div className="flex items-center gap-4">
+                            <Link
+                                to="/docs"
+                                className="hover:text-white transition-colors underline underline-offset-4 decoration-white/30 hover:decoration-white"
+                            >
+                                Product walkthrough & docs
+                            </Link>
+                        </div>
+                    </div>
+                </footer>
+            </div>
         </div>
     )
 }

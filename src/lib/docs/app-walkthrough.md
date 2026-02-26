@@ -1,469 +1,314 @@
-## JobHunter App Walkthrough
+# Welcome to JobHunter
 
-This guide gives a **deeper, practical walkthrough** of every major page in JobHunter: what it’s for, how to use it step‑by‑step, and how pages connect to each other.
-
----
-
-## Big picture: how the app fits together
-
-- **Auth + Onboarding**: create your account, verify email with a code, and set preferences so the rest of the app can personalize results.
-- **Resume Manager**: upload and parse resumes; select one primary resume that powers AI search and document generation.
-- **Job Search + Deep Match**: discover roles from external sources and save promising jobs into your personal pipeline.
-- **Application Tracker**: manage everything you’ve saved/applied in a Kanban board and track outcomes over time.
-- **AI Document Generator**: generate ATS‑optimized resumes and cover letters for specific jobs.
-- **Alerts + Analytics + Profile**: stay informed with alerts, learn from analytics, and keep your profile up to date.
+This guide walks you through everything JobHunter offers — from setting up your account to landing your next role. Think of it as your personal job search assistant.
 
 ---
 
-## Landing (`/`)
+## How JobHunter Works
 
-### Purpose
+Here's the big picture of what you can do with JobHunter:
 
-- **High-level overview** of what JobHunter does and why you’d use it.
-- Direct entry points into **signup / signin**.
+- **Create Your Account**: Sign up, verify your email, and tell us a bit about yourself.
+- **Upload Your Resume**: We'll analyze it to understand your skills and experience.
+- **Search for Jobs**: Browse thousands of job listings or let AI find the best matches for you.
+- **Track Your Applications**: See all your opportunities in one place, from "Saved" to "Offer."
+- **Generate Tailored Applications**: Create resumes and cover letters optimized for each job.
+- **Get Notified**: Set up alerts so you never miss a new opportunity.
 
-### How to use
-
-- **New users**:
-  - Read the short overview and feature list to understand the value.
-  - Click the primary **Get Started** / **Sign Up** call‑to‑action to go to `Auth`.
-- **Returning users**:
-  - Use the navigation to jump directly to `Auth` or other public pages (if surfaced).
+Let's dive into each part in more detail.
 
 ---
 
-## Auth (`/auth`)
+## Getting Started
 
-### Purpose
+### Creating Your Account
 
-- Create an account or sign in to access the dashboard and protected pages.
+1. Click **Sign Up** on the homepage.
+2. Enter your name, email address, and create a password.
+3. Click **Create Account**.
+4. Check your email for a verification code (it might be in your spam folder).
+5. Enter the 6-digit code to verify your email.
+6. Complete your profile setup — this helps us show you relevant jobs.
 
-### Signup flow (email + password + OTP code)
+**Tip**: If you don't receive the email, click **Resend Code** or check your spam folder.
 
-- **Step 1 – Fill in details**
-  - **Full Name** – used to personalize your profile and some docs.
-  - **Email** – must be a valid inbox you can access immediately.
-  - **Password** – standard password field with show/hide toggle.
-- **Step 2 – Submit**
-  - Click **Create Account**.
-  - The app calls Supabase `auth.signUp` and triggers a **Confirm signup** email.
-- **Step 3 – Verify email with code**
-  - After signup, the screen switches into **Verify your email** mode.
-  - Check your inbox for an email from your JobHunter project (via Supabase + Resend).
-  - That email contains a **6‑digit OTP code** (not just a link).
-  - Enter the code into the **Verification Code** input and click **Verify Email**.
-  - The app calls `supabase.auth.verifyOtp({ email, token, type: 'signup' })` and, on success:
-    - Creates/loads your profile.
-    - Redirects you to `Onboarding` (first login) or `Dashboard`.
-- **Resend code**
-  - If the code expires or you can’t find the email:
-    - Click **Resend code**.
-    - The app calls `supabase.auth.resend({ type: 'signup', email })` and shows a toast.
+### Setting Up Your Profile
 
-### Signin flow
+After verification, you'll answer a few questions about:
 
-- Enter the email + password you used at signup.
-- Click **Sign In**.
-- On success:
-  - You’re redirected based on your existing data (onboarding vs dashboard).
-- On failure:
-  - You’ll see a toast explaining the issue (invalid credentials, email not verified, etc.).
+- **Your Location**: Where you're based or willing to work.
+- **Target Roles**: The job titles you're interested in (e.g., Software Engineer, Product Manager).
+- **Preferred Industries**: Tech, Finance, Healthcare, etc.
+- **Work Style**: Remote, hybrid, or onsite.
+- **Salary Range**: Your minimum and ideal salary expectations.
 
-### Tips & edge cases
-
-- **Code not arriving**:
-  - Check spam/junk.
-  - Use **Resend code**.
-- **Wrong code**:
-  - You’ll see a toast; request a new code and try again.
+These preferences help JobHunter show you the most relevant opportunities.
 
 ---
 
-## Onboarding (`/onboarding`)
+## Your Dashboard
 
-### Purpose
+Your dashboard is your home base. Here's what you'll see:
 
-- Collect enough context about **who you are** and **what you’re looking for** so:
-  - Job search filters can default intelligently.
-  - Alerts target the right roles.
-  - Deep Match has a better starting point.
+- **Quick Stats**: How many jobs you've saved, applied to, and interviews scheduled.
+- **Recent Activity**: New alerts, recent documents, and updates.
+- **Quick Actions**: Buttons to jump into job search, resume manager, or document generator.
 
-### Step‑by‑step
-
-1. **Basic Info**
-   - **Your Full Name** – stored in `user_profiles.full_name`.
-   - **Your Location** – stored in `user_profiles.location` and used as a default location filter.
-2. **Job Preferences**
-   - **Target Roles** – multi‑select from a curated list (e.g. Software Engineer, Product Manager).
-   - **Preferred Industries** – optional tags like Technology, Finance, Healthcare.
-   - **Work Preference** – remote, hybrid, onsite, or any.
-3. **Salary Range**
-   - **Minimum / Maximum** – optional fields used as default salary filters.
-   - A **summary card** shows all preferences before you save.
-
-### Completion behavior
-
-- Clicking **Complete Setup**:
-  - Updates `user_profiles` and `job_preferences`.
-  - Redirects to **Dashboard**.
-
-### Best practices
-
-- Start with **1–3 target roles** for better signal.
-- Set location and remote preference realistically; JobHunter will use them for global filters.
+**When to visit**: Start here at the beginning of each session to decide what to work on next.
 
 ---
 
-## Dashboard (`/dashboard`)
+## Finding Jobs
 
-### Purpose
+### Basic Search
 
-- Single place to **see how your search is going** and jump into key workflows.
+On the Jobs page, you can filter by:
 
-### Typical usage
+- **Keywords**: Job title, skills, or company name.
+- **Location**: City, state, or "Remote."
+- **Distance**: How far from your location.
+- **Salary**: Minimum pay you're willing to accept.
+- **Sort By**: Most relevant, newest, or highest paying.
 
-- Check:
-  - **Total saved jobs** vs **applied/interviewing/offers**.
-  - **Recent activity** (new alerts, new analyses, recent ATS documents).
-- Use quick links to:
-  - Go to `Job Search` to find new roles.
-  - Jump into `Tracker` to update pipeline.
-  - Open `Resume Manager` or `AI Document Generator` for content work.
+Click **Search** to see results. Each job card shows the title, company, location, salary, and when it was posted.
 
-### When to visit
+### AI Deep Match
 
-- At the start of a session:
-  - Decide whether to **hunt for new roles**, **follow up** on existing ones, or **improve your profile/docs**.
+Our AI can find jobs that match your resume even better:
 
----
+1. Make sure you've uploaded a resume and set it as **Primary**.
+2. Click **AI Deep Match** instead of regular Search.
+3. Our AI analyzes your background and finds jobs where you're a strong fit.
+4. You'll see a **Match %** score on each job card — higher means a better fit.
 
-## Job Search (`/jobs`)
+**Tip**: Use Deep Match when you want high-quality leads. Use regular search to discover more opportunities.
 
-### Purpose
+### Saving Jobs
 
-- Discover and evaluate live jobs from external APIs (e.g. Adzuna) with optional AI‑assisted matching.
+- Click the **bookmark icon** on any job to save it.
+- Saved jobs appear in your Application Tracker.
+- You can save up to 100 jobs — if you hit the limit, remove ones you're no longer interested in.
 
-### Filters & controls
+### Researching Companies
 
-- **Country** – where to search (US, CA, GB, etc.).
-- **Query** – job title / keywords / company.
-- **Location** – city, state, or remote pattern.
-- **Radius** – distance around the chosen location.
-- **Salary Min** – minimum acceptable salary.
-- **Sort by** – relevance, date, or salary.
-- **Remote Only** – restrict to remote roles where possible.
-- When **global filters** are enabled in preferences:
-  - Default location and salary min may be prefilled.
+Interested in a specific company? Click **Research Company with AI** on any job to get:
 
-### Two main search modes
+- What it's like to work there.
+- Recent news or developments.
+- Interview process insights.
+- Potential red flags.
 
-- **Standard Search**
-  - Click **Search**.
-  - Results are fetched from the Adzuna‑backed Edge Function and cached in localStorage for a few minutes.
-- **AI Deep Match**
-  - Requires a **primary resume** in `Resume Manager`.
-  - Click **AI Deep Match**:
-    - The app summarizes your resume and preferences.
-    - A Supabase Edge Function uses Groq to generate smart queries and fetch multiple result sets.
-    - Jobs are deduplicated and **ranked by semantic fit** (`__match_score`).
-  - The UI shows a **Match % badge** on cards where scores exist.
+### Applying
 
-### Job cards
-
-- Show:
-  - Title, company, location, salary range, posted date, key skills, optional remote flag.
-  - An optional **Match %** (for Deep Match).
-- **Saving jobs**:
-  - Click the bookmark icon to save or unsave.
-  - There is a **limit of 100 saved jobs**; hitting it shows a global toast with guidance to prune older roles.
-  - Saved jobs flow into:
-    - `Application Tracker` (as items in the Kanban board).
-    - `Document Generator` (as target jobs for ATS‑optimized docs).
-
-### Detail panel (right side)
-
-- When you select a job:
-  - The panel shows:
-    - All metadata (location, salary, skills).
-    - Full description.
-    - Quick badges (e.g. Remote).
-  - Buttons:
-    - **Save / Saved** – toggles saved state.
-    - **Apply** – opens the job’s URL in a new tab.
-    - **Research Company with AI** – opens a modal with a Perplexity‑powered report (culture, news, interview process, red flags).
-
-### Best practices
-
-- Use **Deep Match** for signal; use **standard search** to widen the funnel.
-- Keep only jobs you’d realistically apply to; the 100‑job limit prevents overwhelming the tracker.
+- Click **Apply** to open the job posting in a new tab.
+- Use our **Document Generator** to create a tailored resume or cover letter first.
 
 ---
 
-## Job Details (`/jobs/:id`)
+## Application Tracker
 
-### Purpose
+Think of the tracker as your job search command center — like a Kanban board for your job hunt.
 
-- Manage everything about a **single saved job** in more depth.
+### Pipeline Stages
 
-### What you can do
+- **Saved**: Jobs you found interesting but haven't applied to yet.
+- **Applied**: Jobs where you've submitted an application.
+- **Interviewing**: Jobs where you've scheduled or completed interviews.
+- **Offer**: Jobs where you received an offer.
+- **Rejected**: Jobs that didn't work out.
 
-- View:
-  - Full description, requirements, and metadata from the save event.
-  - Any **generated documents** (tailored resumes, cover letters) linked to this job.
-- Manage:
-  - Notes and custom fields (if configured).
-  - Delete documents that are outdated or redundant.
-  - Remove the job entirely (which also affects the tracker and generator references).
+### Moving Jobs Along
 
-### When to use
+- **Drag and drop** a job card from one column to another to update its status.
+- When you move a job to "Applied," "Interviewing," or "Offer," we automatically track the date.
+- This helps you see how your search is progressing over time.
 
-- After generating docs or progressing deeply in a specific process and you need a job‑centric view instead of the broader tracker.
+### Stats & Insights
 
----
+At the top of the tracker, you'll see:
 
-## Application Tracker (`/tracker`)
+- Total saved jobs.
+- Count in each stage.
+- Your estimated response rate (interviews + offers ÷ total applications).
 
-### Purpose
+### Career Development Tab
 
-- Give you a **visual pipeline** for your search, similar to a sales CRM, across all saved roles.
+Track your long-term goals:
 
-### Columns & statuses
+- Roles you want to grow into.
+- Certifications you're working on.
+- Learning resources and courses.
 
-- **Saved** – interesting but not yet applied.
-- **Applied** – you’ve submitted an application.
-- **Interviewing** – you’ve booked or completed interviews.
-- **Offer** – you have an offer on the table.
-- **Rejected** – the opportunity is closed.
+These often come from suggestions in your AI-generated documents.
 
-### Using the Kanban board
+### Analysis History
 
-- Drag cards between columns to update status.
-- When certain statuses are set, the app:
-  - Automatically updates date fields (e.g. `applied_date`, `interview_date`, `offer_date`, `rejected_date`).
-  - Keeps historical data available for analytics.
+When you analyze your resume, the insights appear here:
 
-### Stats bar
-
-- Shows:
-  - Total saved jobs.
-  - Count per status (Saved, Applied, Interviewing, Offers, Rejected).
-  - An approximate **response rate**: (interviewing + offers) / total.
-
-### Additional tabs
-
-- **Career Development**
-  - Manage:
-    - Target roles you’d like to grow into.
-    - Certifications or learning resources you’ve saved.
-  - Items here often come from:
-    - The **Document Generator’s** improvement plan.
-    - Manual additions.
-- **Analysis History**
-  - List of past **career analyses** generated from your resumes.
-  - Each entry includes:
-    - Readiness score.
-    - Recommended roles.
-    - Skill gaps.
-    - Market insights plus links to external resources.
-
-### Best practices
-
-- Update statuses **as soon as something changes** (applied, interview scheduled, offer, rejection).
-- Use **Career Development** to track medium‑term goals, not just immediate applications.
+- Readiness score for your target roles.
+- Skill gaps to address.
+- Recommended next steps.
 
 ---
 
-## Resume Manager (`/resume`)
+## Resume Manager
 
-### Purpose
+Your resume is the foundation of your JobHunter experience. Here's how to make the most of it.
 
-- Central hub for **resume ingestion, parsing, and AI understanding** of your profile.
+### Uploading Your Resume
 
-### Uploading resumes
+1. Go to Resume Manager.
+2. Drag and drop your resume file (PDF or DOCX).
+3. We'll extract your skills, experience, and education using AI.
 
-- Drag & drop or click to upload **PDF or DOCX**.
-- Behind the scenes:
-  - Files are stored in Supabase Storage (`resumes` bucket).
-  - PDF text is extracted in the browser (via pdf.js) or plain text is parsed directly.
-  - The raw text is sent to a Supabase Edge Function (`parse-resume`) for AI parsing.
-  - Parsed output (summary, skills, experience, education, certifications) is saved to the `resumes` table.
+### Managing Multiple Resumes
 
-### Managing multiple resumes
+- Upload as many resumes as you like.
+- Click **Set as Primary** on the one you want to use for AI matching and document generation.
+- Delete old versions you no longer need.
 
-- The left panel lists all uploaded resumes with:
-  - Original filename.
-  - Upload date.
-  - A primary badge (for the one currently in use).
-- Actions:
-  - Click a resume to make it **primary** (used for Deep Match + document generation).
-  - Delete a resume (removes Storage object + DB record).
+### What You'll See
 
-### Detailed view
+After upload, you'll get:
 
-- The right side shows:
-  - **AI Insight Summary** – a natural language summary of your profile.
-  - **Core Skills** – extracted skills rendered as chips.
-  - **Work Experience** – timeline with roles, companies, dates, descriptions, achievements.
-  - **Education** – institutions, degrees, and date ranges.
+- **AI Summary**: A plain-English overview of your background.
+- **Skills**: Extracted skills shown as easy-to-read chips.
+- **Experience**: Your work history with dates and key achievements.
+- **Education**: Degrees and certifications.
 
-### Career analysis
+### Analyzing Your Career
 
-- Button: **Analyze Career Path**.
-- Uses the current resume and your profile to:
-  - Call an analysis Edge Function.
-  - Generate:
-    - Recommended roles.
-    - Skill gaps.
-    - Readiness score.
-    - Market / certification suggestions (with help from Perplexity).
-  - Save the analysis and redirect to `Tracker` → Analysis tab.
+Click **Analyze Career Path** to get:
 
-### Best practices
-
-- Keep 1–2 **high‑quality, up‑to‑date** resumes.
-- Set the version that best represents your current direction as **primary**.
+- Roles that match your background.
+- Skills gaps to work on.
+- A readiness score.
+- Suggestions for certifications or experience.
 
 ---
 
-## AI Document Generator (`/generate`)
+## AI Document Generator
 
-### Purpose
+This is where JobHunter really shines — creating job-specific applications in minutes.
 
-- Turn your resume + job description into **tailored, ATS‑optimized documents** (resumes and cover letters).
+### What You Need First
 
-### Inputs you need ready
+- A **primary resume** uploaded in Resume Manager.
+- A **saved job** from Job Search (or you can paste a job description manually).
 
-- A **primary resume** (from `Resume Manager`).
-- Either:
-  - A **saved job** (from `Job Search` / `Tracker`).
-  - Or a **custom job description** (pasted text, optionally with URL).
+### Creating a Document
 
-### Core workflow
+1. **Choose Type**: Resume or Cover Letter.
+2. **Select Job**: Pick from your saved jobs or paste a job description.
+3. **Generate**: Our AI creates a tailored document optimized for that role.
+4. **Review**: Check the ATS score, see which keywords matched, and read the improvement suggestions.
+5. **Export**: Copy to clipboard, download as text, or save it directly to that job.
 
-1. **Choose Document Type**
-   - `Resume` – a tailored resume for this specific job.
-   - `Cover Letter` – a full letter referencing your background and the role.
-2. **Choose Target Job**
-   - **Saved Job** mode:
-     - Pick a job from the dropdown; skills, company, and description are pulled automatically.
-   - **Custom / URL** mode:
-     - Provide title, company (optional), job URL (optional), and the full pasted job description.
-3. **Generate**
-   - Click **Generate**.
-   - The Edge Function:
-     - Combines `resumeData`, `jobDescription`, and `documentType`.
-     - Generates the document via Groq.
-     - Calculates an **ATS score** and a detailed breakdown + improvement plan.
-4. **Review & iterate**
-   - Inspect:
-     - ATS score, breakdown, matched/missing keywords.
-     - Improvement plan (certificates + stepping‑stone roles).
-   - Optionally click **Re‑improve with Keywords** to regenerate using missing terms.
-5. **Save / export**
-   - **Copy** to clipboard.
-   - **Download** as a `.txt` file.
-   - **Save to Job** (saved‑job mode only):
-     - Attaches the doc to the job in `generated_documents`.
-     - Limit: **2 documents per type per job** to avoid clutter.
+### ATS Score
 
-### Best practices
+ATS (Applicant Tracking System) scores tell you how well your document will pass through employer software:
 
-- Always **skim the generated text** and make light edits before sending to employers.
-- Use the improvement plan to:
-  - Add certificates and roles to `Tracker` → Career Development.
-  - Inform what you study or practice between applications.
+- **70%+**: Good — likely to pass through.
+- **80%+**: Great — strong chance of being seen.
+- **90%+**: Excellent — highly optimized.
+
+### Improvement Suggestions
+
+If your score could be higher, we'll tell you:
+
+- Keywords missing from your application.
+- Certifications to consider.
+- Experience gaps to address.
+
+Use these suggestions to improve over time.
+
+**Tip**: Always review and lightly edit AI-generated documents before submitting. They should sound like you.
 
 ---
 
-## Alerts Manager (`/alerts`)
+## Alerts
 
-### Purpose
+Let JobHunter do the searching so you don't have to.
 
-- Let the system **watch the market for you** and notify you of new opportunities that match your criteria.
+### Setting Up Alerts
 
-### How alerts work
+1. Go to Alerts Manager.
+2. Choose what you want to be notified about:
+   - Keywords (e.g., "Product Manager").
+   - Location.
+   - Salary range.
+3. Pick how often to be notified (daily, weekly).
+4. Turn the alert **On**.
 
-- Each alert stores:
-  - Keywords, location, filters.
-  - Frequency / schedule (e.g. daily).
-  - Active vs paused state.
-- A Supabase scheduled Edge Function uses these definitions to:
-  - Run searches on a schedule.
-  - Trigger outbound notifications (e.g. email) when new matches are found.
+We'll email you when new jobs match your criteria.
 
-### Using the UI
+### Managing Alerts
 
-- **Create an alert**:
-  - Choose query, location, frequency, and any additional filters.
-  - Save the alert; it appears in the list.
-- **Manage alerts**:
-  - Toggle active/paused to control delivery.
-  - Edit an existing alert’s configuration.
-  - Delete alerts you no longer need.
+- **Pause** alerts you're not currently interested in.
+- **Edit** criteria as your search evolves.
+- **Delete** alerts you no longer need.
 
-### Best practices
-
-- Start with **1–3 focused alerts** aligned to your top target roles.
-- Use alerts as a **safety net**, not your only discovery mechanism.
+**Tip**: Start with 2-3 focused alerts for your top roles. Too many alerts can be overwhelming.
 
 ---
 
-## Analytics (`/analytics`)
+## Analytics
 
-### Purpose
+See the bigger picture of your job search.
 
-- Turn your job search activity into **insights and feedback loops**.
+### What You'll Learn
 
-### Typical insights (implementation‑dependent)
+- **Application Volume**: How many jobs you've applied to over time.
+- **Conversion Rates**: How often applications turn into interviews or offers.
+- **Top Performers**: Which roles, locations, or job sources lead to the most success.
 
-- Applications per stage over time.
-- Conversion rates:
-  - Saved → Applied.
-  - Applied → Interview.
-  - Interview → Offer.
-- Top roles, locations, and sources yielding interviews/offers.
+### Using This Data
 
-### How to use
+Ask yourself:
 
-- Identify:
-  - Which **roles** or **locations** convert best.
-  - Whether you should:
-    - Apply more broadly.
-    - Improve documents.
-    - Focus on specific niches.
+- Am I applying to enough jobs?
+- Which roles are getting traction?
+- Should I adjust my focus (location, salary, industry)?
+
+Check Analytics weekly to refine your strategy.
 
 ---
 
-## Profile (`/profile`)
+## Profile
 
-### Purpose
+Keep your basic information up to date:
 
-- Keep your **core user information** consistent and up to date.
-
-### Fields (may vary by implementation)
-
-- Name, email.
+- Name and email.
 - Location.
-- Phone.
-- Links: LinkedIn, personal site / portfolio.
+- Phone number (optional).
+- LinkedIn profile and personal website.
 
-### How it’s used elsewhere
+This information:
 
-- Profile data can:
-  - Pre‑fill sections in generated documents.
-  - Feed into analytics and personalization.
-  - Be used for future features (e.g. referrals, network insights).
+- Pre-fills forms in generated documents.
+- Helps us personalize your job recommendations.
+- Makes applying easier.
 
 ---
 
-## Suggested first‑time flow for users
+## Getting Started: Your First Week
 
-1. **Create account + verify email** on `Auth`.
-2. Complete **Onboarding** with honest preferences.
-3. Upload at least one resume and set a **primary** in `Resume Manager`.
-4. Use **Job Search** + **Deep Match** to find ~10–20 strong roles and **save** them.
-5. Move through **Application Tracker** as you apply and hear back.
-6. For top roles, use **AI Document Generator** to produce tailored resumes/cover letters.
-7. Turn on a couple of **Alerts** to catch new postings.
-8. Revisit **Analytics** weekly to adjust your strategy.
+Here's a suggested flow to get the most out of JobHunter:
 
+1. **Day 1**: Create your account and complete your profile setup.
+2. **Day 2**: Upload your resume and set it as primary.
+3. **Day 3-4**: Use Job Search to find 10-15 jobs you're interested in and save them.
+4. **Day 5**: Generate tailored resumes for your top 3-5 jobs.
+5. **Week 2**: Set up 2-3 alerts for ongoing monitoring. Start tracking applications in the tracker.
+6. **Ongoing**: Check your dashboard and analytics weekly to see what's working.
+
+---
+
+## Need Help?
+
+If you run into any issues or have questions:
+
+- Check this guide for step-by-step instructions.
+- Reach out to our support team — we're happy to help.
+
+Good luck with your job search!

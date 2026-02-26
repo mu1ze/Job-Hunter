@@ -1,9 +1,73 @@
 import { useState, useEffect } from 'react'
-import { Plus, Trash2, Edit2, Bell, BellOff, Mail } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { Plus, Trash2, Edit2, Bell, BellOff, Mail, Clock, Sparkles, ArrowRight } from 'lucide-react'
 import { Card, Button, Input } from '../components/ui'
 import { supabase } from '../lib/supabase'
 import { useUserStore } from '../stores'
 import { showToast } from '../utils/toast'
+
+function ComingSoon() {
+    return (
+        <div className="animate-fade-in">
+            {/* Coming Soon Banner */}
+            <div className="mb-8 p-6 rounded-2xl bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-yellow-500/10 border border-amber-500/20">
+                <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center shrink-0">
+                        <Clock className="w-6 h-6 text-amber-400" />
+                    </div>
+                    <div className="flex-1">
+                        <h2 className="text-xl font-semibold text-white mb-2">Coming Soon</h2>
+                        <p className="text-white/60 mb-4">
+                            Job alerts are being rebuilt with smarter notifications and better integration. We'll notify you when it's ready!
+                        </p>
+                        <div className="flex flex-wrap gap-3">
+                            <Link to="/jobs">
+                                <Button size="sm" className="rounded-full bg-white text-black hover:bg-white/90">
+                                    <Sparkles className="w-4 h-4 mr-2" />
+                                    Find Jobs Now
+                                </Button>
+                            </Link>
+                            <Link to="/generate">
+                                <Button size="sm" variant="outline" className="rounded-full border-amber-500/30 text-amber-400 hover:bg-amber-500/10">
+                                    Generate Applications
+                                    <ArrowRight className="w-4 h-4 ml-2" />
+                                </Button>
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Preview of What's Coming */}
+            <Card className="border border-white/10 bg-white/5 p-8">
+                <h3 className="text-lg font-medium text-white mb-6">What We're Building</h3>
+                <div className="grid md:grid-cols-3 gap-6">
+                    <div className="space-y-3">
+                        <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center">
+                            <Bell className="w-5 h-5 text-white/70" />
+                        </div>
+                        <h4 className="font-medium text-white">Smart Notifications</h4>
+                        <p className="text-sm text-white/50">Get notified via email when new jobs match your preferences, with AI-powered relevance scoring.</p>
+                    </div>
+                    <div className="space-y-3">
+                        <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center">
+                            <Sparkles className="w-5 h-5 text-white/70" />
+                        </div>
+                        <h4 className="font-medium text-white">AI-Powered Matching</h4>
+                        <p className="text-sm text-white/50">Our AI will learn from your preferences and surface the most relevant opportunities automatically.</p>
+                    </div>
+                    <div className="space-y-3">
+                        <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center">
+                            <Mail className="w-5 h-5 text-white/70" />
+                        </div>
+                        <h4 className="font-medium text-white">Weekly Digests</h4>
+                        <p className="text-sm text-white/50">Receive a curated summary of the best new opportunities tailored to your career goals.</p>
+                    </div>
+                </div>
+            </Card>
+        </div>
+    )
+}
 
 interface JobAlert {
     id: string
@@ -23,6 +87,22 @@ export default function AlertsManager() {
     const [isCreating, setIsCreating] = useState(false)
     const [editingId, setEditingId] = useState<string | null>(null)
     const [loading, setLoading] = useState(true)
+    const [showComingSoon] = useState(true) // Toggle to enable/disable Coming Soon
+
+    // Show Coming Soon for now
+    if (showComingSoon) {
+        return (
+            <div className="animate-fade-in font-['General_Sans',_sans-serif]">
+                <div className="mb-6">
+                    <h1 className="font-medium text-3xl text-white mb-2 tracking-tight">Job Alerts</h1>
+                    <p className="text-white/60">
+                        Get notified when new jobs match your criteria
+                    </p>
+                </div>
+                <ComingSoon />
+            </div>
+        )
+    }
 
     useEffect(() => {
         if (profile) {
