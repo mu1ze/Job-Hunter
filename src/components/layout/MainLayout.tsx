@@ -1,5 +1,6 @@
 import { Outlet, Link } from 'react-router-dom'
 import Navbar from './Navbar'
+import BottomNav from './BottomNav'
 
 export default function MainLayout() {
     return (
@@ -12,14 +13,14 @@ export default function MainLayout() {
 
             <Navbar />
 
-            <div className="relative z-10 flex flex-col min-h-screen pt-24">
-                <main className="flex-1 pb-12 px-4 sm:px-6 lg:px-8">
+            <div className="relative z-10 flex flex-col min-h-screen pt-24 pb-20 lg:pb-12">
+                <main className="flex-1 px-4 sm:px-6 lg:px-8">
                     <div className="max-w-7xl mx-auto">
                         <Outlet />
                     </div>
                 </main>
 
-                <footer className="border-t border-white/10 px-4 sm:px-6 lg:px-8 py-4 text-xs text-white/40">
+                <footer className="hidden lg:block border-t border-white/10 px-4 sm:px-6 lg:px-8 py-4 text-xs text-white/40">
                     <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
                         <span>© {new Date().getFullYear()} JobHunter. All rights reserved.</span>
                         <div className="flex items-center gap-4">
@@ -33,6 +34,9 @@ export default function MainLayout() {
                     </div>
                 </footer>
             </div>
+
+            {/* Mobile Navigation */}
+            <BottomNav />
         </div>
     )
 }

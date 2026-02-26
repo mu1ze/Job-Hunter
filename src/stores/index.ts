@@ -117,31 +117,36 @@ interface JobsState {
     setSearching: (status: boolean) => void
 }
 
-export const useJobsStore = create<JobsState>()((set) => ({
-    savedJobs: [],
-    searchResults: [],
-    isSearching: false,
+export const useJobsStore = create<JobsState>()(
+    persist(
+        (set) => ({
+            savedJobs: [],
+            searchResults: [],
+            isSearching: false,
 
-    setSavedJobs: (jobs) => set({ savedJobs: jobs }),
-    addSavedJob: (job) => set((state) => ({
-        savedJobs: [...state.savedJobs, job]
-    })),
-    removeSavedJob: (jobId) => set((state) => ({
-        savedJobs: state.savedJobs.filter((j) => j.id !== jobId)
-    })),
-    updateJobStatus: (jobId, status) => set((state) => ({
-        savedJobs: state.savedJobs.map((j) =>
-            j.id === jobId ? { ...j, status } : j
-        )
-    })),
-    updateJob: (job) => set((state) => ({
-        savedJobs: state.savedJobs.map((j) =>
-            j.id === job.id ? job : j
-        )
-    })),
-    setSearchResults: (jobs) => set({ searchResults: jobs }),
-    setSearching: (status) => set({ isSearching: status }),
-}))
+            setSavedJobs: (jobs) => set({ savedJobs: jobs }),
+            addSavedJob: (job) => set((state) => ({
+                savedJobs: [...state.savedJobs, job]
+            })),
+            removeSavedJob: (jobId) => set((state) => ({
+                savedJobs: state.savedJobs.filter((j) => j.id !== jobId)
+            })),
+            updateJobStatus: (jobId, status) => set((state) => ({
+                savedJobs: state.savedJobs.map((j) =>
+                    j.id === jobId ? { ...j, status } : j
+                )
+            })),
+            updateJob: (job) => set((state) => ({
+                savedJobs: state.savedJobs.map((j) =>
+                    j.id === job.id ? job : j
+                )
+            })),
+            setSearchResults: (jobs) => set({ searchResults: jobs }),
+            setSearching: (status) => set({ isSearching: status }),
+        }),
+        { name: 'job-hunter-jobs' }
+    )
+)
 
 interface ResumeState {
     // Resume data
@@ -156,25 +161,30 @@ interface ResumeState {
     setUploading: (status: boolean) => void
 }
 
-export const useResumeStore = create<ResumeState>()((set) => ({
-    resumes: [],
-    primaryResume: null,
-    isUploading: false,
+export const useResumeStore = create<ResumeState>()(
+    persist(
+        (set) => ({
+            resumes: [],
+            primaryResume: null,
+            isUploading: false,
 
-    setResumes: (resumes) => set({
-        resumes,
-        primaryResume: resumes.find((r) => r.is_primary) || resumes[0] || null
-    }),
-    addResume: (resume) => set((state) => ({
-        resumes: [...state.resumes, resume],
-        primaryResume: resume.is_primary ? resume : state.primaryResume
-    })),
-    setPrimaryResume: (resumeId) => set((state) => ({
-        resumes: state.resumes.map((r) => ({
-            ...r,
-            is_primary: r.id === resumeId
-        })),
-        primaryResume: state.resumes.find((r) => r.id === resumeId) || state.primaryResume
-    })),
-    setUploading: (status) => set({ isUploading: status }),
-}))
+            setResumes: (resumes) => set({
+                resumes,
+                primaryResume: resumes.find((r) => r.is_primary) || resumes[0] || null
+            }),
+            addResume: (resume) => set((state) => ({
+                resumes: [...state.resumes, resume],
+                primaryResume: resume.is_primary ? resume : state.primaryResume
+            })),
+            setPrimaryResume: (resumeId) => set((state) => ({
+                resumes: state.resumes.map((r) => ({
+                    ...r,
+                    is_primary: r.id === resumeId
+                })),
+                primaryResume: state.resumes.find((r) => r.id === resumeId) || state.primaryResume
+            })),
+            setUploading: (status) => set({ isUploading: status }),
+        }),
+        { name: 'job-hunter-resumes' }
+    )
+)

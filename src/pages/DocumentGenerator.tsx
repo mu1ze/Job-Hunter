@@ -73,10 +73,37 @@ export default function DocumentGenerator() {
     const [isSaving, setIsSaving] = useState(false)
     const [savedDocId, setSavedDocId] = useState<string | null>(null)
 
-    const { savedJobs } = useJobsStore()
-    const { primaryResume } = useResumeStore()
+    const { savedJobs, setSavedJobs } = useJobsStore()
+    const { primaryResume, setResumes, setPrimaryResume } = useResumeStore()
     const { addItem: addCareerItem, items: careerItems } = useCareerStore()
     const { profile } = useUserStore()
+
+    // Fetch saved jobs and resumes on mount
+    useEffect(() => {
+        const fetchData = async () => {
+            const { data: { user } } = await supabase.auth.getUser()
+            if (!user) return
+
+            // Fetch saved jobs
+            const { data: jobs } = await supabase
+                .from('saved_jobs')
+                .select('*')
+                .eq('user_id', user.id)
+                .order('created_at', { ascending: false })
+            if (jobs) setSavedJobs(jobs)
+
+            // Fetch resumes
+            const { data: resumes } = await supabase
+                .from('resumes')
+                .select('*')
+                .eq('user_id', user.id)
+                .order('created_at', { ascending: false })
+            if (resumes && resumes.length > 0) {
+                setResumes(resumes)
+            }
+        }
+        fetchData()
+    }, [])
 
     const handleSaveRole = async (role: string) => {
         if (!profile) return

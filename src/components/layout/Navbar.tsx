@@ -109,7 +109,7 @@ export default function Navbar() {
     }, [location.pathname, isMobileMenuOpen])
 
     return (
-        <div className="fixed top-6 left-0 right-0 z-50 flex justify-center px-4 pointer-events-none">
+        <div className="hidden lg:flex fixed top-6 left-0 right-0 z-50 justify-center px-4 pointer-events-none">
             <nav
                 ref={navRef}
                 className={`

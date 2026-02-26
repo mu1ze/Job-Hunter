@@ -96,10 +96,10 @@ This document outlines the remaining work to take JobHunter to production-ready 
 
 ## 4. Performance
 
-- [ ] Add React Query or SWR for data fetching
-- [ ] Implement virtual scrolling for long job lists
-- [ ] Lazy load more components
-- [ ] Add PWA support with service worker
+- [x] Add React Query or SWR for data fetching
+- [x] Implement virtual scrolling for long job lists
+- [x] Lazy load more components
+- [x] Add PWA support with service worker
 
 ---
 
@@ -113,10 +113,10 @@ This document outlines the remaining work to take JobHunter to production-ready 
 
 ## 6. Mobile Experience
 
-- [ ] Bottom navigation bar for mobile
-- [ ] Swipe gestures for job cards
-- [ ] Offline support / PWA capabilities
-- [ ] App store optimization
+- [x] Bottom navigation bar for mobile
+- [x] Swipe gestures for job cards
+- [x] Offline support / PWA capabilities
+- [x] App store optimization
 
 ---
 

@@ -20,6 +20,7 @@ import {
 import ReactMarkdown from 'react-markdown'
 import { Button, Input, Card, NoResults } from '../components/ui'
 import { SkeletonList } from '../components/Skeleton'
+import SwipeableCard, { SwipeHint } from '../components/SwipeableCard'
 import { useJobsStore, useUserStore, useResumeStore } from '../stores'
 import { adzunaService } from '../services/adzuna'
 import { perplexityService } from '../services/perplexity'
@@ -362,8 +363,8 @@ export default function JobSearch() {
             </div>
 
             {/* Search Bar */}
-            <Card className="mb-8 border border-white/10 bg-white/5">
-                <div className="flex flex-col md:flex-row gap-3 md:gap-4 items-stretch md:items-center">
+            <Card className="mb-8 border border-white/10 bg-white/5 overflow-hidden">
+                <div className="flex flex-col md:flex-row gap-2 md:gap-3 items-stretch md:items-center">
                     {/* Country Selector */}
                     <div className="w-full md:w-36 lg:w-40 shrink-0">
                         <div className="relative">
@@ -415,7 +416,7 @@ export default function JobSearch() {
                     </div>
                     
                     {/* Action Buttons */}
-                    <div className="flex gap-2 items-center order-3 md:order-4 shrink-0">
+                    <div className="flex gap-2 items-center order-3 md:order-4 shrink-0 flex-wrap md:flex-nowrap">
                         {preferences?.use_global_filters && (
                             <div className="hidden lg:flex items-center px-4 py-3 rounded-2xl bg-white/10 border border-white/20 text-[10px] text-white font-medium uppercase tracking-widest whitespace-nowrap">
                                 <Settings className="w-3 h-3 mr-2 text-white/60" />
@@ -425,23 +426,23 @@ export default function JobSearch() {
                         <Button
                             variant="secondary"
                             onClick={() => setShowFilters(!showFilters)}
-                            className="shrink-0"
+                            className="shrink-0 text-xs py-2 px-3"
                         >
-                            <Filter className="w-4 h-4 mr-2" />
-                            Filters
+                            <Filter className="w-4 h-4" />
+                            <span className="md:hidden ml-1">Filters</span>
                         </Button>
                         <Button
                             variant="outline"
                             onClick={handleAIDeepSearch}
                             isLoading={isSearching}
-                            className="shrink-0 group"
+                            className="shrink-0 text-xs py-2 px-3"
                         >
-                            <Sparkles className="w-4 h-4 mr-2 group-hover:animate-pulse" />
-                            AI Deep Match
+                            <Sparkles className="w-4 h-4" />
+                            <span className="hidden md:inline ml-1">AI</span>
                         </Button>
-                        <Button onClick={() => handleSearch()} isLoading={isSearching} className="shrink-0 rounded-full">
-                            <Search className="w-4 h-4 mr-2" />
-                            Search
+                        <Button onClick={() => handleSearch()} isLoading={isSearching} className="shrink-0 rounded-full text-xs py-2 px-3">
+                            <Search className="w-4 h-4" />
+                            <span className="hidden md:inline ml-1">Search</span>
                         </Button>
                     </div>
                 </div>
@@ -529,13 +530,24 @@ export default function JobSearch() {
 
                     {jobsList.length > 0 ? (
                         <>
+                            <SwipeHint />
                             {paginatedJobs.map((job) => (
-                                <Card
+                                <SwipeableCard
                                     key={job.id}
-                                    hover
-                                    className={`cursor-pointer bg-white/5 border border-white/10 hover:bg-white/10 transition-all ${selectedJob?.id === job.id ? 'border-white/40 ring-1 ring-white/10' : ''}`}
-                                    onClick={() => setSelectedJob(job)}
+                                    enabled={typeof window !== 'undefined' && window.innerWidth < 1024}
+                                    onSwipeRight={() => toggleSaveJob(job)}
+                                    rightLabel={isJobSaved(job.id) ? 'Saved' : 'Save'}
+                                    onSwipeLeft={() => {
+                                        setJobsList(prev => prev.filter(j => j.id !== job.id))
+                                        showToast.success('Job dismissed')
+                                    }}
+                                    leftLabel="Dismiss"
                                 >
+                                    <Card
+                                        hover
+                                        className={`cursor-pointer bg-white/5 border border-white/10 hover:bg-white/10 transition-all ${selectedJob?.id === job.id ? 'border-white/40 ring-1 ring-white/10' : ''}`}
+                                        onClick={() => setSelectedJob(job)}
+                                    >
                                     <div className="flex items-start gap-4">
                                         <div className="w-12 h-12 rounded-xl bg-white/10 border border-white/5 flex items-center justify-center text-white font-bold text-lg shrink-0">
                                             {job.company[0]}
@@ -618,6 +630,7 @@ export default function JobSearch() {
                                         </div>
                                     </div>
                                 </Card>
+                                </SwipeableCard>
                             ))}
 
                             {/* Pagination Controls */}

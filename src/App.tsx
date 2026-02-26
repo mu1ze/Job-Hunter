@@ -17,6 +17,7 @@ import Profile from './pages/Profile'
 import MainLayout from './components/layout/MainLayout'
 import { Toaster } from 'react-hot-toast'
 import Docs from './pages/Docs'
+import AuthCallback from './pages/AuthCallback'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
     const { isAuthenticated, profile } = useUserStore()
@@ -130,6 +131,7 @@ function App() {
                 {/* Public Routes */}
                 <Route path="/" element={<Landing />} />
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/auth/callback" element={<AuthCallback />} />
                 <Route path="/docs" element={<Docs />} />
 
                 {/* Onboarding - requires auth */}
