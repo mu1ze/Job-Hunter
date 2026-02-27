@@ -4,7 +4,7 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
     server: {
-        allowedHosts: ['.ngrok-free.dev', '.ngrok.io', 'localhost', '.jobhuntr.dvlli.com'],
+        allowedHosts: ['.ngrok-free.dev', '.ngrok.io', 'localhost', '.jobhuntr.dvlli.com', '.devserver-main--jobhuntr.netlify.app'],
         host: '0.0.0.0',
     },
     plugins: [
