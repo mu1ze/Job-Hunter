@@ -1,87 +1,116 @@
 # Job Hunter
 
-Job Hunter is a comprehensive job application tracking and optimization platform designed to streamline your job search process. It combines powerful tracking tools with AI-driven insights to help you find relevant roles, manage your applications, and generate tailored documents.
+AI-powered job search and application tracker.
 
-## 🚀 Key Features
+## 🚀 Quick Start
 
-*   **Application Tracker**: Visualize and manage your job applications through different stages (Saved, Applied, Interviewing, Offer, etc.) using a drag-and-drop interface.
-*   **AI Deep Match**: A sophisticated search and ranking system that leverages your resume to pair you with roles where you have the highest probability of success.
-*   **Resume Manager**: Upload, store, and parse your resumes to extract skills and experience for better job matching.
-*   **Document Generator**: Create AI-powered cover letters and tailored resumes based on specific job descriptions and your profile.
-*   **Job Search**: Integrated job search functionality with advanced filtering and Deep Match capabilities.
-*   **Analytics**: Gain insights into the job market and your application performance with visual analytics.
-*   **Alerts Manager**: Set up and manage job alerts to stay updated on new opportunities.
+```bash
+# 1. Clone & install
+git clone https://github.com/yourusername/job-hunter.git
+cd job-hunter
+npm install
+
+# 2. Setup environment
+cp .env.example .env
+# Edit .env with your Supabase credentials
+
+# 3. Run locally
+npm run dev
+```
+
+Access the app at `http://localhost:5173`.
 
 ## 🛠 Tech Stack
 
-*   **Frontend**: React (Vite), TypeScript
-*   **Styling**: Tailwind CSS
-*   **State Management**: Zustand
-*   **Routing**: React Router
-*   **Backend/Database**: Supabase (PostgreSQL, Auth, Realtime)
-*   **UI Components**: Lucide React, dnd-kit, Recharts, React Hot Toast
-
-## 🏁 Getting Started
-
-### Prerequisites
-
-*   Node.js (v18 or higher)
-*   npm or yarn
-
-### Installation
-
-1.  Clone the repository:
-    ```bash
-    git clone https://github.com/yourusername/job-hunter.git
-    cd job-hunter
-    ```
-
-2.  Install dependencies:
-    ```bash
-    npm install
-    ```
-
-3.  Environment Setup:
-    Create a `.env` file in the root directory based on `.env.example` and add your Supabase credentials:
-    ```env
-    VITE_SUPABASE_URL=your_supabase_url
-    VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-    ```
-
-4.  Start the development server:
-    ```bash
-    npm run dev
-    ```
+- **Frontend**: React 18 + Vite + TypeScript
+- **Styling**: Tailwind CSS (dark theme)
+- **State Management**: Zustand (persisted to localStorage)
+- **Routing**: React Router v6
+- **Backend**: Supabase (PostgreSQL, Auth, Edge Functions)
+- **UI Libraries**: Lucide React, dnd-kit, Recharts, React Hot Toast
 
 ## 📂 Project Structure
 
-*   `/src/components`: Reusable UI components and layout wrappers.
-*   `/src/pages`: Application views (Dashboard, JobSearch, Tracker, etc.).
-*   `/src/lib`: Configuration and helper functions (Supabase client).
-*   `/src/stores`: Zustand state stores (User, Job, etc.).
-*   `/src/hooks`: Custom React hooks.
-*   `/supabase`: Database migrations and types.
+```
+src/
+├── components/
+│   ├── ui/           # Reusable components (Button, Input, Card, etc.)
+│   └── layout/       # MainLayout, Sidebar, etc.
+├── pages/            # Route components (Dashboard, Jobs, Tracker, etc.)
+├── stores/           # Zustand stores (useUserStore, useJobsStore, etc.)
+├── hooks/            # Custom React hooks
+├── lib/              # Supabase client config
+├── services/         # API wrappers
+├── types/            # TypeScript interfaces
+└── utils/            # Helper functions
+```
 
-## 🗄️ Database Schema
+## 🗄️ Database (Supabase)
 
-The project uses Supabase (PostgreSQL) with the following core tables:
+### Tables
+- `user_profiles` - Extended user info
+- `job_preferences` - Search criteria & preferences
+- `saved_jobs` - Tracked job applications with status (saved → applied → interviewing → offer)
+- `resumes` - Uploaded resumes with parsed data
+- `generated_documents` - AI-generated tailored resumes/cover letters
+- `job_market_analytics` - Cached market data
 
-*   `user_profiles`: Extended user information.
-*   `job_preferences`: User search criteria and preferences.
-*   `saved_jobs`: tracked job applications with status and details.
-*   `resumes`: Parsed resume data.
-*   `generated_documents`: tailored cover letters and resumes.
-*   `job_market_analytics`: Cached market data for analytics.
+All user tables have RLS enabled - users can only access their own data.
 
-## 🧩 Deep Match
+### Setup
+1. Create a Supabase project at supabase.com
+2. Run `schema.sql` in the Supabase SQL Editor
+3. Deploy Edge Functions (see below)
 
-Deep Match is our proprietary AI matching engine. It analyzes your primary resume to extract core skills and career trajectory, then evaluates job listings based on:
-*   **Skill Alignment (50%)**
-*   **Experience Relevance (30%)**
-*   **Industry Context (20%)**
+## ⚡ Edge Functions
 
-See `DeepMatch.md` for more details.
+The app uses Supabase Edge Functions for AI and external API calls:
 
-## 📄 License
+| Function | Purpose |
+|----------|---------|
+| `search-jobs` | Proxies job search to Adzuna API |
+| `deep-job-search` | AI-powered job matching |
+| `generate-document` | Generates tailored resumes/cover letters |
+| `calculate-ats-score` | Analyzes resume against job |
 
-This project is licensed under the MIT License.
+### Deploy Functions
+```bash
+supabase functions deploy search-jobs
+supabase functions deploy deep-job-search
+supabase functions deploy generate-document
+supabase functions deploy calculate-ats-score
+```
+
+### Set Secrets
+```bash
+supabase secrets set OPENAI_API_KEY=sk-...
+supabase secrets set ADZUNA_APP_ID=...
+supabase secrets set ADZUNA_APP_KEY=...
+supabase secrets set PERPLEXITY_API_KEY=pplx-...
+```
+
+## 🔑 Environment Variables
+
+Create a `.env` file:
+
+```env
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
+```
+
+## 🎯 Key Features
+
+1. **Application Tracker** - Kanban board (drag-and-drop) for managing job applications
+2. **AI Deep Match** - Ranks jobs against your resume based on skills (50%), experience (30%), industry (20%)
+3. **Job Search** - Integrated search with filters (location, remote, salary)
+4. **Resume Manager** - Upload and parse resumes, set primary resume for matching
+5. **Document Generator** - AI-generated tailored resumes and cover letters
+6. **Analytics** - Visual insights into your job search progress
+
+## 📝 Available Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start development server |
+| `npm run build` | Build for production |
+| `npm run preview` | Preview production build |

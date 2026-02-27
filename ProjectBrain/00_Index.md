@@ -48,3 +48,37 @@ npm run dev
 # Build for production
 npm run build
 ```
+
+---
+
+## 📊 Current Implementation Overview
+
+### Authentication Flow
+- Uses Supabase Auth with email/password and OTP verification
+- Session persisted via Zustand with localStorage
+- Auth state listener in App.tsx maintains sync between tabs
+- Protected routes redirect unauthenticated users to `/auth`
+- Onboarding required after first login to set up profile and preferences
+
+### State Management
+- **Zustand** with `persist` middleware for localStorage persistence
+- Three main stores:
+  - `useUserStore` - User profile, preferences, authentication state
+  - `useJobsStore` - Saved jobs, search results
+  - `useResumeStore` - Uploaded resumes, parsed data, primary resume selection
+  - `useCareerStore` - Career items, resume analyses
+
+### API Integration
+- **Adzuna API** - Job search via Edge Function proxy
+- **Perplexity API** - Company research via Edge Function
+- **OpenAI** - Document generation and Deep Match via Edge Functions
+
+### Key Pages
+1.  **Dashboard** - Overview with stats, recent activity, recommended jobs
+2.  **Job Search** - Search interface with filters, Deep Match toggle
+3.  **Application Tracker** - Kanban board with drag-and-drop (dnd-kit)
+4.  **Resume Manager** - Upload, parse, and manage resumes
+5.  **Document Generator** - AI-generated tailored resumes/cover letters
+6.  **Analytics** - Charts showing application metrics (Recharts)
+7.  **Alerts Manager** - Configure job search alerts
+8.  **Profile** - User settings and preferences
