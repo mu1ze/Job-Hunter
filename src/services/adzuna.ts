@@ -83,6 +83,14 @@ export const adzunaService = {
         { results: JobListing[]; count: number; queries_used?: string[] }
     > {
         try {
+            // Check if user is authenticated
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                throw new Error("You must be logged in to use AI Deep Match. Please sign in first.");
+            }
+
+            console.log("Current session:", session);
+
             const { data, error } = await supabase.functions.invoke(
                 "deep-job-search",
                 {
@@ -154,6 +162,11 @@ export const adzunaService = {
             };
         } catch (error: any) {
             console.error("Error performing deep search:", error);
+            // Check if it's an auth error
+            if (error.message && error.message.includes("Invalid or expired token")) {
+                console.error("Authentication error - user may not be properly logged in");
+                throw new Error("Authentication failed. Please sign out and sign in again.");
+            }
             throw error;
         }
     },

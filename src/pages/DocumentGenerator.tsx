@@ -72,9 +72,18 @@ export default function DocumentGenerator() {
     const [copied, setCopied] = useState(false)
     const [isSaving, setIsSaving] = useState(false)
     const [savedDocId, setSavedDocId] = useState<string | null>(null)
+    const [showSaveModal, setShowSaveModal] = useState(false)
+    const [contactInfo, setContactInfo] = useState({
+        full_name: '',
+        email: '',
+        phone: '',
+        location: '',
+        linkedin_url: '',
+        portfolio_url: ''
+    })
 
     const { savedJobs, setSavedJobs } = useJobsStore()
-    const { primaryResume, setResumes, setPrimaryResume } = useResumeStore()
+    const { primaryResume, setResumes } = useResumeStore()
     const { addItem: addCareerItem, items: careerItems } = useCareerStore()
     const { profile } = useUserStore()
 
@@ -192,7 +201,6 @@ export default function DocumentGenerator() {
                     documentType,
                     focusKeywords,
                     jobTitle: jobTitle,
-                    userProfile: profile
                 }
             })
 
@@ -243,6 +251,21 @@ export default function DocumentGenerator() {
     const handleSaveDocument = async () => {
         if (!generatedContent || !selectedJobId || !profile || !primaryResume) return
 
+        // Open confirmation modal with profile contact info
+        setContactInfo({
+            full_name: profile.full_name || '',
+            email: profile.email || '',
+            phone: profile.phone || '',
+            location: profile.location || '',
+            linkedin_url: profile.linkedin_url || '',
+            portfolio_url: profile.portfolio_url || ''
+        })
+        setShowSaveModal(true)
+    }
+
+    const handleConfirmSave = async () => {
+        if (!generatedContent || !selectedJobId || !profile || !primaryResume) return
+
         setIsSaving(true)
         try {
             // 1. Enforce limit: Max 2 of each type per job
@@ -259,7 +282,30 @@ export default function DocumentGenerator() {
                 return
             }
 
-            // 2. Save document
+            // 2. Format contact information section
+            const contactFields = []
+            if (contactInfo.full_name) contactFields.push(contactInfo.full_name)
+            if (contactInfo.email) contactFields.push(contactInfo.email)
+            if (contactInfo.phone) contactFields.push(contactInfo.phone)
+            if (contactInfo.location) contactFields.push(contactInfo.location)
+            if (contactInfo.linkedin_url) contactFields.push(contactInfo.linkedin_url)
+            if (contactInfo.portfolio_url) contactFields.push(contactInfo.portfolio_url)
+
+            let contactSection = ''
+            if (contactFields.length > 0) {
+                if (documentType === 'resume') {
+                    // Resume format: centered header style
+                    contactSection = contactFields.join(' | ') + '\n\n'
+                } else {
+                    // Cover letter format: business letter header
+                    contactSection = contactFields.join('\n') + '\n\n'
+                }
+            }
+
+            // 3. Prepend contact info to the document
+            const finalContent = contactSection + generatedContent
+
+            // 4. Save document with contact info
             const { data, error: saveError } = await supabase
                 .from('generated_documents')
                 .insert([{
@@ -267,7 +313,7 @@ export default function DocumentGenerator() {
                     job_id: selectedJobId,
                     resume_id: primaryResume.id,
                     document_type: documentType,
-                    content: generatedContent,
+                    content: finalContent,
                     ats_score: atsScore,
                     matched_keywords: matchedKeywords,
                     missing_keywords: missingKeywords,
@@ -278,6 +324,7 @@ export default function DocumentGenerator() {
             if (saveError) throw saveError
 
             setSavedDocId(data.id)
+            setShowSaveModal(false)
             showToast.success(`${documentType === 'resume' ? 'Resume' : 'Cover Letter'} saved to job details`)
         } catch (error: any) {
             console.error('Save failed:', error)
@@ -770,6 +817,142 @@ export default function DocumentGenerator() {
                     </Card>
                 </div>
             </div>
+
+            {/* Save Confirmation Modal */}
+            {showSaveModal && (
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
+                    <div className="bg-[#0A0A0A] border border-white/20 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl shadow-black/50">
+                        <div className="p-6">
+                            <div className="flex items-center justify-between mb-6">
+                                <h3 className="font-medium text-2xl text-white">
+                                    {documentType === 'resume' ? 'Resume' : 'Cover Letter'} Contact Information
+                                </h3>
+                                <button
+                                    onClick={() => setShowSaveModal(false)}
+                                    className="text-white/40 hover:text-white transition-colors"
+                                >
+                                    <span className="text-2xl">×</span>
+                                </button>
+                            </div>
+
+                            <p className="text-white/60 mb-6">
+                                This contact information will be added to the top of your document before saving. Edit any fields as needed.
+                            </p>
+
+                            <div className="grid md:grid-cols-2 gap-4 mb-6">
+                                <div>
+                                    <label className="block text-sm font-medium text-white/70 mb-2">
+                                        Full Name
+                                    </label>
+                                    <Input
+                                        placeholder="John Doe"
+                                        value={contactInfo.full_name}
+                                        onChange={(e) => setContactInfo({ ...contactInfo, full_name: e.target.value })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-white/70 mb-2">
+                                        Email
+                                    </label>
+                                    <Input
+                                        type="email"
+                                        placeholder="john@example.com"
+                                        value={contactInfo.email}
+                                        onChange={(e) => setContactInfo({ ...contactInfo, email: e.target.value })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-white/70 mb-2">
+                                        Phone
+                                    </label>
+                                    <Input
+                                        placeholder="+1 (555) 000-0000"
+                                        value={contactInfo.phone}
+                                        onChange={(e) => setContactInfo({ ...contactInfo, phone: e.target.value })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-white/70 mb-2">
+                                        Location
+                                    </label>
+                                    <Input
+                                        placeholder="New York, NY"
+                                        value={contactInfo.location}
+                                        onChange={(e) => setContactInfo({ ...contactInfo, location: e.target.value })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-white/70 mb-2">
+                                        LinkedIn URL
+                                    </label>
+                                    <Input
+                                        placeholder="linkedin.com/in/username"
+                                        value={contactInfo.linkedin_url}
+                                        onChange={(e) => setContactInfo({ ...contactInfo, linkedin_url: e.target.value })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-white/70 mb-2">
+                                        Portfolio/Website
+                                    </label>
+                                    <Input
+                                        placeholder="yourwebsite.com"
+                                        value={contactInfo.portfolio_url}
+                                        onChange={(e) => setContactInfo({ ...contactInfo, portfolio_url: e.target.value })}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Preview Section */}
+                            <div className="mb-6 p-4 rounded-xl bg-white/5 border border-white/10">
+                                <label className="block text-sm font-medium text-white/70 mb-3">
+                                    Preview ({documentType === 'resume' ? 'Resume Header' : 'Letter Header'})
+                                </label>
+                                <div className="p-4 rounded-lg bg-black/40 border border-white/5 font-mono text-sm text-white/80">
+                                    {documentType === 'resume' ? (
+                                        <div className="whitespace-pre-wrap">
+                                            {[
+                                                contactInfo.full_name,
+                                                [contactInfo.email, contactInfo.phone, contactInfo.location].filter(Boolean).join(' | '),
+                                                [contactInfo.linkedin_url, contactInfo.portfolio_url].filter(Boolean).join(' | ')
+                                            ].filter(Boolean).join('\n') || <span className="text-white/30">No contact information to display</span>}
+                                        </div>
+                                    ) : (
+                                        <div className="whitespace-pre-wrap">
+                                            {[
+                                                contactInfo.full_name,
+                                                contactInfo.email,
+                                                contactInfo.phone,
+                                                contactInfo.location,
+                                                contactInfo.linkedin_url,
+                                                contactInfo.portfolio_url
+                                            ].filter(Boolean).join('\n') || <span className="text-white/30">No contact information to display</span>}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="flex gap-3">
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setShowSaveModal(false)}
+                                    className="flex-1"
+                                >
+                                    Cancel
+                                </Button>
+                                <Button
+                                    onClick={handleConfirmSave}
+                                    isLoading={isSaving}
+                                    className="flex-1 bg-white text-black hover:bg-white/90"
+                                >
+                                    <Save className="w-4 h-4 mr-2" />
+                                    Save with Contact Info
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }
