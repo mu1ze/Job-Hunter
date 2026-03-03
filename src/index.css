@@ -208,3 +208,15 @@ button:focus-visible {
     scroll-behavior: auto !important;
   }
 }
+
+/* Print Styles for Resume */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  
+  .no-print {
+    display: none !important;
+  }
+}

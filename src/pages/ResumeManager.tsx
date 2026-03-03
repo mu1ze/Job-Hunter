@@ -9,7 +9,8 @@ import {
     Briefcase,
     GraduationCap,
     Code,
-    Sparkles
+    Sparkles,
+    Eye
 } from 'lucide-react'
 import { Button, Card } from '../components/ui'
 import { useResumeStore, useUserStore } from '../stores'
@@ -19,6 +20,7 @@ import { analysisService } from '../services/analysis'
 import type { ParsedResume } from '../types'
 import { showToast } from '../utils/toast'
 import { useNavigate } from 'react-router-dom'
+import ResumePreview from '../components/ResumePreview'
 
 export default function ResumeManager() {
     const { resumes, addResume, setResumes, primaryResume, setPrimaryResume } = useResumeStore()
@@ -35,6 +37,9 @@ export default function ResumeManager() {
 
     // Analysis State
     const [isAnalyzing, setIsAnalyzing] = useState(false)
+    
+    // Preview State
+    const [showPreview, setShowPreview] = useState(false)
 
     const handleAnalyzeCareer = async () => {
         if (!currentResume || !profile) return
@@ -257,26 +262,38 @@ export default function ResumeManager() {
                         Upload and manage your resumes. We'll extract skills and experience for better matching.
                     </p>
                 </div>
-                {/* Analyze Button */}
-                {currentResume && (
-                    <Button
-                        onClick={handleAnalyzeCareer}
-                        disabled={isAnalyzing}
-                        className="bg-white text-black hover:bg-white/90 border-none shadow-lg shadow-white/10 disabled:opacity-70 disabled:cursor-not-allowed group rounded-full w-full md:w-auto text-sm md:text-base"
-                    >
-                        {isAnalyzing ? (
-                            <>
-                                <div className="w-5 h-5 mr-2 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-                                Analyzing...
-                            </>
-                        ) : (
-                            <>
-                                <Sparkles className="w-4 h-4 md:w-5 md:h-5 mr-2 text-black/60 group-hover:text-black" />
-                                Analyze Career Path
-                            </>
-                        )}
-                    </Button>
-                )}
+                <div className="flex gap-2 flex-col md:flex-row">
+                    {/* Preview Button */}
+                    {currentResume && (
+                        <Button
+                            onClick={() => setShowPreview(!showPreview)}
+                            className="bg-blue-600 hover:bg-blue-700 text-white border-none shadow-lg shadow-blue-600/20 group rounded-full w-full md:w-auto text-sm md:text-base"
+                        >
+                            <Eye className="w-4 h-4 md:w-5 md:h-5 mr-2 text-white/80 group-hover:text-white" />
+                            {showPreview ? 'Hide Preview' : 'Preview Resume'}
+                        </Button>
+                    )}
+                    {/* Analyze Button */}
+                    {currentResume && (
+                        <Button
+                            onClick={handleAnalyzeCareer}
+                            disabled={isAnalyzing}
+                            className="bg-white text-black hover:bg-white/90 border-none shadow-lg shadow-white/10 disabled:opacity-70 disabled:cursor-not-allowed group rounded-full w-full md:w-auto text-sm md:text-base"
+                        >
+                            {isAnalyzing ? (
+                                <>
+                                    <div className="w-5 h-5 mr-2 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+                                    Analyzing...
+                                </>
+                            ) : (
+                                <>
+                                    <Sparkles className="w-4 h-4 md:w-5 md:h-5 mr-2 text-black/60 group-hover:text-black" />
+                                    Analyze Career Path
+                                </>
+                            )}
+                        </Button>
+                    )}
+                </div>
             </div>
 
             <div className="grid md:grid-cols-3 gap-6">
@@ -365,7 +382,9 @@ export default function ResumeManager() {
 
                 {/* Right Column: Details Rendering */}
                 <div className="md:col-span-2 space-y-4 md:space-y-6">
-                    {currentResume ? (
+                    {showPreview && currentResume ? (
+                        <ResumePreview resume={currentResume} variant="preview" />
+                    ) : currentResume ? (
                         <>
                             {/* Summary Card */}
                             <Card className="p-4 md:p-6 border border-white/10 bg-white/5">

@@ -11,6 +11,8 @@ import { Button, Card, Input } from '../components/ui'
 import { supabase } from '../lib/supabase'
 import { showToast, toastMessages } from '../utils/toast'
 import type { SavedJob, GeneratedDocument } from '../types'
+import GeneratedResumePreview from '../components/GeneratedResumePreview'
+import CoverLetterPreview from '../components/CoverLetterPreview'
 
 export default function JobDetails() {
     const { id } = useParams<{ id: string }>()
@@ -659,7 +661,7 @@ export default function JobDetails() {
             {/* Document Preview Modal - Mobile Optimized */}
             {selectedDoc && (
                 <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in">
-                    <div className="bg-[#0A0A0A] border border-white/10 rounded-t-2xl sm:rounded-2xl w-full max-w-4xl h-[95vh] sm:h-auto sm:max-h-[90vh] flex flex-col shadow-2xl overflow-hidden m-0 sm:m-4">
+                    <div className="bg-[#0A0A0A] border border-white/10 rounded-t-2xl sm:rounded-2xl w-full max-w-5xl h-[95vh] sm:h-auto sm:max-h-[90vh] flex flex-col shadow-2xl overflow-hidden m-0 sm:m-4">
                         {/* Header */}
                         <div className="flex items-center justify-between px-4 py-4 sm:px-6 sm:py-6 border-b border-white/10 flex-shrink-0">
                             <div className="min-w-0 flex-1 pr-2">
@@ -672,11 +674,10 @@ export default function JobDetails() {
                             </div>
                             <div className="flex items-center gap-2 flex-shrink-0">
                                 {selectedDoc.ats_score && (
-                                    <div className={`px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg border ${
-                                        selectedDoc.ats_score >= 90 ? 'bg-green-500/10 text-green-300 border-green-500/20' :
-                                        selectedDoc.ats_score >= 70 ? 'bg-blue-500/10 text-blue-300 border-blue-500/20' :
-                                        'bg-yellow-500/10 text-yellow-300 border-yellow-500/20'
-                                    }`}>
+                                    <div className={`px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg border ${selectedDoc.ats_score >= 90 ? 'bg-green-500/10 text-green-300 border-green-500/20' :
+                                            selectedDoc.ats_score >= 70 ? 'bg-blue-500/10 text-blue-300 border-blue-500/20' :
+                                                'bg-yellow-500/10 text-yellow-300 border-yellow-500/20'
+                                        }`}>
                                         <span className="text-xs sm:text-sm font-bold">{selectedDoc.ats_score}%</span>
                                     </div>
                                 )}
@@ -688,93 +689,18 @@ export default function JobDetails() {
                                 </button>
                             </div>
                         </div>
-                        
+
                         {/* Document Content - Scrollable Area */}
                         <div className="flex-1 overflow-y-auto overflow-x-hidden bg-[#0A0A0A]">
-                            <div className="min-h-full p-2 sm:p-4 flex justify-center">
-                                {/* Paper Container - Scales to fit screen */}
-                                <div className="w-full max-w-full">
-                                    <div className="bg-white shadow-lg sm:shadow-xl w-full overflow-hidden">
-                                        {/* Document Content */}
-                                        <div className="p-4 sm:p-6 md:p-8 lg:p-10 max-h-[70vh] sm:max-h-none overflow-y-auto">
-                                            <div className="text-gray-900">
-                                                {selectedDoc.content.split('\n').map((paragraph, idx) => {
-                                                    const trimmedPara = paragraph.trim();
-                                                    if (!trimmedPara) return <div key={idx} className="h-2 sm:h-3" />;
-                                                    
-                                                    // Check if this looks like a contact header (first few lines)
-                                                    const isContactLine = idx < 5 && (
-                                                        trimmedPara.includes('@') || // email
-                                                        trimmedPara.includes('|') || // separator
-                                                        trimmedPara.startsWith('http') || // URL
-                                                        trimmedPara.includes('linkedin') ||
-                                                        /^\+?\d[\d\s\-\(\)]+$/.test(trimmedPara) || // phone
-                                                        trimmedPara.split('|').length >= 2 // multiple fields with pipes
-                                                    );
-                                                    
-                                                    // Check if it's a section header
-                                                    const isHeader = trimmedPara.length < 60 && 
-                                                        trimmedPara.length > 3 &&
-                                                        trimmedPara === trimmedPara.toUpperCase();
-                                                    
-                                                    // Check if it's a job title line
-                                                    const isJobTitle = trimmedPara.length < 80 && 
-                                                        !trimmedPara.includes('@') &&
-                                                        !trimmedPara.includes('|') &&
-                                                        idx > 0 && idx < 10;
-                                                    
-                                                    if (isContactLine) {
-                                                        return (
-                                                            <div key={idx} className="text-center text-[10px] sm:text-xs text-gray-600 mb-0.5 sm:mb-1 px-1">
-                                                                {trimmedPara.split('|').map((part, i) => (
-                                                                    <span key={i} className="inline-block px-0.5 break-all">
-                                                                        {i > 0 && <span className="mx-0.5 sm:mx-1 text-gray-400">|</span>}
-                                                                        {part.trim()}
-                                                                    </span>
-                                                                ))}
-                                                            </div>
-                                                        );
-                                                    }
-                                                    
-                                                    if (isHeader) {
-                                                        return (
-                                                            <h3 key={idx} className="text-xs sm:text-sm md:text-base font-bold text-gray-900 mt-3 sm:mt-4 mb-1 sm:mb-2 uppercase tracking-wide border-b border-gray-300 pb-0.5 sm:pb-1">
-                                                                {trimmedPara}
-                                                            </h3>
-                                                        );
-                                                    }
-                                                    
-                                                    if (isJobTitle && idx < 5) {
-                                                        return (
-                                                            <h1 key={idx} className="text-base sm:text-lg md:text-xl font-bold text-gray-900 mb-1 sm:mb-2 text-center break-words">
-                                                                {trimmedPara}
-                                                            </h1>
-                                                        );
-                                                    }
-                                                    
-                                                    // Regular paragraph or bullet point
-                                                    if (trimmedPara.startsWith('•') || trimmedPara.startsWith('-') || trimmedPara.startsWith('·')) {
-                                                        return (
-                                                            <div key={idx} className="flex items-start gap-1 sm:gap-1.5 ml-2 sm:ml-3 mb-1">
-                                                                <span className="text-gray-900 text-[10px] sm:text-xs">•</span>
-                                                                <span className="text-gray-700 text-[10px] sm:text-xs flex-1 break-words leading-snug">{trimmedPara.substring(1).trim()}</span>
-                                                            </div>
-                                                        );
-                                                    }
-                                                    
-                                                    return (
-                                                        <p key={idx} className="text-gray-700 text-[10px] sm:text-xs sm:text-sm mb-1.5 sm:mb-2 leading-snug sm:leading-relaxed break-words px-1">
-                                                            {trimmedPara}
-                                                        </p>
-                                                    );
-                                                })}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                            <div className="min-h-full p-2 sm:p-4 w-full" style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
+                                {selectedDoc.document_type === 'resume' ? (
+                                    <GeneratedResumePreview document={selectedDoc} variant="preview" />
+                                ) : (
+                                    <CoverLetterPreview document={selectedDoc} variant="preview" />
+                                )}
                             </div>
                         </div>
-                        
+
                         {/* Action Buttons - Mobile Optimized */}
                         <div className="p-3 sm:p-4 border-t border-white/10 bg-[#0A0A0A] flex-shrink-0 safe-area-pb">
                             <div className="grid grid-cols-2 gap-2">
