@@ -30,6 +30,12 @@ This documentation details the structure, logic, and environment of the Job Hunt
     -   Environment variables (`.env`).
     -   Supabase configuration and Edge Functions.
 
+6.  [**Workflows & Diagrams**](./06_Workflows_and_Diagrams.md)
+    -   AI Document Generation Flow.
+    -   Deep Match Search Flow.
+    -   Resume Parsing & Analysis.
+    -   Mobile Interaction Patterns.
+
 ---
 
 ## 🚀 Quick Start Summary

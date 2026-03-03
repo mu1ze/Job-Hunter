@@ -89,6 +89,13 @@ Generates AI-tailored resumes and cover letters based on a job description and u
 -   **2 Tailored Resumes** per saved job
 -   **2 Tailored Cover Letters** per saved job
 
+### Rendering & Export Logic
+
+1.  **Professional Formatting**: Previews are rendered using North American standard resume layouts with proper spacing, font pairings (Inter for Resumes, Crimson Pro for Cover Letters), and section dividers.
+2.  **Markdown Parsing**: AI-generated content is stripped of markdown markers (`**`) and parsed into structured segments for cleaner UI rendering.
+3.  **PDF Optimization**: Specialized print CSS reduces margins (0.3in) and section spacing to attempt fitting content onto a single page.
+4.  **Mobile Guardrails**: Long content uses `word-break: break-word` and `overflow-wrap: anywhere` to prevent layout breaking on small screens.
+
 ---
 
 ## 3. Job Search

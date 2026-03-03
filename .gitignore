@@ -3,3 +3,11 @@ node_modules
 # Local Netlify folder
 .netlify
 .env
+.agent
+
+
+design_prompt.md
+# ProjectBrain.md
+forHuman.md
+NextSteps.md
+Web3_Migration.md

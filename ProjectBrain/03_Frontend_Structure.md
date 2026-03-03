@@ -59,6 +59,11 @@ Two wrapper components handle route protection:
     -   Fixed to bottom on small screens
     -   Icons: Home, Jobs, Tracker, Profile
 
+-   **`DocumentPreviewModal.tsx`**: Mobile-first bottom sheet for document previews
+    -   Top sticky actions (Download, Copy, Remix, Cancel)
+    -   Body scroll locking
+    -   Optimized for bottom nav bar avoidance
+
 ### 2. UI Library (`src/components/ui`)
 
 | Component | Usage |
