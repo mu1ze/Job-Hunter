@@ -73,6 +73,18 @@ export default function DocumentGenerator() {
     const [isSaving, setIsSaving] = useState(false)
     const [savedDocId, setSavedDocId] = useState<string | null>(null)
     const [showSaveModal, setShowSaveModal] = useState(false)
+
+    // Lock body scroll when save modal is open
+    useEffect(() => {
+        if (showSaveModal) {
+            document.body.style.overflow = 'hidden'
+        } else {
+            document.body.style.overflow = 'unset'
+        }
+        return () => {
+            document.body.style.overflow = 'unset'
+        }
+    }, [showSaveModal])
     const [contactInfo, setContactInfo] = useState({
         full_name: '',
         email: '',
@@ -750,7 +762,12 @@ export default function DocumentGenerator() {
                                             </>
                                         )}
                                     </Button>
-                                    <Button variant="secondary" size="sm" onClick={handleDownload} className="text-white hover:bg-white/20">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={handleDownload}
+                                        className="bg-zinc-900 border-white/10 text-white hover:bg-zinc-800"
+                                    >
                                         <Download className="w-4 h-4 mr-1" />
                                         Download
                                     </Button>

@@ -56,7 +56,7 @@ export default function CoverLetterPreview({ document, variant = 'preview', cont
                     width: 8.5in;
                     min-height: 11in;
                     margin: 0 auto;
-                    padding: 0.75in 1in;
+                    padding: 0.4in 0.75in;
                     position: relative;
                     background: #fff;
                 }
@@ -69,7 +69,7 @@ export default function CoverLetterPreview({ document, variant = 'preview', cont
                         margin: 0;
                     }
                     .cover-letter-container {
-                        padding: 0.75in 1in;
+                        padding: 0.4in 0.75in;
                         box-shadow: none;
                         width: 8.5in;
                         min-height: 11in;
@@ -216,7 +216,7 @@ export default function CoverLetterPreview({ document, variant = 'preview', cont
             <div className="flex justify-end gap-2">
                 <Button
                     onClick={handlePrint}
-                    className="bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-600/20"
+                    className="bg-zinc-900 hover:bg-zinc-800 text-white border border-white/10 shadow-lg"
                     size="sm"
                 >
                     <Download className="w-4 h-4 mr-2" />

@@ -221,7 +221,7 @@ export default function ResumePreview({ resume, variant = 'preview' }: ResumePre
             <div className="flex justify-end gap-2">
                 <Button
                     onClick={handlePrint}
-                    className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/20"
+                    className="bg-zinc-900 hover:bg-zinc-800 text-white border border-white/10 shadow-lg"
                     size="sm"
                 >
                     <Download className="w-4 h-4 mr-2" />

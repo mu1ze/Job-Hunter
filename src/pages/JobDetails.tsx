@@ -13,6 +13,7 @@ import { showToast, toastMessages } from '../utils/toast'
 import type { SavedJob, GeneratedDocument } from '../types'
 import GeneratedResumePreview from '../components/GeneratedResumePreview'
 import CoverLetterPreview from '../components/CoverLetterPreview'
+import DocumentPreviewModal from '../components/DocumentPreviewModal'
 
 export default function JobDetails() {
     const { id } = useParams<{ id: string }>()
@@ -658,99 +659,15 @@ export default function JobDetails() {
                 </div>
             </div>
 
-            {/* Document Preview Modal - Mobile Optimized */}
-            {selectedDoc && (
-                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in">
-                    <div className="bg-[#0A0A0A] border border-white/10 rounded-t-2xl sm:rounded-2xl w-full max-w-5xl h-[95vh] sm:h-auto sm:max-h-[90vh] flex flex-col shadow-2xl overflow-hidden m-0 sm:m-4">
-                        {/* Header */}
-                        <div className="flex items-center justify-between px-4 py-4 sm:px-6 sm:py-6 border-b border-white/10 flex-shrink-0">
-                            <div className="min-w-0 flex-1 pr-2">
-                                <h3 className="text-base sm:text-xl font-semibold text-white truncate capitalize">
-                                    {selectedDoc.document_type.replace('_', ' ')}
-                                </h3>
-                                <p className="text-xs text-white/40 truncate hidden sm:block">
-                                    Generated on {new Date(selectedDoc.created_at).toLocaleString()}
-                                </p>
-                            </div>
-                            <div className="flex items-center gap-2 flex-shrink-0">
-                                {selectedDoc.ats_score && (
-                                    <div className={`px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg border ${selectedDoc.ats_score >= 90 ? 'bg-green-500/10 text-green-300 border-green-500/20' :
-                                            selectedDoc.ats_score >= 70 ? 'bg-blue-500/10 text-blue-300 border-blue-500/20' :
-                                                'bg-yellow-500/10 text-yellow-300 border-yellow-500/20'
-                                        }`}>
-                                        <span className="text-xs sm:text-sm font-bold">{selectedDoc.ats_score}%</span>
-                                    </div>
-                                )}
-                                <button
-                                    onClick={() => setSelectedDoc(null)}
-                                    className="h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center rounded-full hover:bg-white/10 text-white/60 hover:text-white transition-colors"
-                                >
-                                    <X className="w-5 h-5 sm:w-6 sm:h-6" />
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Document Content - Scrollable Area */}
-                        <div className="flex-1 overflow-y-auto overflow-x-hidden bg-[#0A0A0A]">
-                            <div className="min-h-full p-2 sm:p-4 w-full" style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
-                                {selectedDoc.document_type === 'resume' ? (
-                                    <GeneratedResumePreview document={selectedDoc} variant="preview" />
-                                ) : (
-                                    <CoverLetterPreview document={selectedDoc} variant="preview" />
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Action Buttons - Mobile Optimized */}
-                        <div className="p-3 sm:p-4 border-t border-white/10 bg-[#0A0A0A] flex-shrink-0 safe-area-pb">
-                            <div className="grid grid-cols-2 gap-2">
-                                <button
-                                    onClick={() => {
-                                        const blob = new Blob([selectedDoc.content], { type: 'text/plain' });
-                                        const url = URL.createObjectURL(blob);
-                                        const a = document.createElement('a');
-                                        a.href = url;
-                                        a.download = `${selectedDoc.document_type}_${job.title.replace(/\s+/g, '_')}_${job.company.replace(/\s+/g, '_')}.txt`;
-                                        a.click();
-                                        URL.revokeObjectURL(url);
-                                        showToast.success('Document downloaded');
-                                    }}
-                                    className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-colors text-xs h-11 active:scale-95 transition-transform"
-                                >
-                                    <Download className="w-4 h-4" />
-                                    <span>Download</span>
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        navigator.clipboard.writeText(selectedDoc.content)
-                                        showToast.success('Content copied to clipboard')
-                                    }}
-                                    className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-colors text-xs h-11 active:scale-95 transition-transform"
-                                >
-                                    <FileText className="w-4 h-4" />
-                                    <span>Copy</span>
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        setSelectedDoc(null);
-                                        navigate('/generate', { state: { jobId: job.id } });
-                                    }}
-                                    className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg bg-white/10 border border-white/10 text-white hover:bg-white/20 transition-colors text-xs h-11 active:scale-95 transition-transform"
-                                >
-                                    <Edit2 className="w-4 h-4" />
-                                    <span>New Version</span>
-                                </button>
-                                <button
-                                    onClick={() => setSelectedDoc(null)}
-                                    className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg bg-white text-black hover:bg-white/90 transition-colors text-xs font-medium h-11 active:scale-95 transition-transform"
-                                >
-                                    <span>Close</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
+            {/* Document Preview Modal */}
+            <DocumentPreviewModal
+                isOpen={!!selectedDoc}
+                document={selectedDoc}
+                onClose={() => setSelectedDoc(null)}
+                jobTitle={job.title}
+                companyName={job.company}
+                jobId={job.id}
+            />
         </div>
     )
 }

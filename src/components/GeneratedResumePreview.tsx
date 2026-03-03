@@ -48,15 +48,15 @@ export default function GeneratedResumePreview({ document, variant = 'preview' }
                     width: 8.5in;
                     min-height: 11in;
                     margin: 0 auto;
-                    padding: 0.75in 0.9in;
+                    padding: 0.3in 0.5in;
                     position: relative;
                     background: #fff;
                 }
                 
                 .resume-header { 
                     text-align: left; 
-                    margin-bottom: 0.3in;
-                    padding-bottom: 0.15in;
+                    margin-bottom: 0.15in;
+                    padding-bottom: 0.1in;
                     border-bottom: 2pt solid #1e3a8a;
                 }
                 
@@ -81,7 +81,7 @@ export default function GeneratedResumePreview({ document, variant = 'preview' }
                 }
                 
                 .resume-section { 
-                    margin-bottom: 0.25in; 
+                    margin-bottom: 0.15in; 
                 }
                 
                 .resume-section-title { 
@@ -304,7 +304,7 @@ export default function GeneratedResumePreview({ document, variant = 'preview' }
             <div className="flex justify-end gap-2 no-print">
                 <Button
                     onClick={handlePrint}
-                    className="bg-blue-700 hover:bg-blue-800 text-white shadow-lg"
+                    className="bg-zinc-900 hover:bg-zinc-800 text-white border border-white/10 shadow-lg"
                     size="sm"
                 >
                     <Download className="w-4 h-4 mr-2" />
