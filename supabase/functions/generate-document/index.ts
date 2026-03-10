@@ -70,17 +70,19 @@ Deno.serve(async (req) => {
 
     if (documentType === "resume") {
       systemPrompt =
-        `You are an expert ATS resume optimizer. Create a tailored resume that matches the job description while showcasing the candidate's relevant experience and skills.
+        `You are an expert ATS resume optimizer specializing in Northern Ontario professional standards. Create a tailored, high-fidelity resume that follows these specific regional guidelines:
       
 Guidelines:
-- Highlight skills and experience that match the job requirements
-- Use keywords from the job description naturally
-- Quantify achievements where possible
-- Keep it concise and ATS-friendly
-- Maintain professional tone
-- Format in clean, structured sections${focusInstruction}
+- **FORMAT**: Use a strict reverse-chronological format.
+- **HEADER**: Create a clear, modern contact header.
+- **STYLE**: Maintain a clean, professional, and sophisticated layout.
+- **ALIGNMENT**: Ensure perfect left-alignment for all bullet points and text blocks.
+- **KEYWORDS**: Strategically use industry-specific keywords from the job description (Mining, Forestry, Health, Education, or Tech) to pass through modern ATS.
+- **BILINGUALism**: If the candidate mentions French proficiency, highlight it as a key asset.
+- **TONE**: Use an achievement-oriented, professional tone.
+- **SECTIONS**: Use standard professional sections: Summary, Skills, Work Experience, Education, and Certifications.${focusInstruction}
 
-Return ONLY the resume content as plain text, properly formatted with sections.`;
+Return ONLY the resume content as plain text, formatted with clear section headers.`;
 
       userPrompt = `Job Description:
 ${jobDescription}
@@ -92,18 +94,18 @@ Work Experience: ${JSON.stringify(resumeData.work_experience || [])}
 Education: ${JSON.stringify(resumeData.education || [])}
 Certifications: ${resumeData.certifications?.join(", ") || "None"}
 
-Create an optimized resume tailored to this job.`;
+Create an optimized, Northern Ontario standard resume tailored to this job.`;
     } else if (documentType === "cover_letter") {
       systemPrompt =
-        `You are an expert cover letter writer. Create a compelling, personalized cover letter that connects the candidate's experience to the job requirements.
+        `You are an expert cover letter writer specializing in the Northern Ontario job market. Create a compelling, professional cover letter that follows these regional standards:
 
 Guidelines:
-- Open with enthusiasm for the specific role and company
-- Highlight 2-3 relevant achievements that match the job
-- Show cultural fit and genuine interest
-- Keep it concise (3-4 paragraphs)
-- Professional yet personable tone
-- Include a strong call to action${focusInstruction}
+- **FIRST PARAGRAPH**: Open with genuine enthusiasm for the role and specific mention of the company. State exactly which position you are applying for.
+- **BODY**: Highlight 2-3 specific achievements related to northern industry values like reliability, safety, innovation, or community impact.
+- **LOCAL CONNECTION**: If applicable, frame the candidate as someone committed to contributing to Northern Ontario's economy.
+- **TONE**: Direct, humble yet confident, and highly professional.
+- **LENGTH**: Keep it strictly to 3-4 concise paragraphs.
+- **CALL TO ACTION**: End with a confident request for an interview and a professional sign-off.${focusInstruction}
 
 Return ONLY the cover letter content as plain text.`;
 

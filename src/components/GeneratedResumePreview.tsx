@@ -24,7 +24,7 @@ export default function GeneratedResumePreview({ document, variant = 'preview' }
 
         const styles = `
             <style>
-                @import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+                @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@700&family=Inter:wght@400;500;600;700&display=swap');
                 
                 * { 
                     margin: 0; 
@@ -33,78 +33,79 @@ export default function GeneratedResumePreview({ document, variant = 'preview' }
                 }
                 
                 body { 
-                    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; 
-                    font-size: 11pt;
-                    line-height: 1.5; 
-                    color: #1a1a1a;
+                    font-family: 'Inter', -apple-system, system-ui, sans-serif; 
+                    font-size: 10pt;
+                    line-height: 1.4; 
+                    color: #000;
                     background: #fff;
-                    padding: 0;
-                    margin: 0;
-                    width: 8.5in;
-                    min-height: 11in;
+                    -webkit-print-color-adjust: exact;
                 }
                 
                 .resume-container {
                     width: 8.5in;
                     min-height: 11in;
                     margin: 0 auto;
-                    padding: 0.3in 0.5in;
-                    position: relative;
+                    padding: 0.4in 0.6in;
                     background: #fff;
                 }
                 
                 .resume-header { 
-                    text-align: left; 
-                    margin-bottom: 0.15in;
-                    padding-bottom: 0.1in;
-                    border-bottom: 2pt solid #1e3a8a;
+                    text-align: center; 
+                    margin-bottom: 0.2in;
                 }
                 
                 .resume-name { 
-                    font-family: 'Crimson Pro', Georgia, serif;
+                    font-family: 'Libre Baskerville', serif;
                     font-size: 24pt; 
                     font-weight: 700; 
-                    color: #1e3a8a;
-                    margin-bottom: 0.06in;
-                    letter-spacing: 0;
+                    color: #000;
+                    margin-bottom: 0.05in;
+                    letter-spacing: -0.5pt;
+                    line-height: 1.1;
                 }
                 
                 .resume-contact { 
-                    font-size: 9.5pt; 
-                    color: #4b5563;
-                    line-height: 1.6;
+                    font-size: 9pt; 
+                    color: #333;
+                    line-height: 1.4;
+                    font-weight: 400;
+                    display: flex;
+                    justify-content: center;
+                    flex-wrap: wrap;
+                    gap: 8pt;
                 }
                 
-                .resume-contact-divider {
-                    color: #9ca3af;
-                    margin: 0 0.12in;
+                .resume-contact-item {
+                    display: flex;
+                    align-items: center;
                 }
                 
                 .resume-section { 
-                    margin-bottom: 0.15in; 
+                    margin-bottom: 0.18in; 
                 }
                 
                 .resume-section-title { 
-                    font-family: 'Crimson Pro', Georgia, serif;
-                    font-size: 11pt; 
+                    font-size: 10.5pt; 
                     font-weight: 700; 
-                    color: #1e3a8a; 
+                    color: #000; 
                     text-transform: uppercase; 
                     letter-spacing: 1.5pt;
-                    margin-bottom: 0.1in;
-                    padding-bottom: 0.04in;
-                    border-bottom: 1pt solid #d1d5db;
+                    margin-bottom: 0.06in;
+                    padding-bottom: 1.5pt;
+                    border-bottom: 1pt solid #000;
+                    font-family: 'Inter', sans-serif;
                 }
                 
                 .resume-summary { 
                     font-size: 10pt;
-                    color: #374151;
-                    line-height: 1.55;
-                    text-align: left;
+                    color: #000;
+                    line-height: 1.45;
+                    margin-bottom: 0.08in;
+                    text-align: justify;
                 }
                 
                 .resume-entry {
-                    margin-bottom: 0.2in;
+                    margin-bottom: 0.12in;
                 }
                 
                 .resume-entry:last-child {
@@ -115,91 +116,68 @@ export default function GeneratedResumePreview({ document, variant = 'preview' }
                     display: flex;
                     justify-content: space-between;
                     align-items: baseline;
-                    margin-bottom: 0.03in;
+                    margin-bottom: 1.5pt;
                 }
                 
                 .resume-entry-title {
-                    font-family: 'Inter', sans-serif;
                     font-size: 10.5pt;
                     font-weight: 700;
-                    color: #111827;
-                    margin: 0;
+                    color: #000;
                 }
                 
                 .resume-entry-subtitle {
                     font-size: 10pt;
-                    color: #374151;
-                    font-weight: 500;
-                    margin: 0;
+                    color: #000;
+                    font-weight: 600;
                 }
                 
                 .resume-entry-date {
-                    font-size: 9pt;
-                    color: #6b7280;
-                    font-weight: 400;
-                    text-align: right;
+                    font-size: 9.5pt;
+                    color: #222;
+                    font-weight: 500;
                     white-space: nowrap;
-                    font-style: italic;
                 }
                 
                 .resume-bullets {
-                    margin: 0.04in 0 0 0;
-                    padding-left: 0.2in;
+                    margin-top: 1.5pt;
+                    padding-left: 14pt;
                     list-style-type: disc;
                 }
                 
                 .resume-bullet {
-                    margin-bottom: 0.03in;
-                    font-size: 10pt;
-                    color: #374151;
-                    line-height: 1.45;
-                    text-align: left;
+                    margin-bottom: 2pt;
+                    font-size: 9.5pt;
+                    color: #111;
+                    line-height: 1.4;
                 }
                 
                 .resume-skill-line {
-                    font-size: 10pt;
-                    color: #374151;
-                    line-height: 1.55;
-                    margin-bottom: 0.04in;
+                    font-size: 9.5pt;
+                    color: #111;
+                    line-height: 1.4;
+                    margin-bottom: 3pt;
+                    display: flex;
                 }
                 
                 .resume-skill-label {
-                    font-weight: 600;
-                    color: #1f2937;
-                }
-                
-                .resume-edu-entry {
-                    margin-bottom: 0.12in;
-                }
-                
-                .resume-cert-entry {
-                    font-size: 10pt;
-                    color: #374151;
-                    margin-bottom: 0.04in;
-                    line-height: 1.45;
+                    font-weight: 700;
+                    color: #000;
+                    min-width: 1.2in;
+                    flex-shrink: 0;
                 }
                 
                 @media print {
                     @page {
                         size: letter;
-                        margin: 0.75in 0.9in;
+                        margin: 0;
                     }
                     body { 
                         width: 8.5in;
-                        min-height: 11in;
+                        height: 11in;
                         padding: 0;
                         margin: 0;
-                        -webkit-print-color-adjust: exact;
-                        print-color-adjust: exact;
-                    }
-                    .resume-container {
-                        padding: 0;
-                        box-shadow: none;
-                        width: 100%;
                     }
                     .no-print { display: none !important; }
-                    .resume-section { page-break-inside: avoid; }
-                    .resume-entry { page-break-inside: avoid; }
                 }
             </style>
         `
@@ -227,8 +205,15 @@ export default function GeneratedResumePreview({ document, variant = 'preview' }
     }
 
     const parseResumeContent = (content: string) => {
-        // Strip markdown bold markers from content
-        const cleanContent = content.replace(/\*\*/g, '')
+        // Aggressively strip markdown artifacts and common symbols the AI hallucinated
+        const cleanContent = content
+            .replace(/\*\*/g, '')
+            .replace(/^#+\s+/gm, '')
+            .replace(/\s+\|$/gm, '')
+            .replace(/^\|\s+/gm, '')
+            .replace(/•/g, '-')
+            .trim()
+
         const lines = cleanContent.split('\n')
 
         const sections: Array<{
@@ -241,28 +226,34 @@ export default function GeneratedResumePreview({ document, variant = 'preview' }
         let headerLines: string[] = []
         let foundFirstSection = false
 
+        const SECTION_HEADERS = [
+            'SUMMARY', 'PROFESSIONAL SUMMARY', 'PROFILE', 'OBJECTIVE', 'CAREER OBJECTIVE',
+            'EXPERIENCE', 'WORK EXPERIENCE', 'PROFESSIONAL EXPERIENCE', 'EMPLOYMENT HISTORY',
+            'EDUCATION', 'ACADEMIC BACKGROUND', 'SKILLS', 'TECHNICAL SKILLS', 'CORE COMPETENCIES',
+            'KEY SKILLS', 'CERTIFICATIONS', 'CERTIFICATES', 'PROJECTS', 'AWARDS', 'VOLUNTEER',
+            'REFERENCES'
+        ]
+
         for (let i = 0; i < lines.length; i++) {
             const line = lines[i].trim()
             if (!line) continue
 
-            // Detect section headers - check for common resume section names
-            const sectionMatch = line.match(/^(SUMMARY|PROFESSIONAL SUMMARY|PROFILE|OBJECTIVE|CAREER OBJECTIVE|EXPERIENCE|WORK EXPERIENCE|PROFESSIONAL EXPERIENCE|EMPLOYMENT HISTORY|EDUCATION|ACADEMIC BACKGROUND|SKILLS|TECHNICAL SKILLS|CORE COMPETENCIES|KEY SKILLS|CERTIFICATIONS|CERTIFICATES|PROJECTS|AWARDS|VOLUNTEER|REFERENCES|INTERESTS|LANGUAGES|PUBLICATIONS)$/i)
+            const cleanLineForCheck = line.toUpperCase().replace(/^#+\s+/, '').replace(/:$/, '').trim()
+            const isHeader = SECTION_HEADERS.some(h => cleanLineForCheck === h || cleanLineForCheck.startsWith(h))
 
-            if (sectionMatch) {
+            if (isHeader) {
                 if (currentSection) sections.push(currentSection)
                 foundFirstSection = true
 
                 let type: typeof sections[0]['type'] = 'other'
-                const sectionName = sectionMatch[1].toUpperCase()
-                if (/SUMMARY|PROFILE|OBJECTIVE/.test(sectionName)) type = 'summary'
-                else if (/EXPERIENCE|WORK|EMPLOYMENT/.test(sectionName)) type = 'experience'
-                else if (/EDUCATION|ACADEMIC/.test(sectionName)) type = 'education'
-                else if (/SKILLS|COMPETENCIES/.test(sectionName)) type = 'skills'
-                else if (/CERTIFICATIONS|CERTIFICATES/.test(sectionName)) type = 'certifications'
+                if (/SUMMARY|PROFILE|OBJECTIVE/.test(cleanLineForCheck)) type = 'summary'
+                else if (/EXPERIENCE|WORK|EMPLOYMENT/.test(cleanLineForCheck)) type = 'experience'
+                else if (/EDUCATION|ACADEMIC/.test(cleanLineForCheck)) type = 'education'
+                else if (/SKILLS|COMPETENCIES/.test(cleanLineForCheck)) type = 'skills'
+                else if (/CERTIFICATIONS|CERTIFICATES/.test(cleanLineForCheck)) type = 'certifications'
 
-                currentSection = { type, title: line, content: [] }
+                currentSection = { type, title: line.replace(/:$/, '').trim(), content: [] }
             } else if (!foundFirstSection) {
-                // Before first section heading = header/contact info
                 headerLines.push(line)
             } else if (currentSection) {
                 currentSection.content.push(line)
@@ -271,7 +262,6 @@ export default function GeneratedResumePreview({ document, variant = 'preview' }
 
         if (currentSection) sections.push(currentSection)
 
-        // Build header section from collected header lines
         if (headerLines.length > 0) {
             sections.unshift({ type: 'header', title: 'Contact Information', content: headerLines })
         }
@@ -317,11 +307,11 @@ export default function GeneratedResumePreview({ document, variant = 'preview' }
                     maxWidth: '8.5in',
                     width: '100%',
                     minHeight: 'auto',
-                    padding: 'clamp(1rem, 4vw, 0.75in) clamp(1rem, 5vw, 0.9in)',
+                    padding: '0.5in 0.65in',
                     fontFamily: "'Inter', sans-serif",
-                    fontSize: 'clamp(9pt, 1.5vw, 11pt)',
-                    lineHeight: 1.5,
-                    color: '#1a1a1a',
+                    fontSize: '10.5pt',
+                    lineHeight: 1.4,
+                    color: '#111',
                     margin: '0 auto',
                 }}>
                     <ResumeContent sections={sections} />
@@ -335,14 +325,12 @@ function ResumeContent({ sections }: { sections: Array<{ type: string; title: st
     const headerSection = sections.find(s => s.type === 'header')
     const otherSections = sections.filter(s => s.type !== 'header')
 
-    // Parse header: first line or pipe-separated line is the name, rest is contact info
     const parseHeader = () => {
         if (!headerSection || headerSection.content.length === 0) return { name: '', contactItems: [] as string[] }
 
         const allContent = headerSection.content.join(' | ')
         const items = allContent.split('|').map(s => s.trim()).filter(s => s)
 
-        // First item that looks like a name (not an email, phone, or URL)
         let name = ''
         const contactItems: string[] = []
 
@@ -360,25 +348,22 @@ function ResumeContent({ sections }: { sections: Array<{ type: string; title: st
     const { name, contactItems } = parseHeader()
 
     return (
-        <>
+        <div style={{ padding: '0' }}>
             {/* Header Section */}
             {headerSection && headerSection.content.length > 0 && (
                 <div style={{
-                    textAlign: 'left',
-                    marginBottom: '0.3in',
-                    paddingBottom: '0.15in',
-                    borderBottom: '2pt solid #1e3a8a'
+                    textAlign: 'center',
+                    marginBottom: '0.25in',
                 }}>
                     {name && (
                         <h1 style={{
-                            fontFamily: "'Crimson Pro', Georgia, serif",
-                            fontSize: 'clamp(18pt, 3.5vw, 24pt)',
+                            fontFamily: "'Libre Baskerville', serif",
+                            fontSize: '26pt',
                             fontWeight: 700,
-                            color: '#1e3a8a',
-                            margin: '0 0 0.06in 0',
-                            letterSpacing: 0,
-                            lineHeight: 1.2,
-                            wordBreak: 'break-word' as const,
+                            color: '#000',
+                            margin: '0 0 0.08in 0',
+                            letterSpacing: '-0.5pt',
+                            lineHeight: 1.1,
                         }}>
                             {name}
                         </h1>
@@ -386,19 +371,20 @@ function ResumeContent({ sections }: { sections: Array<{ type: string; title: st
 
                     {contactItems.length > 0 && (
                         <div style={{
-                            fontSize: 'clamp(8pt, 1.3vw, 9.5pt)',
-                            color: '#4b5563',
-                            lineHeight: 1.6,
+                            fontSize: '9pt',
+                            color: '#444',
+                            lineHeight: 1.4,
                             display: 'flex',
-                            flexWrap: 'wrap' as const,
-                            gap: '0.04in 0',
+                            flexWrap: 'wrap',
+                            justifyContent: 'center',
                             alignItems: 'center',
+                            fontWeight: 400,
                         }}>
                             {contactItems.map((item, i) => (
-                                <span key={i} style={{ display: 'inline', whiteSpace: 'nowrap' as const }}>
+                                <span key={i} style={{ display: 'inline', whiteSpace: 'nowrap' }}>
                                     {item}
                                     {i < contactItems.length - 1 && (
-                                        <span style={{ color: '#9ca3af', margin: '0 0.12in' }}>|</span>
+                                        <span style={{ color: '#999', margin: '0 0.08in' }}>|</span>
                                     )}
                                 </span>
                             ))}
@@ -409,32 +395,34 @@ function ResumeContent({ sections }: { sections: Array<{ type: string; title: st
 
             {/* Other Sections */}
             {otherSections.map((section, idx) => (
-                <div key={idx} style={{ marginBottom: '0.25in' }}>
+                <div key={idx} style={{ marginBottom: '0.2in' }}>
                     <h2 style={{
-                        fontFamily: "'Crimson Pro', Georgia, serif",
-                        fontSize: 'clamp(10pt, 1.4vw, 11pt)',
+                        fontSize: '11pt',
                         fontWeight: 700,
-                        color: '#1e3a8a',
-                        textTransform: 'uppercase' as const,
-                        letterSpacing: '1.5pt',
-                        margin: '0 0 0.1in 0',
-                        paddingBottom: '0.04in',
-                        borderBottom: '1pt solid #d1d5db'
+                        color: '#000',
+                        textTransform: 'uppercase',
+                        letterSpacing: '1.2pt',
+                        margin: '0 0 0.08in 0',
+                        paddingBottom: '2pt',
+                        borderBottom: '1.5pt solid #333',
+                        fontFamily: "'Inter', sans-serif",
+                        textAlign: 'left',
                     }}>
                         {section.title}
                     </h2>
 
                     <div style={{
-                        color: '#1f2937',
-                        fontSize: 'clamp(9pt, 1.3vw, 10pt)',
-                        lineHeight: 1.5,
-                        textAlign: 'left' as const
+                        color: '#111',
+                        fontSize: '10pt',
+                        lineHeight: 1.45,
+                        textAlign: 'left',
+                        fontFamily: "'Inter', sans-serif",
                     }}>
                         {renderSectionContent(section)}
                     </div>
                 </div>
             ))}
-        </>
+        </div>
     )
 }
 
@@ -445,18 +433,18 @@ function renderSectionContent(section: { type: string; title: string; content: s
         case 'summary':
             return (
                 <p style={{
-                    fontSize: 'clamp(9pt, 1.3vw, 10pt)',
-                    color: '#374151',
-                    lineHeight: 1.55,
-                    textAlign: 'left' as const,
-                    margin: 0
+                    fontSize: '10pt',
+                    color: '#222',
+                    lineHeight: '1.5',
+                    textAlign: 'justify' as const,
+                    margin: 0,
+                    padding: 0,
                 }}>
-                    {lines.join(' ')}
+                    {lines.map(l => l.replace(/Summary\s*\|\s*/i, '')).join(' ')}
                 </p>
             )
 
         case 'experience': {
-            // Parse experience entries: look for lines that seem like job titles + company + dates
             const entries: Array<{
                 title: string
                 company: string
@@ -464,115 +452,98 @@ function renderSectionContent(section: { type: string; title: string; content: s
                 location: string
                 bullets: string[]
             }> = []
-            let currentEntry: typeof entries[0] | null = null
 
-            for (let i = 0; i < lines.length; i++) {
-                const line = lines[i]
+            let i = 0
+            while (i < lines.length) {
+                const line = lines[i].trim()
+                if (!line) { i++; continue }
 
-                // Check if this line has pipe separators (title | company | date pattern)
-                const pipeCount = (line.match(/\|/g) || []).length
+                const isBullet = line.startsWith('-') || line.startsWith('•') || line.startsWith('–')
 
-                if (pipeCount >= 1 && !line.startsWith('-') && !line.startsWith('•')) {
-                    // This is likely a job entry header line
-                    if (currentEntry) entries.push(currentEntry)
-
+                if (!isBullet) {
+                    // Start of a new job entry
                     const parts = line.split('|').map(s => s.trim())
-                    currentEntry = {
-                        title: parts[0] || '',
-                        company: parts[1] || '',
-                        date: parts.slice(2).join(' | ') || '',
-                        location: '',
-                        bullets: []
+                    let title = parts[0]
+                    let company = parts[1] || ''
+                    let date = parts.find(p => p.match(/\d{4}|Present|Current/i)) || ''
+                    let location = parts.length > 3 ? parts[parts.length - 1] : ''
+
+                    // Improved date extraction for headers without pipes
+                    if (parts.length === 1) {
+                        const dateMatch = line.match(/(.*)(\b\d{4}.*|Present.*|Current.*)/i)
+                        if (dateMatch) {
+                            title = dateMatch[1].trim().replace(/,$/, '')
+                            date = dateMatch[2].trim()
+                        }
                     }
-                } else if (line.match(/\d{4}/) && (line.includes('–') || line.includes('-') || line.includes('to') || line.includes('Present') || line.includes('Current'))) {
-                    // Date line or title with date
-                    if (currentEntry && !currentEntry.date) {
-                        currentEntry.date = line
-                    } else {
-                        if (currentEntry) entries.push(currentEntry)
-                        currentEntry = { title: line, company: '', date: '', location: '', bullets: [] }
+
+                    const entry = { title, company, date, location, bullets: [] as string[] }
+                    i++
+
+                    // Consume everything until the next line that looks like a NEW header
+                    // A new header is a line that:
+                    // 1. Is not a bullet
+                    // 2. Is not empty
+                    // 3. Usually followed by bullets OR contains a date/pipe
+                    while (i < lines.length) {
+                        const nextLine = lines[i].trim()
+                        if (!nextLine) { i++; continue }
+
+                        const isBulletLine = nextLine.startsWith('-') || nextLine.startsWith('•') || nextLine.startsWith('–')
+                        // If it's not a bullet, it might be a new header
+                        if (!isBulletLine) {
+                            // HEURISTIC: If it has a date, pipe, or the previous line was a bullet, it's a new header
+                            const hasHeaderMarkers = nextLine.includes('|') || nextLine.match(/\b\d{4}|Present|Current/i)
+                            const prevLineWasBullet = i > 0 && (lines[i - 1].trim().startsWith('-') || lines[i - 1].trim().startsWith('•'))
+
+                            if (hasHeaderMarkers || prevLineWasBullet || nextLine.length < 60) {
+                                break // It's a next header
+                            }
+                        }
+
+                        entry.bullets.push(nextLine.replace(/^[-•–]\s*/, ''))
+                        i++
                     }
-                } else if (line.startsWith('•') || line.startsWith('-') || line.startsWith('–')) {
-                    const bullet = line.replace(/^[•\-–]\s*/, '').trim()
-                    if (currentEntry) {
-                        currentEntry.bullets.push(bullet)
-                    }
-                } else if (currentEntry) {
-                    // Non-bullet, non-header content — could be a description or sub-info
-                    if (currentEntry.bullets.length === 0 && !currentEntry.company) {
-                        currentEntry.company = line
-                    } else {
-                        currentEntry.bullets.push(line)
-                    }
+                    entries.push(entry)
                 } else {
-                    // No current entry yet — start one
-                    currentEntry = { title: line, company: '', date: '', location: '', bullets: [] }
+                    // Bullet without a header - prepend a generic header or group with previous
+                    if (entries.length > 0) {
+                        entries[entries.length - 1].bullets.push(line.replace(/^[-•–]\s*/, ''))
+                    } else {
+                        entries.push({
+                            title: 'Professional Highlights',
+                            company: '',
+                            date: '',
+                            location: '',
+                            bullets: [line.replace(/^[-•–]\s*/, '')]
+                        })
+                    }
+                    i++
                 }
             }
 
-            if (currentEntry) entries.push(currentEntry)
-
-            return entries.map((entry, i) => (
-                <div key={i} style={{ marginBottom: '0.2in' }}>
+            return entries.map((entry, idx) => (
+                <div key={idx} style={{ marginBottom: idx === entries.length - 1 ? 0 : '0.15in', padding: 0 }}>
                     <div style={{
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'baseline',
-                        marginBottom: '0.03in',
-                        flexWrap: 'wrap' as const,
-                        gap: '0 0.15in',
+                        marginBottom: '2pt',
+                        padding: 0,
                     }}>
-                        <div style={{ flex: '1 1 auto', minWidth: 0 }}>
-                            {entry.title && (
-                                <h3 style={{
-                                    fontFamily: "'Inter', sans-serif",
-                                    fontSize: 'clamp(9.5pt, 1.4vw, 10.5pt)',
-                                    fontWeight: 700,
-                                    color: '#111827',
-                                    margin: 0,
-                                    wordBreak: 'break-word' as const,
-                                }}>
-                                    {entry.title}
-                                </h3>
-                            )}
-                            {entry.company && (
-                                <p style={{
-                                    fontSize: 'clamp(9pt, 1.3vw, 10pt)',
-                                    color: '#374151',
-                                    fontWeight: 500,
-                                    margin: '0.02in 0 0 0'
-                                }}>
-                                    {entry.company}
-                                </p>
-                            )}
+                        <div style={{ flex: 1, padding: 0 }}>
+                            <span style={{ fontWeight: 700, fontSize: '10.5pt', color: '#000' }}>{entry.title}</span>
+                            {entry.company && <span style={{ fontWeight: 600, color: '#333' }}> | {entry.company}</span>}
+                            {entry.location && <span style={{ fontWeight: 600, color: '#444' }}> — {entry.location}</span>}
                         </div>
-                        {entry.date && (
-                            <span style={{
-                                fontSize: 'clamp(8pt, 1.2vw, 9pt)',
-                                color: '#6b7280',
-                                fontStyle: 'italic' as const,
-                                whiteSpace: 'nowrap' as const,
-                                flexShrink: 0,
-                            }}>
-                                {entry.date}
-                            </span>
-                        )}
+                        <div style={{ fontWeight: 600, fontSize: '9.5pt', color: '#444', textAlign: 'right' }}>
+                            {entry.date}
+                        </div>
                     </div>
-
                     {entry.bullets.length > 0 && (
-                        <ul style={{
-                            margin: '0.04in 0 0 0',
-                            paddingLeft: '0.2in',
-                            listStyleType: 'disc'
-                        }}>
+                        <ul style={{ margin: '1pt 0 0 0', paddingLeft: '0.15in', listStyleType: 'disc' }}>
                             {entry.bullets.map((bullet, j) => (
-                                <li key={j} style={{
-                                    marginBottom: '0.03in',
-                                    fontSize: 'clamp(9pt, 1.3vw, 10pt)',
-                                    color: '#374151',
-                                    lineHeight: 1.45,
-                                    textAlign: 'left' as const
-                                }}>
+                                <li key={j} style={{ marginBottom: '2pt', fontSize: '10pt', color: '#333', lineHeight: '1.4', textAlign: 'left' }}>
                                     {bullet}
                                 </li>
                             ))}
@@ -582,203 +553,56 @@ function renderSectionContent(section: { type: string; title: string; content: s
             ))
         }
 
-        case 'education':
+        case 'education': {
             return lines.map((line, i) => {
-                // Check for pipe-separated education entries
-                if (line.includes('|')) {
-                    const parts = line.split('|').map(s => s.trim())
+                const parts = line.split('|').map(s => s.trim())
+                if (parts.length >= 2) {
                     return (
-                        <div key={i} style={{ marginBottom: '0.12in' }}>
-                            <div style={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'baseline',
-                                flexWrap: 'wrap' as const,
-                                gap: '0 0.15in',
-                            }}>
-                                <div style={{ flex: '1 1 auto', minWidth: 0 }}>
-                                    <h3 style={{
-                                        fontFamily: "'Inter', sans-serif",
-                                        fontSize: 'clamp(9.5pt, 1.4vw, 10.5pt)',
-                                        fontWeight: 700,
-                                        color: '#111827',
-                                        margin: '0 0 0.02in 0',
-                                        wordBreak: 'break-word' as const,
-                                    }}>
-                                        {parts[0]}
-                                    </h3>
-                                    {parts[1] && (
-                                        <p style={{
-                                            fontSize: 'clamp(9pt, 1.3vw, 10pt)',
-                                            color: '#374151',
-                                            fontWeight: 500,
-                                            margin: 0,
-                                        }}>
-                                            {parts[1]}
-                                        </p>
-                                    )}
-                                </div>
-                                {parts[2] && (
-                                    <span style={{
-                                        fontSize: 'clamp(8pt, 1.2vw, 9pt)',
-                                        color: '#6b7280',
-                                        fontStyle: 'italic' as const,
-                                        whiteSpace: 'nowrap' as const,
-                                        flexShrink: 0,
-                                    }}>
-                                        {parts[2]}
-                                    </span>
-                                )}
+                        <div key={i} style={{ marginBottom: '0.1in', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                            <div>
+                                <div style={{ fontWeight: 700, fontSize: '10.5pt' }}>{parts[0]}</div>
+                                {parts[1] && <div style={{ fontWeight: 500, color: '#444' }}>{parts[1]}</div>}
                             </div>
+                            <div style={{ fontWeight: 600, fontSize: '9.5pt', color: '#444' }}>{parts[2] || ''}</div>
                         </div>
                     )
                 }
-
-                // Bullet point
-                if (line.startsWith('•') || line.startsWith('-')) {
-                    return (
-                        <p key={i} style={{
-                            margin: '0 0 0.04in 0.2in',
-                            fontSize: 'clamp(9pt, 1.3vw, 10pt)',
-                            color: '#374151',
-                            lineHeight: 1.45,
-                            textAlign: 'left' as const,
-                            textIndent: '-0.15in',
-                            paddingLeft: '0.15in',
-                        }}>
-                            • {line.replace(/^[•\-–]\s*/, '').trim()}
-                        </p>
-                    )
-                }
-
-                return (
-                    <p key={i} style={{
-                        fontSize: 'clamp(9pt, 1.3vw, 10pt)',
-                        color: '#374151',
-                        fontWeight: 500,
-                        margin: '0.02in 0 0.08in 0'
-                    }}>
-                        {line}
-                    </p>
-                )
-            })
-
-        case 'skills': {
-            // Check if skills are listed with categories (e.g., "Languages: Java, Python")
-            const hasCategories = lines.some(l => l.includes(':'))
-
-            if (hasCategories) {
-                return lines.map((line, i) => {
-                    // Remove bullet prefix if present
-                    const cleanLine = line.replace(/^[•\-–]\s*/, '').trim()
-                    const colonIdx = cleanLine.indexOf(':')
-
-                    if (colonIdx > 0) {
-                        const label = cleanLine.substring(0, colonIdx)
-                        const value = cleanLine.substring(colonIdx + 1).trim()
-                        return (
-                            <p key={i} style={{
-                                fontSize: 'clamp(9pt, 1.3vw, 10pt)',
-                                color: '#374151',
-                                lineHeight: 1.55,
-                                marginBottom: '0.04in',
-                            }}>
-                                <strong style={{ fontWeight: 600, color: '#1f2937' }}>{label}:</strong> {value}
-                            </p>
-                        )
-                    }
-
-                    return (
-                        <p key={i} style={{
-                            fontSize: 'clamp(9pt, 1.3vw, 10pt)',
-                            color: '#374151',
-                            lineHeight: 1.55,
-                            marginBottom: '0.04in',
-                        }}>
-                            {cleanLine}
-                        </p>
-                    )
-                })
-            }
-
-            // Simple list style
-            const allSkills = lines.join(', ').split(/[,;]/).map(s => s.replace(/^[•\-–]\s*/, '').trim()).filter(s => s)
-            return (
-                <div style={{
-                    fontSize: 'clamp(9pt, 1.3vw, 10pt)',
-                    color: '#374151',
-                    lineHeight: 1.6
-                }}>
-                    {allSkills.join(' • ')}
+                const bulletClean = line.replace(/^[-•–]\s*/, '')
+                return <div key={i} style={{ marginBottom: '2pt', paddingLeft: line.startsWith('-') ? '0.15in' : 0 }}>
+                    {line.startsWith('-') ? `• ${bulletClean}` : line}
                 </div>
-            )
+            })
         }
 
-        case 'certifications':
+        case 'skills': {
             return lines.map((line, i) => {
-                const cleanLine = line.replace(/^[•\-–]\s*/, '').trim()
+                const cleanLine = line.replace(/^[-•–]\s*/, '').trim()
+                const colonIdx = cleanLine.indexOf(':')
 
-                // Check if it's pipe-separated
-                if (cleanLine.includes('|')) {
-                    const parts = cleanLine.split('|').map(s => s.trim())
+                if (colonIdx > 0) {
+                    const label = cleanLine.substring(0, colonIdx)
+                    const value = cleanLine.substring(colonIdx + 1).trim()
                     return (
-                        <div key={i} style={{ marginBottom: '0.06in' }}>
-                            <span style={{
-                                fontSize: 'clamp(9pt, 1.3vw, 10pt)',
-                                color: '#374151',
-                                fontWeight: 600,
-                            }}>
-                                {parts[0]}
-                            </span>
-                            {parts.slice(1).map((part, j) => (
-                                <span key={j} style={{ color: '#6b7280', fontSize: 'clamp(8.5pt, 1.2vw, 9.5pt)' }}>
-                                    {' '} — {part}
-                                </span>
-                            ))}
+                        <div key={i} style={{ marginBottom: '4pt', display: 'flex', alignItems: 'flex-start', padding: 0 }}>
+                            <span style={{ fontWeight: 700, color: '#000', marginRight: '8pt', minWidth: '1.4in', display: 'inline-block' }}>{label}:</span>
+                            <span style={{ color: '#222', flex: 1 }}>{value}</span>
                         </div>
                     )
                 }
-
-                return (
-                    <p key={i} style={{
-                        margin: '0 0 0.04in 0',
-                        fontSize: 'clamp(9pt, 1.3vw, 10pt)',
-                        color: '#374151',
-                        lineHeight: 1.45,
-                    }}>
-                        • {cleanLine}
-                    </p>
-                )
+                return <div key={i} style={{ marginBottom: '2pt', padding: 0 }}>{cleanLine}</div>
             })
+        }
 
         default:
-            return lines.map((line, i) => {
-                if (line.startsWith('•') || line.startsWith('-')) {
-                    return (
-                        <p key={i} style={{
-                            margin: '0 0 0.04in 0.2in',
-                            fontSize: 'clamp(9pt, 1.3vw, 10pt)',
-                            color: '#374151',
-                            lineHeight: 1.45,
-                            textAlign: 'left' as const,
-                            textIndent: '-0.15in',
-                            paddingLeft: '0.15in',
-                        }}>
-                            • {line.replace(/^[•\-–]\s*/, '').trim()}
-                        </p>
-                    )
-                }
-                return (
-                    <p key={i} style={{
-                        margin: '0 0 0.08in 0',
-                        fontSize: 'clamp(9pt, 1.3vw, 10pt)',
-                        color: '#374151',
-                        lineHeight: 1.5,
-                        textAlign: 'left' as const
-                    }}>
-                        {line}
-                    </p>
-                )
-            })
+            return lines.map((line, i) => (
+                <div key={i} style={{ marginBottom: '4px', padding: 0 }}>
+                    {line.startsWith('-') || line.startsWith('•') ? (
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                            <span>•</span>
+                            <span>{line.replace(/^[-•]\s*/, '')}</span>
+                        </div>
+                    ) : line}
+                </div>
+            ))
     }
 }

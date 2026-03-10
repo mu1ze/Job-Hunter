@@ -51,30 +51,32 @@ body {
 
 /* Safe area padding for mobile notches */
 .safe-area-pb {
-    padding-bottom: env(safe-area-inset-bottom, 0);
+  padding-bottom: env(safe-area-inset-bottom, 0);
 }
 
 .safe-area-pt {
-    padding-top: env(safe-area-inset-top, 0);
+  padding-top: env(safe-area-inset-top, 0);
 }
 
 .safe-area-pl {
-    padding-left: env(safe-area-inset-left, 0);
+  padding-left: env(safe-area-inset-left, 0);
 }
 
 .safe-area-pr {
-    padding-right: env(safe-area-inset-right, 0);
+  padding-right: env(safe-area-inset-right, 0);
 }
 
 /* Touch target improvements */
 @media (max-width: 1023px) {
-    button,
-    a,
-    [role="button"] {
-        min-height: 44px;
-        min-width: 44px;
-    }
+
+  button,
+  a,
+  [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
 }
+
 @layer utilities {
   .glass {
     background: rgba(255, 255, 255, 0.03);
@@ -209,13 +211,23 @@ button:focus-visible {
   }
 }
 
+/* Accessibility Overrides for WCAG AA (4.5:1 Contrast) */
+.text-white\/40 {
+  color: rgba(255, 255, 255, 0.62) !important;
+  /* Meets 4.5:1 on black */
+}
+
+.text-white\/30 {
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+
 /* Print Styles for Resume */
 @media print {
   body {
     background: white !important;
     color: black !important;
   }
-  
+
   .no-print {
     display: none !important;
   }

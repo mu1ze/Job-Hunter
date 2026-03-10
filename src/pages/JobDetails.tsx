@@ -217,6 +217,26 @@ export default function JobDetails() {
         }
     };
 
+    const handleUpdateDocument = async (newContent: string) => {
+        if (!selectedDoc) return
+
+        try {
+            const { error } = await supabase
+                .from('generated_documents')
+                .update({ content: newContent })
+                .eq('id', selectedDoc.id)
+
+            if (error) throw error
+
+            const updatedDoc = { ...selectedDoc, content: newContent }
+            setDocuments(prev => prev.map(d => d.id === selectedDoc.id ? updatedDoc : d))
+            setSelectedDoc(updatedDoc)
+        } catch (error) {
+            console.error('Error updating documentContent:', error)
+            throw error // Let the modal handle the error display
+        }
+    }
+
     if (loading) {
         return (
             <div className="min-h-[60vh] flex items-center justify-center text-white/40">
@@ -667,6 +687,7 @@ export default function JobDetails() {
                 jobTitle={job.title}
                 companyName={job.company}
                 jobId={job.id}
+                onUpdate={handleUpdateDocument}
             />
         </div>
     )

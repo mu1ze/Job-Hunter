@@ -32,7 +32,7 @@ export default function CoverLetterPreview({ document, variant = 'preview', cont
 
         const styles = `
             <style>
-                @import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap');
+                @import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@400;500;600&display=swap');
                 
                 * { 
                     margin: 0; 
@@ -43,43 +43,81 @@ export default function CoverLetterPreview({ document, variant = 'preview', cont
                 body { 
                     font-family: 'Crimson Pro', Georgia, 'Times New Roman', serif;
                     font-size: 11.5pt;
-                    line-height: 1.6; 
-                    color: #1a1a1a;
+                    line-height: 1.5; 
+                    color: #000;
                     background: #fff;
-                    padding: 0;
-                    margin: 0;
-                    width: 8.5in;
-                    min-height: 11in;
+                    -webkit-print-color-adjust: exact;
                 }
                 
                 .cover-letter-container {
                     width: 8.5in;
                     min-height: 11in;
                     margin: 0 auto;
-                    padding: 0.4in 0.75in;
-                    position: relative;
+                    padding: 0.5in 0.8in;
                     background: #fff;
                 }
                 
+                .sender-info {
+                    margin-bottom: 0.3in;
+                    font-family: 'Inter', sans-serif;
+                }
+                
+                .sender-name {
+                    font-size: 14pt;
+                    font-weight: 600;
+                    margin-bottom: 2pt;
+                }
+                
+                .sender-line {
+                    font-size: 9pt;
+                    color: #333;
+                }
+                
+                .date-line {
+                    margin: 0.2in 0;
+                    font-size: 11pt;
+                }
+                
+                .recipient-info {
+                    margin-bottom: 0.25in;
+                    font-size: 11pt;
+                }
+                
+                .salutation {
+                    margin-bottom: 0.15in;
+                    font-weight: 500;
+                }
+                
+                .letter-body {
+                    text-align: justify;
+                }
+                
+                .letter-paragraph {
+                    margin-bottom: 0.12in;
+                    text-indent: 0;
+                }
+                
+                .closing-block {
+                    margin-top: 0.3in;
+                }
+                
+                .signature {
+                    font-weight: 600;
+                    margin-top: 5pt;
+                }
+                
                 @media print {
+                    @page {
+                        size: letter;
+                        margin: 0;
+                    }
                     body { 
                         width: 8.5in;
-                        min-height: 11in;
+                        height: 11in;
                         padding: 0;
                         margin: 0;
                     }
-                    .cover-letter-container {
-                        padding: 0.4in 0.75in;
-                        box-shadow: none;
-                        width: 8.5in;
-                        min-height: 11in;
-                    }
                     .no-print { display: none !important; }
-                }
-                
-                @page {
-                    size: letter;
-                    margin: 0;
                 }
             </style>
         `
@@ -251,26 +289,26 @@ const styles = {
         textAlign: 'left' as const,
     },
     senderName: {
-        fontSize: 'clamp(12pt, 2vw, 14pt)',
+        fontSize: 'clamp(12pt, 2.5vw, 15pt)',
         fontWeight: 600,
         color: '#1e293b',
         marginBottom: '0.05in',
         letterSpacing: '0.3pt',
     },
     senderLine: {
-        fontSize: 'clamp(9pt, 1.3vw, 10.5pt)',
+        fontSize: 'clamp(10pt, 1.4vw, 11pt)',
         color: '#374151',
         lineHeight: 1.4,
         marginBottom: '0.02in',
     },
     date: {
-        fontSize: 'clamp(9.5pt, 1.4vw, 11pt)',
+        fontSize: 'clamp(10pt, 1.5vw, 12pt)',
         color: '#1e293b',
         margin: '0.25in 0',
     },
     recipientInfo: {
         marginBottom: '0.25in',
-        fontSize: 'clamp(9.5pt, 1.4vw, 11pt)',
+        fontSize: 'clamp(10pt, 1.5vw, 12pt)',
         color: '#1e293b',
         lineHeight: 1.4,
     },
@@ -278,13 +316,13 @@ const styles = {
         marginBottom: '0.02in',
     },
     salutation: {
-        fontSize: 'clamp(9.5pt, 1.4vw, 11pt)',
+        fontSize: 'clamp(11pt, 1.5vw, 12pt)',
         color: '#1e293b',
         marginBottom: '0.2in',
         fontWeight: 500,
     },
     body: {
-        fontSize: 'clamp(10pt, 1.5vw, 11.5pt)',
+        fontSize: 'clamp(11pt, 1.5vw, 12.5pt)',
         lineHeight: 1.6,
         color: '#1e293b',
         textAlign: 'left' as const,
@@ -297,12 +335,12 @@ const styles = {
         marginTop: '0.3in',
     },
     closing: {
-        fontSize: 'clamp(9.5pt, 1.4vw, 11pt)',
+        fontSize: 'clamp(10.5pt, 1.4vw, 12pt)',
         color: '#1e293b',
         marginBottom: '0.4in',
     },
     signature: {
-        fontSize: 'clamp(9.5pt, 1.4vw, 11pt)',
+        fontSize: 'clamp(10.5pt, 1.4vw, 12pt)',
         color: '#1e293b',
         fontWeight: 600,
         marginTop: '0.1in',

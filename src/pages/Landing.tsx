@@ -68,9 +68,7 @@ export default function Landing() {
                     playsInline
                     className="absolute inset-0 w-full h-full object-cover opacity-60"
                     poster="https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop"
-                >
-                    <source src="https://assets.mixkit.co/videos/preview/mixkit-digital-animation-of-blue-particles-4788-large.mp4" type="video/mp4" />
-                </video>
+                />
                 <div className="absolute inset-0 bg-black/50" /> {/* 50% black overlay as requested */}
             </div>
 

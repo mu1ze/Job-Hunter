@@ -788,7 +788,7 @@ export default function DocumentGenerator() {
                         </div>
 
                         {isGenerating ? (
-                            <div className="text-center py-16">
+                            <div className="text-center py-16" aria-busy="true" aria-live="polite">
                                 <div className="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center mx-auto mb-4 animate-pulse border border-white/5">
                                     <Sparkles className="w-8 h-8 text-white" />
                                 </div>

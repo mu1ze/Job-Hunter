@@ -1,23 +1,32 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { supabase } from './lib/supabase'
 import { useUserStore } from './stores'
-import Landing from './pages/Landing'
-import Dashboard from './pages/Dashboard'
-import JobSearch from './pages/JobSearch'
-import JobDetails from './pages/JobDetails'
-import ResumeManager from './pages/ResumeManager'
-import DocumentGenerator from './pages/DocumentGenerator'
-import Auth from './pages/Auth'
-import Onboarding from './pages/Onboarding'
-import ApplicationTracker from './pages/ApplicationTracker'
-import Analytics from './pages/Analytics'
-import AlertsManager from './pages/AlertsManager'
-import Profile from './pages/Profile'
 import MainLayout from './components/layout/MainLayout'
 import { Toaster } from 'react-hot-toast'
-import Docs from './pages/Docs'
-import AuthCallback from './pages/AuthCallback'
+
+// Lazy load pages for performance
+const Landing = lazy(() => import('./pages/Landing'))
+const Dashboard = lazy(() => import('./pages/Dashboard'))
+const JobSearch = lazy(() => import('./pages/JobSearch'))
+const JobDetails = lazy(() => import('./pages/JobDetails'))
+const ResumeManager = lazy(() => import('./pages/ResumeManager'))
+const DocumentGenerator = lazy(() => import('./pages/DocumentGenerator'))
+const Auth = lazy(() => import('./pages/Auth'))
+const Onboarding = lazy(() => import('./pages/Onboarding'))
+const ApplicationTracker = lazy(() => import('./pages/ApplicationTracker'))
+const Analytics = lazy(() => import('./pages/Analytics'))
+const AlertsManager = lazy(() => import('./pages/AlertsManager'))
+const Profile = lazy(() => import('./pages/Profile'))
+const Docs = lazy(() => import('./pages/Docs'))
+const AuthCallback = lazy(() => import('./pages/AuthCallback'))
+
+// Loading component for Suspense
+const PageLoader = () => (
+    <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+    </div>
+)
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
     const { isAuthenticated, profile } = useUserStore()
@@ -127,33 +136,35 @@ function App() {
                     },
                 }}
             />
-            <Routes>
-                {/* Public Routes */}
-                <Route path="/" element={<Landing />} />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/auth/callback" element={<AuthCallback />} />
-                <Route path="/docs" element={<Docs />} />
+            <Suspense fallback={<PageLoader />}>
+                <Routes>
+                    {/* Public Routes */}
+                    <Route path="/" element={<Landing />} />
+                    <Route path="/auth" element={<Auth />} />
+                    <Route path="/auth/callback" element={<AuthCallback />} />
+                    <Route path="/docs" element={<Docs />} />
 
-                {/* Onboarding - requires auth */}
-                <Route path="/onboarding" element={
-                    <OnboardingRoute>
-                        <Onboarding />
-                    </OnboardingRoute>
-                } />
+                    {/* Onboarding - requires auth */}
+                    <Route path="/onboarding" element={
+                        <OnboardingRoute>
+                            <Onboarding />
+                        </OnboardingRoute>
+                    } />
 
-                {/* Protected Routes with Layout */}
-                <Route element={<MainLayout />}>
-                    <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-                    <Route path="/jobs" element={<ProtectedRoute><JobSearch /></ProtectedRoute>} />
-                    <Route path="/jobs/:id" element={<ProtectedRoute><JobDetails /></ProtectedRoute>} />
-                    <Route path="/resume" element={<ProtectedRoute><ResumeManager /></ProtectedRoute>} />
-                    <Route path="/generate" element={<ProtectedRoute><DocumentGenerator /></ProtectedRoute>} />
-                    <Route path="/tracker" element={<ProtectedRoute><ApplicationTracker /></ProtectedRoute>} />
-                    <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
-                    <Route path="/alerts" element={<ProtectedRoute><AlertsManager /></ProtectedRoute>} />
-                    <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-                </Route>
-            </Routes>
+                    {/* Protected Routes with Layout */}
+                    <Route element={<MainLayout />}>
+                        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+                        <Route path="/jobs" element={<ProtectedRoute><JobSearch /></ProtectedRoute>} />
+                        <Route path="/jobs/:id" element={<ProtectedRoute><JobDetails /></ProtectedRoute>} />
+                        <Route path="/resume" element={<ProtectedRoute><ResumeManager /></ProtectedRoute>} />
+                        <Route path="/generate" element={<ProtectedRoute><DocumentGenerator /></ProtectedRoute>} />
+                        <Route path="/tracker" element={<ProtectedRoute><ApplicationTracker /></ProtectedRoute>} />
+                        <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
+                        <Route path="/alerts" element={<ProtectedRoute><AlertsManager /></ProtectedRoute>} />
+                        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+                    </Route>
+                </Routes>
+            </Suspense>
         </BrowserRouter>
     )
 }
