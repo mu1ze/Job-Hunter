@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
+import DOMPurify from 'dompurify'
 import {
     BookOpen,
     UserPlus,
@@ -508,16 +509,19 @@ export default function Docs() {
                                     [&>strong]:text-white [&>strong]:font-medium
                                 "
                                 dangerouslySetInnerHTML={{
-                                    __html: content
-                                        .replace(/^# (.+)$/gm, '<h1>$1</h1>')
-                                        .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-                                        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-                                        .replace(/^\d+\. (.+)$/gm, '<li>$1</li>')
-                                        .replace(/^\- (.+)$/gm, '<li>$1</li>')
-                                        .split('\n\n').map(p => {
-                                            if (p.startsWith('<')) return p;
-                                            return `<p>${p}</p>`;
-                                        }).join('')
+                                    __html: DOMPurify.sanitize(
+                                        content
+                                            .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+                                            .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+                                            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                                            .replace(/^\d+\. (.+)$/gm, '<li>$1</li>')
+                                            .replace(/^\- (.+)$/gm, '<li>$1</li>')
+                                            .split('\n\n').map(p => {
+                                                if (p.startsWith('<')) return p;
+                                                return `<p>${p}</p>`;
+                                            }).join(''),
+                                        { ALLOWED_TAGS: ['h1', 'h2', 'p', 'strong', 'li', 'ul', 'ol'] }
+                                    )
                                 }}
                             />
                         </article>
