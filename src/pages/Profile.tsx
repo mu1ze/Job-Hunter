@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react'
-import { User, Mail, Phone, MapPin, Linkedin, Link as LinkIcon, Briefcase, DollarSign, Settings, Save, Camera, Loader2 } from 'lucide-react'
+import { useState, useRef, useEffect } from 'react'
+import { User, Mail, Phone, MapPin, Linkedin, Link as LinkIcon, Briefcase, DollarSign, Settings, Save, Camera, Loader2, AlertTriangle, Key } from 'lucide-react'
 import { useUserStore } from '../stores'
 import { Button, Input, Card } from '../components/ui'
 import { supabase } from '../lib/supabase'
@@ -10,6 +10,23 @@ export default function Profile() {
     const [isSaving, setIsSaving] = useState(false)
     const [isUploadingAvatar, setIsUploadingAvatar] = useState(false)
     const avatarInputRef = useRef<HTMLInputElement>(null)
+
+    // Delete Account Modal State
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+    const [deletePassword, setDeletePassword] = useState('')
+    const [deleteConfirmationText, setDeleteConfirmationText] = useState('')
+    const [expectedConfirmationText, setExpectedConfirmationText] = useState('DELETE MY ACCOUNT')
+    const [isDeleting, setIsDeleting] = useState(false)
+
+    useEffect(() => {
+        if (isDeleteModalOpen) {
+            // Generate a random 4-digit code to append for extra safety
+            const code = Math.floor(1000 + Math.random() * 9000)
+            setExpectedConfirmationText(`DELETE-${code}`)
+            setDeletePassword('')
+            setDeleteConfirmationText('')
+        }
+    }, [isDeleteModalOpen])
 
     const [profileData, setProfileData] = useState({
         full_name: profile?.full_name || '',
@@ -88,8 +105,41 @@ export default function Profile() {
         }
     }
 
+    const handleDeleteAccount = async () => {
+        if (deleteConfirmationText !== expectedConfirmationText || !deletePassword) return
+        
+        setIsDeleting(true)
+        try {
+            const { data: { session } } = await supabase.auth.getSession()
+            if (!session) throw new Error('Not authenticated')
+
+            const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/delete-account`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${session.access_token}`
+                },
+                body: JSON.stringify({ password: deletePassword })
+            })
+
+            const result = await response.json()
+            if (!response.ok) throw new Error(result.error || 'Failed to delete account')
+
+            toast.success('Account deleted successfully')
+            // Sign out to clear local state
+            await supabase.auth.signOut()
+            window.location.href = '/'
+            
+        } catch (error: any) {
+            console.error('Delete account error:', error)
+            toast.error(error.message || 'Failed to delete account')
+        } finally {
+            setIsDeleting(false)
+        }
+    }
+
     return (
-        <div className="max-w-4xl mx-auto space-y-8 animate-fade-in font-['General_Sans',_sans-serif]">
+        <div className="max-w-4xl mx-auto space-y-8 animate-fade-in font-['General_Sans',_sans-serif] relative">
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4">
                 <div>
@@ -295,6 +345,24 @@ export default function Profile() {
                         </div>
                     </Card>
 
+                    <Card className="border border-red-500/30 bg-red-500/5 overflow-hidden">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center">
+                                <AlertTriangle className="w-5 h-5 text-red-500" />
+                            </div>
+                            <h2 className="font-medium text-xl text-white">Danger Zone</h2>
+                        </div>
+                        <p className="text-sm text-white/50 mb-6 leading-relaxed">
+                            Permanently delete your account and personal data. This action cannot be undone.
+                        </p>
+                        <Button 
+                            className="w-full bg-red-500 hover:bg-red-600 text-white rounded-full h-12"
+                            onClick={() => setIsDeleteModalOpen(true)}
+                        >
+                            Delete Account
+                        </Button>
+                    </Card>
+
                     <Card className="bg-gradient-to-br from-white/10 to-transparent border border-white/10">
                         <h3 className="font-medium text-white mb-2 text-sm uppercase tracking-wider">Pro Tip</h3>
                         <p className="text-white/50 text-sm leading-relaxed">
@@ -303,6 +371,79 @@ export default function Profile() {
                     </Card>
                 </div>
             </div>
+
+            {/* Delete Account Modal */}
+            {isDeleteModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+                    <div className="bg-[#121212] border border-red-500/30 rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl animate-fade-in relative">
+                        <div className="flex items-center gap-3 mb-6 text-red-500">
+                            <AlertTriangle className="w-8 h-8" />
+                            <h2 className="text-2xl font-bold text-white">Delete Account</h2>
+                        </div>
+                        
+                        <div className="space-y-4 mb-6">
+                            <p className="text-white/80">
+                                This action is permanent. Please review what happens:
+                            </p>
+                            <ul className="text-sm space-y-2 text-white/60 bg-white/5 p-4 rounded-xl border border-white/5">
+                                <li className="flex items-start gap-2">
+                                    <span className="text-red-400 font-bold">Deleted:</span> 
+                                    Personal data, resumes, email, name, and job history.
+                                </li>
+                                <li className="flex items-start gap-2">
+                                    <span className="text-green-400 font-bold">Retained:</span> 
+                                    Anonymized usage analytics and crash reports (GDPR compliant).
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div className="space-y-5">
+                            <div>
+                                <label className="block text-sm font-medium text-white/70 mb-2">
+                                    Enter your password
+                                </label>
+                                <Input 
+                                    type="password" 
+                                    placeholder="Your password" 
+                                    icon={<Key className="w-5 h-5" />}
+                                    value={deletePassword}
+                                    onChange={(e) => setDeletePassword(e.target.value)}
+                                />
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-white/70 mb-2">
+                                    Type <strong className="text-white bg-white/10 px-2 py-0.5 rounded tracking-widest">{expectedConfirmationText}</strong> to confirm
+                                </label>
+                                <Input 
+                                    type="text" 
+                                    placeholder={expectedConfirmationText}
+                                    value={deleteConfirmationText}
+                                    onChange={(e) => setDeleteConfirmationText(e.target.value)}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex gap-4 mt-8">
+                            <Button 
+                                className="flex-1 bg-white/10 hover:bg-white/20 text-white rounded-xl h-12"
+                                onClick={() => setIsDeleteModalOpen(false)}
+                                disabled={isDeleting}
+                            >
+                                Cancel
+                            </Button>
+                            <Button 
+                                className="flex-1 bg-red-500 hover:bg-red-600 text-white rounded-xl h-12 disabled:opacity-50 disabled:cursor-not-allowed"
+                                onClick={handleDeleteAccount}
+                                isLoading={isDeleting}
+                                disabled={!deletePassword || deleteConfirmationText !== expectedConfirmationText}
+                            >
+                                Delete Everything
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }
