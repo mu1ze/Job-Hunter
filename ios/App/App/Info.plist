@@ -47,5 +47,11 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>JobHunter needs access to your camera to scan physical resumes.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>JobHunter needs access to your photo library to upload resume images.</string>
+	<key>NSUserTrackingUsageDescription</key>
+	<string>JobHunter tracks standard app usage to improve your job search experience.</string>
 </dict>
 </plist>
